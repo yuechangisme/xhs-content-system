@@ -1,5 +1,22 @@
 # Changelog
 
+## v0.3.2 (2026-05-17)
+
+### 清理
+
+- 删除 `content/diagnose-render.js` — 一次性诊断工具（未追踪，无引用）
+- 删除 `content/render-trilogy.js` — 已被 pipeline 替代的批量渲染脚本（未追踪，无引用）
+- 删除 `state.json.pre-publish` — 发布前 state 备份（未追踪，无引用）
+
+### 验证
+
+- `pipeline status` ✅
+- `schedule list` / `due` ✅
+- `publish --dry-run` ✅
+- 无代码修改，不影响任何现有功能
+
+---
+
 ## v0.3.1 (2026-05-17)
 
 ### 新增
