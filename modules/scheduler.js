@@ -8,6 +8,9 @@
  * 所有函数直接返回 result 对象，不操作 pipeline 输出。
  */
 
+const fs = require('fs');
+const path = require('path');
+const config = require('../config');
 const state = require('./state');
 const logger = require('./logger');
 
@@ -210,4 +213,91 @@ function parseTime(str) {
   return d;
 }
 
-module.exports = { add, list, status, cancel, due };
+/**
+ * 执行到期任务的 mock 发布
+ *
+ * @param {string} mockType - 'success' 或 'fail'
+ * @returns {object} { success, data: { processed: [...], errors: [...] } }
+ */
+function runDue(mockType) {
+  // 1. 获取到期任务
+  const dueResult = due();
+  const tasks = dueResult.data.due;
+
+  if (tasks.length === 0) {
+    return { success: true, data: { processed: [], errors: [], note: '没有到期任务' } };
+  }
+
+  const processed = [];
+  const errors = [];
+  let s = state.load();
+
+  for (const task of tasks) {
+    const taskDir = task.id;
+
+    // 安全限制：mock 只能用于测试任务
+    if (!taskDir.includes('测试') && !taskDir.includes('mock')) {
+      errors.push({ taskDir, code: 'SCHEDULE_MOCK_TASK_REQUIRED', message: 'mock 模式只能用于名称包含"测试"或"mock"的任务目录' });
+      continue;
+    }
+
+    const post = state.findPost(s, taskDir);
+    if (!post || !post.schedule) {
+      errors.push({ taskDir, code: 'SCHEDULE_NOT_FOUND', message: '帖子或排期不存在' });
+      continue;
+    }
+
+    // 2. 标记 RUNNING
+    post.schedule.status = 'RUNNING';
+    post.schedule.triggeredAt = new Date().toISOString();
+    state.save(s);
+
+    if (mockType === 'success') {
+      // 3a. mock 成功
+      const fullPath = path.join(config.contentDir, taskDir);
+      post.status = 'PUBLISHED';
+      post.publish.status = 'PUBLISHED';
+      post.publish.publishedAt = new Date().toISOString();
+      post.publish.error = null;
+      post.schedule.status = 'SUCCEEDED';
+      post.schedule.completedAt = new Date().toISOString();
+      s.schedule.lastPublishedAt = post.publish.publishedAt;
+      state.save(s);
+
+      // 移动文件夹
+      const folderName = path.basename(fullPath);
+      const targetDir = path.join(config.contentDir, '投稿内容', '已投递', folderName);
+      if (fs.existsSync(targetDir)) fs.rmSync(targetDir, { recursive: true, force: true });
+      try { fs.renameSync(fullPath, targetDir); } catch (_) {
+        logger.warn('MOCK_MOVE_FAILED', 'scheduler', `mock 成功但文件夹移动失败`, { taskDir, targetDir });
+      }
+
+      logger.info('SCHEDULE_MOCK_SUCCESS', 'scheduler', `排期 mock 发布成功: ${taskDir}`, { scheduleStatus: 'SUCCEEDED' });
+      processed.push({ taskDir, result: 'SUCCEEDED' });
+
+    } else if (mockType === 'fail') {
+      // 3b. mock 失败
+      post.status = 'PUBLISH_FAILED';
+      post.publish.status = 'FAILED';
+      post.publish.attempts = (post.publish.attempts || 0) + 1;
+      post.publish.error = { code: 'MOCK_PUBLISH_FAILED', message: 'mock 模拟发布失败' };
+      post.schedule.status = 'FAILED';
+      post.schedule.completedAt = new Date().toISOString();
+      state.save(s);
+
+      logger.error('SCHEDULE_MOCK_FAILED', 'scheduler', `排期 mock 发布失败: ${taskDir}`, { attempts: post.publish.attempts });
+      processed.push({ taskDir, result: 'FAILED' });
+    }
+  }
+
+  return {
+    success: true,
+    data: {
+      processed,
+      errors: errors.length > 0 ? errors : undefined,
+      note: errors.length > 0 ? '部分任务失败，详见 errors' : undefined,
+    },
+  };
+}
+
+module.exports = { add, list, status, cancel, due, runDue };

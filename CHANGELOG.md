@@ -1,5 +1,39 @@
 # Changelog
 
+## v0.3.1 (2026-05-17)
+
+### 新增
+
+- scheduler.runDue() — 到期任务 mock 执行
+- `schedule run-due --mock-success` — 模拟排期到期后成功发布流程
+- `schedule run-due --mock-fail` — 模拟排期到期后失败流程
+- 安全限制：run-due mock 只能用于名称含"测试"或"mock"的任务
+
+### 状态流转验证
+
+mock-success:
+  CONFIRMED → RUNNING → SUCCEEDED
+  post.status: QA_PASSED → PUBLISHED
+  文件夹：待投递 → 已投递
+
+mock-fail:
+  CONFIRMED → RUNNING → FAILED
+  post.status: QA_PASSED → PUBLISH_FAILED
+  publish.attempts: +1
+  文件夹：不移
+
+### 测试验证
+
+| 场景 | 结果 |
+|------|------|
+| due 查到到期任务 | ✅ |
+| run-due --mock-success | SUCCEEDED，文件夹已移动 ✅ |
+| run-due --mock-fail | FAILED，attempts+1，文件夹不移 ✅ |
+| due 无副作用 | state diff 确认 ✅ |
+| 安全限制 | 非 mock 任务拒绝 ✅ |
+
+---
+
 ## v0.3.0 (2026-05-17)
 
 ### 新增

@@ -184,8 +184,10 @@ function cmdSchedule() {
       return cmdScheduleCancel();
     case 'due':
       return cmdScheduleDue();
+    case 'run-due':
+      return cmdScheduleRunDue();
     default:
-      errorOut('UNKNOWN_COMMAND', `未知 schedule 子命令: ${sub}。可用命令: add, list, status, cancel, due`, 'pipeline');
+      errorOut('UNKNOWN_COMMAND', `未知 schedule 子命令: ${sub}。可用命令: add, list, status, cancel, due, run-due`, 'pipeline');
   }
 }
 
@@ -243,6 +245,26 @@ function cmdScheduleCancel() {
 
 function cmdScheduleDue() {
   const result = scheduler.due();
+  output({ success: true, command, data: result.data });
+}
+
+function cmdScheduleRunDue() {
+  const isMockSuccess = args.includes('--mock-success');
+  const isMockFail = args.includes('--mock-fail');
+
+  if (!isMockSuccess && !isMockFail) {
+    errorOut('SCHEDULE_MISSING_ARGS', '用法: pipeline schedule run-due --mock-success 或 --mock-fail', 'scheduler');
+    return;
+  }
+
+  const mockType = isMockSuccess ? 'success' : 'fail';
+  const result = scheduler.runDue(mockType);
+
+  if (!result.success) {
+    errorOut('SCHEDULE_RUN_FAILED', '执行到期任务失败', 'scheduler');
+    return;
+  }
+
   output({ success: true, command, data: result.data });
 }
 

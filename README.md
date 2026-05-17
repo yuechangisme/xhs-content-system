@@ -126,6 +126,8 @@ node pipeline.js schedule list
 node pipeline.js schedule status "<taskDir>"
 node pipeline.js schedule cancel "<taskDir>"
 node pipeline.js schedule due
+node pipeline.js schedule run-due --mock-success   # 模拟到期发布（仅测试）
+node pipeline.js schedule run-due --mock-fail      # 模拟到期失败（仅测试）
 
 # 发布前验证（dry-run，不调用真实发布脚本）
 node pipeline.js publish "投稿内容/待投递/你的任务目录" --dry-run
