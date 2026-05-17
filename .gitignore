@@ -8,6 +8,16 @@ content/node_modules/
 # 运行时状态（每次运行变化）
 state.json
 error.log
+*.log
+
+# 环境变量与密钥
+.env
+secrets/
+*.cookie
+xiaohongshu.json
+
+# skill 本地配置（不上传）
+local/
 
 # 输出图片
 content/**/output/
