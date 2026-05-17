@@ -191,7 +191,8 @@ xhs-content-system/
 
 ## 相关项目
 
-- [xhs-planner](https://github.com/yuechangisme/xhs-planner) — 小红书内容策划 skill（策略层）
+- [xhs-planner (GitHub)](https://github.com/yuechangisme/xhs-planner) — 小红书内容策划 skill（策略层）
+- [xhs-planner (Gitee)](https://gitee.com/yuechangIsMe/xhs-planner) — 同上，国内镜像
 
 ---
 
