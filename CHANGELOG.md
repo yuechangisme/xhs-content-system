@@ -1,5 +1,41 @@
 # Changelog
 
+## v0.3.4 (2026-05-17)
+
+### 里程碑
+
+**首次真实 scheduled publish 闭环完成。** 三部曲全部发布成功。
+
+### 新增
+
+- `schedule run-due --confirm-scheduled-publish --task "<taskDir>"` 首次真实执行成功
+- 帖子「内脏脂肪习惯」通过排期自动发布到小红书
+- 完整链路：HTML → PNG → QA → schedule → due → dry-run → real publish → state 归档
+
+### 修复
+
+- `runDueConfirm()` 成功路径漏更新 `post.status` / `publish.status` / `publishedAt`：
+  - 修复前：schedule=SUCCEEDED 但 post=QA_PASSED / publish=PENDING（状态不一致）
+  - 修复后：post=PUBLISHED / publish=PUBLISHED / publishedAt=写入 / schedule=SUCCEEDED
+- 失败路径同步修复：漏更新 `post.status` / `publish.status` / `publish.attempts`
+
+### 职责边界审计
+
+- scheduler 不直接调 publish-xhs.js ✅
+- publisher 是唯一调用 publish-xhs.js 的模块 ✅
+- caller（pipeline.js / scheduler.js）负责状态更新和文件夹移动（架构既定模式）
+- 边界描述与实现存在差异，建议在 v0.4.0 contract 更新中修正
+
+### 三部曲发布状态
+
+| 帖子 | 发布方式 | 状态 |
+|------|---------|------|
+| 压力肚自测 | 手动 --confirm-publish | ✅ |
+| 内脏脂肪食物 | 手动 --confirm-publish | ✅ |
+| 内脏脂肪习惯 | scheduled --confirm-scheduled-publish | ✅ |
+
+---
+
 ## v0.3.3 (2026-05-17)
 
 ### 新增

@@ -9,8 +9,8 @@
 ## 版本状态
 
 ```
-当前版本: v0.3.0
-当前阶段: schedule queue 排期队列管理（add/list/status/cancel/due）
+当前版本: v0.3.4
+当前阶段: scheduled real publish 闭环（manual + mock + scheduled dry-run + scheduled real publish）
 ```
 
 ### 已完成
