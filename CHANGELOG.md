@@ -1,5 +1,22 @@
 # Changelog
 
+## v0.2.2 (2026-05-17)
+
+### 修复
+
+- publish-xhs.js：新增退出逻辑。成功时 `process.exit(0)`，失败时 `process.exit(1)`，`finally` 中关闭 browser。解决 publisher 模块因脚本不退出导致的 PUBLISH_SCRIPT_FAILED 误判
+- state reconciliation：平台确认发布成功后，将 `PUBLISH_FAILED` 修正为 `PUBLISHED`，清空误判 error
+
+### 首次真实发布验证
+
+- 帖子：内脏脂肪最怕8种家常食物
+- 平台确认：✅ 发布成功
+- 本地 publisher 超时误判：已人工 reconciled
+- 文件夹：待投递 → 已投递
+- 记录 `PUBLISH_RECONCILED` 到 error.log
+
+---
+
 ## v0.2.1 (2026-05-17)
 
 ### 新增

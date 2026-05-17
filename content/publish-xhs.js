@@ -36,13 +36,15 @@ async function mouseClick(page, x, y) {
   await cdp.send('Input.dispatchMouseEvent', { type: 'mouseReleased', x, y, button: 'left', clickCount: 1 });
 }
 
+let browser;
 (async () => {
-  const b = await puppeteer.launch({
+  try {
+    browser = await puppeteer.launch({
     headless: false,
     executablePath: CHROME,
     args: ['--no-sandbox', `--user-agent=${UA}`]
   });
-  const p = await b.newPage();
+  const p = await browser.newPage();
   await p.setViewport({ width: 1440, height: 900 });
 
   await p.setCookie(...Object.entries(COOKIES).map(([n, v]) => ({ name: n, value: v, domain: '.xiaohongshu.com', path: '/' })));
@@ -162,4 +164,13 @@ async function mouseClick(page, x, y) {
   console.log('\n═══════════════════════════════════════');
   console.log('  全流程完成！请检查小红书确认是否发布成功');
   console.log('═══════════════════════════════════════');
+    process.exit(0);
+  } catch (err) {
+    console.error('❌ 发布异常:', err.message);
+    process.exit(1);
+  } finally {
+    if (browser) {
+      try { await browser.close(); } catch (_) {}
+    }
+  }
 })();
