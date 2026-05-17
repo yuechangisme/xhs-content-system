@@ -390,23 +390,36 @@ async function runDueConfirm(taskDir, dryRun) {
   const pubResult = await publisher.publish(taskDir);
 
   if (pubResult.success) {
-    // 成功
+    // 成功：更新 post + publish + schedule 三个层的状态
     s = state.load();
     const p = state.findPost(s, taskDir);
-    if (p && p.schedule) {
-      p.schedule.status = 'SUCCEEDED';
-      p.schedule.completedAt = new Date().toISOString();
+    if (p) {
+      p.status = 'PUBLISHED';
+      p.publish.status = 'PUBLISHED';
+      p.publish.publishedAt = pubResult.data.publishedAt;
+      p.publish.error = null;
+      s.schedule.lastPublishedAt = pubResult.data.publishedAt;
+      if (p.schedule) {
+        p.schedule.status = 'SUCCEEDED';
+        p.schedule.completedAt = new Date().toISOString();
+      }
       state.save(s);
     }
-    logger.info('SCHEDULE_PUBLISH_SUCCEEDED', 'scheduler', `scheduled publish 成功: ${taskDir}`, { publishedAt: pubResult.data.publishedAt });
+    logger.info('SCHEDULE_PUBLISH_SUCCEEDED', 'scheduler', `scheduled publish 成功: ${taskDir}`, { publishedAt: pubResult.data.publishedAt, scheduleStatus: 'SUCCEEDED' });
     return { success: true, data: { taskDir, result: 'SUCCEEDED', publishedAt: pubResult.data.publishedAt, imageCount: pubResult.data.imageCount } };
   } else {
     // 失败
     s = state.load();
     const p = state.findPost(s, taskDir);
-    if (p && p.schedule) {
-      p.schedule.status = 'FAILED';
-      p.schedule.completedAt = new Date().toISOString();
+    if (p) {
+      p.status = 'PUBLISH_FAILED';
+      p.publish.status = 'FAILED';
+      p.publish.attempts = (p.publish.attempts || 0) + 1;
+      p.publish.error = pubResult.error;
+      if (p.schedule) {
+        p.schedule.status = 'FAILED';
+        p.schedule.completedAt = new Date().toISOString();
+      }
       state.save(s);
     }
     logger.error('SCHEDULE_PUBLISH_FAILED', 'scheduler', `scheduled publish 失败: ${taskDir}`, { error: pubResult.error });
