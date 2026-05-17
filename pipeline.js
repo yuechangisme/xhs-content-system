@@ -26,6 +26,7 @@ const state = require('./modules/state');
 const logger = require('./modules/logger');
 const qa = require('./modules/qa');
 const publisher = require('./modules/publisher');
+const scheduler = require('./modules/scheduler');
 
 // ─── 命令路由 ────────────────────────────────────────────
 
@@ -155,49 +156,94 @@ function cmdQa() {
 }
 
 function cmdSchedule() {
-  let s;
-  try {
-    s = state.load();
-  } catch (err) {
-    errorOut('STATE_INVALID', 'state.json 格式错误', 'pipeline');
+  const sub = args[0];
+
+  // 无子命令时保留原有推荐时间功能
+  if (!sub) {
+    let s;
+    try { s = state.load(); } catch (err) { errorOut('STATE_INVALID', 'state.json 格式错误', 'pipeline'); return; }
+    const pendingPosts = s.posts.filter(p => p.status === 'QA_PASSED');
+    const lastPublished = s.schedule.lastPublishedAt ? new Date(s.schedule.lastPublishedAt) : new Date();
+    const nextDate = new Date(lastPublished);
+    nextDate.setDate(nextDate.getDate() + 2);
+    nextDate.setHours(12, 0, 0, 0);
+    if (nextDate <= new Date()) nextDate.setDate(nextDate.getDate() + 1);
+    output({ success: true, command, data: { lastPublishedAt: s.schedule.lastPublishedAt, nextRecommendedAt: nextDate.toISOString(), reason: '上次发布后间隔 2 天，取午休 12:00 时段', pendingPosts: pendingPosts.map(p => ({ id: p.id, status: p.status })) } });
     return;
   }
 
-  const pendingPosts = s.posts.filter(p => p.status === 'QA_PASSED');
+  // ─── 子命令路由 ────────────────────────────────────
+  switch (sub) {
+    case 'add':
+      return cmdScheduleAdd();
+    case 'list':
+      return cmdScheduleList();
+    case 'status':
+      return cmdScheduleStatus();
+    case 'cancel':
+      return cmdScheduleCancel();
+    case 'due':
+      return cmdScheduleDue();
+    default:
+      errorOut('UNKNOWN_COMMAND', `未知 schedule 子命令: ${sub}。可用命令: add, list, status, cancel, due`, 'pipeline');
+  }
+}
 
-  if (pendingPosts.length === 0) {
-    errorOut('SCHEDULER_NO_PENDING_POSTS', '没有待发布的帖子', 'scheduler');
+function cmdScheduleAdd() {
+  const taskDir = args[1];
+  const timeIndex = args.indexOf('--time');
+  const timeStr = timeIndex >= 0 ? args[timeIndex + 1] : null;
+  const confirmed = args.includes('--confirm-schedule');
+
+  if (!taskDir || !timeStr) {
+    errorOut('SCHEDULE_MISSING_ARGS', '用法: pipeline schedule add <taskDir> --time "YYYY-MM-DD HH:mm" [--confirm-schedule]', 'scheduler');
     return;
   }
 
-  // ─── 占位实现 ─────────────────────────────────────────
-  // v0.1 MVP: 简单返回最近发布时间 + 2 天
-  // 后续版本实现完整调度算法
-
-  const lastPublished = s.schedule.lastPublishedAt
-    ? new Date(s.schedule.lastPublishedAt)
-    : new Date();
-
-  const nextDate = new Date(lastPublished);
-  nextDate.setDate(nextDate.getDate() + 2);
-  nextDate.setHours(12, 0, 0, 0);
-
-  // 如果今天 12:00 已过，推到明天
-  const now = new Date();
-  if (nextDate <= now) {
-    nextDate.setDate(nextDate.getDate() + 1);
+  const result = scheduler.add(taskDir, timeStr, confirmed);
+  if (!result.success) {
+    errorOut(result.error.code, result.error.message, 'scheduler', result.error.detail);
+    return;
   }
+  output({ success: true, command, data: result.data, ...(result.warning ? { warning: result.warning } : {}) });
+}
 
-  output({
-    success: true,
-    command,
-    data: {
-      lastPublishedAt: s.schedule.lastPublishedAt,
-      nextRecommendedAt: nextDate.toISOString(),
-      reason: `上次发布后间隔 2 天，取午休 12:00 时段`,
-      pendingPosts: pendingPosts.map(p => ({ id: p.id, status: p.status })),
-    },
-  });
+function cmdScheduleList() {
+  const result = scheduler.list();
+  output({ success: true, command, data: result.data });
+}
+
+function cmdScheduleStatus() {
+  const taskDir = args[1];
+  if (!taskDir) {
+    errorOut('SCHEDULE_MISSING_ARGS', '用法: pipeline schedule status <taskDir>', 'scheduler');
+    return;
+  }
+  const result = scheduler.status(taskDir);
+  if (!result.success) {
+    errorOut(result.error.code, result.error.message, 'scheduler');
+    return;
+  }
+  output({ success: true, command, data: result.data });
+}
+
+function cmdScheduleCancel() {
+  const taskDir = args[1];
+  if (!taskDir) {
+    errorOut('SCHEDULE_MISSING_ARGS', '用法: pipeline schedule cancel <taskDir>', 'scheduler');
+    return;
+  }
+  const result = scheduler.cancel(taskDir);
+  if (!result.success) {
+    errorOut(result.error.code, result.error.message, 'scheduler');
+    return;
+  }
+  output({ success: true, command, data: result.data, ...(result.warning ? { warning: result.warning } : {}) });
+}
+
+function cmdScheduleDue() {
+  const result = scheduler.due();
+  output({ success: true, command, data: result.data });
 }
 
 function cmdPublish() {

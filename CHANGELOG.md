@@ -1,5 +1,42 @@
 # Changelog
 
+## v0.3.0 (2026-05-17)
+
+### 新增
+
+- modules/scheduler.js — 排期队列管理模块
+- pipeline.js schedule 子命令路由（add/list/status/cancel/due）
+- 6 条 schedule 命令：
+  - `schedule add <dir> --time <t> --confirm-schedule` — 创建已确认排期
+  - `schedule list` — 列出全部排期
+  - `schedule status <dir>` — 查看单篇排期
+  - `schedule cancel <dir>` — 取消排期
+  - `schedule due` — 查看到期任务（纯查询，无副作用）
+  - `schedule`（无子命令）— 保留原有推荐时间功能
+- 7 个错误码：SCHEDULE_CONFIRM_REQUIRED, SCHEDULE_POST_NOT_FOUND, SCHEDULE_QA_NOT_PASSED, SCHEDULE_ALREADY_PUBLISHED, SCHEDULE_DUPLICATE, SCHEDULE_TIME_INVALID, SCHEDULE_NOT_FOUND
+
+### 安全
+
+- 无 `--confirm-schedule` 的 add 不写入 state
+- 已 PUBLISHED / QA_FAILED 的帖子禁止排期
+- 重复 active 排期被拒绝
+- due 是纯查询，不修改 state
+
+### 测试验证
+
+| 场景 | 结果 |
+|------|------|
+| add 无 --confirm-schedule | SCHEDULE_CONFIRM_REQUIRED，state 不变 ✅ |
+| add --confirm-schedule | CONFIRMED，写入 state ✅ |
+| list | 列出全部排期 ✅ |
+| status | 返回单篇详情 ✅ |
+| due（未来时间） | 空列表，state 不变 ✅ |
+| duplicate | SCHEDULE_DUPLICATE ✅ |
+| cancel | SKIPPED ✅ |
+| due 无副作用 | state diff 确认 ✅ |
+
+---
+
 ## v0.2.2 (2026-05-17)
 
 ### 修复

@@ -9,8 +9,8 @@
 ## 版本状态
 
 ```
-当前版本: v0.2.2
-当前阶段: 核心 MVP 执行链路闭环（HTML→PNG→QA→publish→归档）
+当前版本: v0.3.0
+当前阶段: schedule queue 排期队列管理（add/list/status/cancel/due）
 ```
 
 ### 已完成
@@ -29,6 +29,9 @@
 - 真实发布 → 小红书平台确认成功
 - 状态 reconciliation：PUBLISH_FAILED 可人工修正为 PUBLISHED
 - GitHub / Gitee 双远程基线
+- `modules/scheduler.js` 排期队列管理（add/list/status/cancel/due）
+- 7 个 SCHEDULE_* 错误码
+- 定时发布安全确认模型（`--confirm-schedule` / `CONFIRMED` 状态）
 
 ### 未完成
 
@@ -117,6 +120,13 @@ node pipeline.js qa "投稿内容/待投递/你的任务目录"
 # 查看推荐发布时间
 node pipeline.js schedule
 
+# 排期管理
+node pipeline.js schedule add "<taskDir>" --time "2026-05-19 12:00" --confirm-schedule
+node pipeline.js schedule list
+node pipeline.js schedule status "<taskDir>"
+node pipeline.js schedule cancel "<taskDir>"
+node pipeline.js schedule due
+
 # 发布前验证（dry-run，不调用真实发布脚本）
 node pipeline.js publish "投稿内容/待投递/你的任务目录" --dry-run
 
@@ -201,7 +211,7 @@ xhs-content-system/
 | v0.1.2 | render hotfix | 统一 viewport 1080×1440，CSS reset 注入 |
 | v0.1.3 | docs baseline | README / CHANGELOG / documentation policy |
 | v0.2 | publisher 接入 | 真实发布（五种模式 + 首次真实发布验证 + reconciliation） |
-| v0.3 | scheduler | 定时发布（设计阶段） |
+| v0.3 | scheduler | 排期队列管理（add/list/status/cancel/due） |
 | v0.4 | 热点获取 | 自动选题建议 |
 | v0.5 | 数据回流 | 发布后数据追踪 |
 
