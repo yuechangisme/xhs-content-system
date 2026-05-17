@@ -16,7 +16,10 @@ secrets/
 *.cookie
 xiaohongshu.json
 
-# skill 本地配置（不上传）
+# 本机私有配置覆盖
+config.local.js
+
+# skill 本地配置
 local/
 
 # 输出图片

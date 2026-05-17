@@ -53,13 +53,12 @@ npx http-server -p 8080 content/ --cors
 
 ## Windows 路径注意
 
-- 本地路径：`D:\AI workspace\fish-contend-pipeline\content\xxx`
-- Puppeteer file URL：`file:///D:/AI%20workspace/...`
-- 路径拼接：`path.resolve()` 后 `replace(/\\/g, '/')`
-- Chrome 位置：`C:/Users/MECHREUO/.cache/puppeteer/chrome/win64-131.0.6778.204/chrome-win64/chrome.exe`
+- 本地路径：使用 `path.resolve()` 后 `replace(/\\/g, '/')` 转 Puppeteer file URL
+- Chrome 位置：配置在 `config.local.js` 的 `chromePath` 字段，留空则使用 puppeteer 自动查找
+- 小红书 Cookie：配置在 `config.local.js` 的 `cookiePath` 字段
 
 ## 依赖
 
 - Node.js 20+
-- Puppeteer（已安装 Chrome 131，.cache 目录下）
+- Puppeteer（自动下载 Chrome）
 - 图片来源：Pexels CDN（images.pexels.com 可直接热链）

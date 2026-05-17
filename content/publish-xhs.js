@@ -1,9 +1,11 @@
 const puppeteer = require('puppeteer');
 const fs = require('fs');
 const path = require('path');
+const config = require('../config');
 
-const CHROME = 'C:/Users/MECHREUO/.cache/puppeteer/chrome/win64-131.0.6778.204/chrome-win64/chrome.exe';
-const COOKIES = JSON.parse(fs.readFileSync('C:/Users/MECHREUO/.claude/secrets/xiaohongshu.json', 'utf-8'));
+const CHROME = config.chromePath;
+const COOKIES_PATH = config.cookiePath;
+const COOKIES = COOKIES_PATH ? JSON.parse(fs.readFileSync(COOKIES_PATH, 'utf-8')) : {};
 const UA = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/134.0.0.0 Safari/537.36';
 
 // 用法: node publish-xhs.js <任务目录>

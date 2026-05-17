@@ -15,7 +15,8 @@ const absHtmlPath = path.resolve(htmlPath);
 const taskDir = path.dirname(absHtmlPath);
 const prefix = process.argv[3] || 'slide';
 const outputDir = path.join(taskDir, 'output');
-const chromePath = 'C:/Users/MECHREUO/.cache/puppeteer/chrome/win64-131.0.6778.204/chrome-win64/chrome.exe';
+const config = require('../config');
+const chromePath = config.chromePath;
 
 (async () => {
   console.log('HTML: ' + absHtmlPath);
