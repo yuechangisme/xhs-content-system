@@ -1,5 +1,39 @@
 # Changelog
 
+## v0.3.3 (2026-05-17)
+
+### 新增
+
+- `schedule run-due --confirm-scheduled-publish` — 受控排期发布入口（列出到期任务，不执行）
+- `schedule run-due --confirm-scheduled-publish --dry-run --task "<taskDir>"` — 完全前置检查，不发布
+- `schedule run-due --confirm-scheduled-publish --task "<taskDir>"` — 真实 scheduled publish 入口
+
+### 安全
+
+- 无 flag 的 run-due → `SCHEDULE_FLAG_REQUIRED`
+- confirm 无 --task → `SCHEDULE_TASK_REQUIRED`（列出任务，不执行）
+- 即使 due tasks = 1，也必须显式指定 --task 才允许执行
+- dry-run 不调用 publisher，不写 state，不移动文件夹
+- 13 项前置检查，任一失败不发布
+- scheduler 禁止直接调 publish-xhs.js，禁止直接写 PUBLISHED
+
+### 职责边界
+
+- scheduler 只负责：查 due → 前置检查 → 调 publisher → 更新 schedule 状态
+- publisher 继续负责：前置检查 → 真实发布 → 写 PUBLISHED → 移文件夹
+
+### 测试验证
+
+| 场景 | 结果 |
+|------|------|
+| run-due 无 flag | SCHEDULE_FLAG_REQUIRED ✅ |
+| confirm 无 --task | SCHEDULE_TASK_REQUIRED + due list ✅ |
+| confirm + dry-run + task | 13 项检查，不修改 state ✅ |
+| mock-success / mock-fail | 原行为保持不变 ✅ |
+| dry-run 无副作用 | state diff 确认 ✅ |
+
+---
+
 ## v0.3.2 (2026-05-17)
 
 ### 清理

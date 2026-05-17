@@ -13,6 +13,7 @@ const path = require('path');
 const config = require('../config');
 const state = require('./state');
 const logger = require('./logger');
+const publisher = require('./publisher');
 
 const ACTIVE_STATUSES = ['CONFIRMED', 'RUNNING'];
 
@@ -300,4 +301,117 @@ function runDue(mockType) {
   };
 }
 
-module.exports = { add, list, status, cancel, due, runDue };
+/**
+ * 受控 scheduled publish — 真实发布入口
+ *
+ * @param {string} taskDir - 帖子目录
+ * @param {boolean} dryRun - 是否仅 dry-run
+ * @returns {Promise<object>}
+ */
+async function runDueConfirm(taskDir, dryRun) {
+  const dueResult = due();
+  const dueTasks = dueResult.data.due;
+  const dueIds = dueTasks.map(t => t.id);
+
+  // 校验 task 是否在到期列表中
+  if (!dueIds.includes(taskDir)) {
+    return { success: false, error: { code: 'SCHEDULE_TASK_NOT_IN_DUE', message: `指定任务不在到期列表中: ${taskDir}` } };
+  }
+
+  let s = state.load();
+  const post = state.findPost(s, taskDir);
+  if (!post || !post.schedule) {
+    return { success: false, error: { code: 'SCHEDULE_NOT_FOUND', message: '帖子或排期不存在' } };
+  }
+
+  // ─── 前置检查 ─────────────────────────────────────
+  const now = new Date();
+  const prechecks = [
+    { name: 'schedule_confirmed', pass: post.schedule.confirmed === true },
+    { name: 'schedule_status', pass: post.schedule.status === 'CONFIRMED' },
+    { name: 'scheduled_at', pass: new Date(post.schedule.scheduledAt) <= now },
+    { name: 'post_status', pass: post.status === 'QA_PASSED' },
+    { name: 'qa_status', pass: post.qa.status === 'PASSED' },
+    { name: 'publish_status', pass: post.publish.status === 'PENDING' },
+    { name: 'publish_attempts', pass: post.publish.attempts < post.publish.maxRetries },
+    { name: 'chrome_path', pass: !!config.chromePath },
+    { name: 'cookie_path', pass: !!config.cookiePath },
+    { name: 'cookie_file', pass: config.cookiePath ? fs.existsSync(config.cookiePath) : false },
+  ];
+
+  // 物理文件检查
+  const fullPath = path.join(config.contentDir, taskDir);
+  prechecks.push({ name: 'dir_exists', pass: fs.existsSync(fullPath) });
+  if (fs.existsSync(fullPath)) {
+    prechecks.push({ name: 'manifest_exists', pass: fs.existsSync(path.join(fullPath, 'manifest.json')) });
+    const outputDir = path.join(fullPath, 'output');
+    const hasPng = fs.existsSync(outputDir) && fs.readdirSync(outputDir).some(f => /\.png$/i.test(f));
+    prechecks.push({ name: 'output_exists', pass: hasPng });
+  } else {
+    prechecks.push({ name: 'manifest_exists', pass: false });
+    prechecks.push({ name: 'output_exists', pass: false });
+  }
+
+  const failedChecks = prechecks.filter(c => !c.pass);
+
+  // ─── dry-run 模式 ─────────────────────────────────
+  if (dryRun) {
+    return {
+      success: true,
+      data: {
+        mode: 'dry-run',
+        taskDir,
+        scheduledAt: post.schedule.scheduledAt,
+        allPassed: failedChecks.length === 0,
+        checks: prechecks,
+        note: failedChecks.length === 0
+          ? '[DRY-RUN] 前置条件通过。使用 --task (不加 --dry-run) 执行真实 scheduled publish'
+          : '[DRY-RUN] 前置条件未全部满足',
+      },
+    };
+  }
+
+  // ─── 前置检查失败 → 不发布 ────────────────────────
+  if (failedChecks.length > 0) {
+    post.schedule.status = 'FAILED';
+    post.schedule.completedAt = new Date().toISOString();
+    post.schedule.note = `前置检查失败: ${failedChecks.map(c => c.name).join(', ')}`;
+    state.save(s);
+    logger.error('SCHEDULE_PRECHECK_FAILED', 'scheduler', `scheduled publish 前置检查失败: ${taskDir}`, { failedChecks: failedChecks.map(c => c.name) });
+    return { success: false, error: { code: 'SCHEDULE_PRECHECK_FAILED', message: `前置检查未通过: ${failedChecks.map(c => c.name).join(', ')}`, detail: { checks: prechecks } } };
+  }
+
+  // ─── 设置 RUNNING ─────────────────────────────────
+  post.schedule.status = 'RUNNING';
+  post.schedule.triggeredAt = new Date().toISOString();
+  state.save(s);
+
+  // ─── 调用 publisher ───────────────────────────────
+  const pubResult = await publisher.publish(taskDir);
+
+  if (pubResult.success) {
+    // 成功
+    s = state.load();
+    const p = state.findPost(s, taskDir);
+    if (p && p.schedule) {
+      p.schedule.status = 'SUCCEEDED';
+      p.schedule.completedAt = new Date().toISOString();
+      state.save(s);
+    }
+    logger.info('SCHEDULE_PUBLISH_SUCCEEDED', 'scheduler', `scheduled publish 成功: ${taskDir}`, { publishedAt: pubResult.data.publishedAt });
+    return { success: true, data: { taskDir, result: 'SUCCEEDED', publishedAt: pubResult.data.publishedAt, imageCount: pubResult.data.imageCount } };
+  } else {
+    // 失败
+    s = state.load();
+    const p = state.findPost(s, taskDir);
+    if (p && p.schedule) {
+      p.schedule.status = 'FAILED';
+      p.schedule.completedAt = new Date().toISOString();
+      state.save(s);
+    }
+    logger.error('SCHEDULE_PUBLISH_FAILED', 'scheduler', `scheduled publish 失败: ${taskDir}`, { error: pubResult.error });
+    return { success: false, error: { code: 'SCHEDULE_PUBLISH_FAILED', message: pubResult.error.message, detail: pubResult.error } };
+  }
+}
+
+module.exports = { add, list, status, cancel, due, runDue, runDueConfirm };

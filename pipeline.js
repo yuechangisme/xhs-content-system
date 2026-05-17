@@ -251,21 +251,57 @@ function cmdScheduleDue() {
 function cmdScheduleRunDue() {
   const isMockSuccess = args.includes('--mock-success');
   const isMockFail = args.includes('--mock-fail');
+  const isConfirmPublish = args.includes('--confirm-scheduled-publish');
+  const isDryRun = args.includes('--dry-run');
+  const taskDir = getArgValue('--task');
 
-  if (!isMockSuccess && !isMockFail) {
-    errorOut('SCHEDULE_MISSING_ARGS', '用法: pipeline schedule run-due --mock-success 或 --mock-fail', 'scheduler');
+  // 模式 0: mock-success / mock-fail（已有）
+  if (isMockSuccess || isMockFail) {
+    const mockType = isMockSuccess ? 'success' : 'fail';
+    const result = scheduler.runDue(mockType);
+    if (!result.success) { errorOut('SCHEDULE_RUN_FAILED', '执行到期任务失败', 'scheduler'); return; }
+    output({ success: true, command, data: result.data });
     return;
   }
 
-  const mockType = isMockSuccess ? 'success' : 'fail';
-  const result = scheduler.runDue(mockType);
-
-  if (!result.success) {
-    errorOut('SCHEDULE_RUN_FAILED', '执行到期任务失败', 'scheduler');
+  // 模式 1: 无 flag → SCHEDULE_FLAG_REQUIRED
+  if (!isConfirmPublish) {
+    errorOut('SCHEDULE_FLAG_REQUIRED', '请指定操作模式: --mock-success, --mock-fail, 或 --confirm-scheduled-publish', 'scheduler');
     return;
   }
 
-  output({ success: true, command, data: result.data });
+  // 模式 2: confirm 但无 --task → 列出到期任务
+  if (!taskDir) {
+    const dueResult = scheduler.due();
+    errorOut('SCHEDULE_TASK_REQUIRED', '请使用 --task 指定要发布的任务',
+      'scheduler', { dueTasks: dueResult.data.due });
+    return;
+  }
+
+  // 模式 3: confirm + dry-run + task → 前置检查，不发布
+  if (isDryRun) {
+    scheduler.runDueConfirm(taskDir, true).then(result => {
+      output({ success: true, command, data: result.data });
+    }).catch(err => {
+      errorOut('SCHEDULE_DRY_RUN_FAILED', err.message, 'scheduler');
+    });
+    return;
+  }
+
+  // 模式 4: confirm + task（无 dry-run）→ 真实 scheduled publish
+  scheduler.runDueConfirm(taskDir, false).then(result => {
+    if (!result.success) {
+      errorOut(result.error.code || 'SCHEDULE_PUBLISH_FAILED', result.error.message, 'scheduler', result.error.detail);
+      return;
+    }
+    output({ success: true, command, data: result.data });
+  });
+}
+
+// 从 args 中获取指定 flag 的值
+function getArgValue(flag) {
+  const idx = args.indexOf(flag);
+  return idx >= 0 ? args[idx + 1] : null;
 }
 
 function cmdPublish() {

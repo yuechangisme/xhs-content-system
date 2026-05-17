@@ -105,3 +105,53 @@ node pipeline.js schedule due
 | `SCHEDULE_DUPLICATE` | 已存在 active 排期 |
 | `SCHEDULE_TIME_IN_PAST` | --time 是过去时间 |
 | `SCHEDULE_NOT_FOUND` | 排期不存在 |
+
+---
+
+## v0.3.3 — Controlled Scheduled Publish Contract
+
+### CLI 安全命令矩阵
+
+| 命令 | 行为 | 真实发布 |
+|------|------|---------|
+| `schedule due` | 查询到期任务 | ❌ 纯查询 |
+| `schedule run-due`（无 flag） | **拒绝** → `SCHEDULE_FLAG_REQUIRED` | ❌ |
+| `schedule run-due --mock-success` | mock 成功 | ❌ |
+| `schedule run-due --mock-fail` | mock 失败 | ❌ |
+| `schedule run-due --confirm-scheduled-publish` | 列出到期任务，不执行 | ❌ |
+| `schedule run-due --confirm-scheduled-publish --dry-run --task "<taskDir>"` | 完整前置检查，不发布 | ❌ |
+| `schedule run-due --confirm-scheduled-publish --task "<taskDir>"` | **真实 scheduled publish** | **✅** |
+
+### 安全规则
+
+1. 无 flag → `SCHEDULE_FLAG_REQUIRED`
+2. `--confirm-scheduled-publish` 但无 `--task` → 列出任务，要求 `--task`
+3. `--confirm-scheduled-publish --dry-run --task` → 检查全部，不发布，不写 state
+4. `--confirm-scheduled-publish --task` → 真实发布（需 13 项前置检查全部通过）
+5. 即使 due tasks = 1，也必须显式指定 `--task`
+
+### 13 项前置检查
+
+```
+schedule.confirmed / schedule.status = CONFIRMED / scheduledAt <= now
+post.status = QA_PASSED / qa.status = PASSED
+publish.status = PENDING / attempts < maxRetries
+taskDir 物理存在 / manifest.json 存在 / output/ 有 PNG
+chromePath / cookiePath / cookie 文件
+```
+
+### 职责边界
+
+- scheduler：查 due → 前置检查 → 调 publisher → 更新 schedule 状态
+- publisher：前置检查 → 真实发布 → 写 PUBLISHED → 移文件夹
+- scheduler 禁止直接调 publish-xhs.js，禁止直接写 PUBLISHED
+
+### 错误码
+
+| 码 | 场景 |
+|----|------|
+| `SCHEDULE_FLAG_REQUIRED` | run-due 未指定任何 flag |
+| `SCHEDULE_TASK_REQUIRED` | confirm 未带 --task |
+| `SCHEDULE_TASK_NOT_IN_DUE` | --task 不在到期列表中 |
+| `SCHEDULE_NO_DUE_TASKS` | 没有到期任务 |
+| `SCHEDULE_PRECHECK_FAILED` | 前置检查未通过 |
