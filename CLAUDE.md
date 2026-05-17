@@ -141,3 +141,13 @@ CLAUDE.md 不是普通变更记录，而是 Agent 的项目行为规则文件。
 以上内容应放在 README、CHANGELOG、CONTRACT、commit message 或任务报告中，而不是 CLAUDE.md。
 
 本规则从现在开始长期生效。
+
+## 定时发布确认模型（排期规则）
+
+1. **确认发生在排期时，不是执行时。** 定时发布的确认由 `--confirm-schedule` 在 `schedule add` 时完成，执行时不再要求人在场。
+2. **没有 `--confirm-schedule` 不得写入 confirmed schedule。** 未带此 flag 的 `schedule add` 只做预检查，不修改 state.json。
+3. **未 confirmed 的排期永不自动发布。** `schedule.confirmed = false` 时，即使到时间也不触发发布。
+4. **v0.3.0 禁止真实自动发布。** 当前版本只实现 schedule queue（add/list/cancel/status/due），不安装 node-schedule，不做常驻进程，不自动执行 publisher。
+5. **已 PUBLISHED 的帖子禁止排期。** `schedule add` 前置检查会拒绝。
+6. **QA 未通过的帖子禁止排期。** 只有 `QA_PASSED` 状态的帖子可以排期。
+7. **已存在 active 排期的帖子禁止重复 add。** 每个帖子同时只能有一个 CONFIRMED 或 RUNNING 排期。
