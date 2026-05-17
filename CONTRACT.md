@@ -140,11 +140,44 @@ taskDir 物理存在 / manifest.json 存在 / output/ 有 PNG
 chromePath / cookiePath / cookie 文件
 ```
 
-### 职责边界
+### 职责边界（v0.3.5 修正版）
 
-- scheduler：查 due → 前置检查 → 调 publisher → 更新 schedule 状态
-- publisher：前置检查 → 真实发布 → 写 PUBLISHED → 移文件夹
-- scheduler 禁止直接调 publish-xhs.js，禁止直接写 PUBLISHED
+#### publisher.publish()
+
+仅负责执行发布动作，返回结果。不更新 state，不移动文件夹。
+
+```
+输入: taskDir
+动作: 验证前置条件 → 调用 publish-xhs.js（子进程）→ 捕获 stdout/stderr/exitCode
+返回: { success, data?: { publishedAt, imageCount }, error?: { code, message, detail } }
+```
+
+#### caller（pipeline.js / scheduler.js）
+
+根据 publisher 返回结果更新全层状态和移动文件夹。手动发布和排期发布遵循相同模式。
+
+```
+caller 收到 publisher 成功:
+  → 更新 posts[].status = PUBLISHED
+  → 更新 publish.status = PUBLISHED
+  → 更新 publish.publishedAt = now
+  → 更新 schedule.lastPublishedAt = now
+  → 更新 schedule.status = SUCCEEDED（如适用）
+  → 移动文件夹：待投递 → 已投递
+
+caller 收到 publisher 失败:
+  → 更新 posts[].status = PUBLISH_FAILED
+  → 更新 publish.status = FAILED
+  → 更新 publish.attempts +1
+  → 更新 publish.error
+  → 不移动文件夹
+```
+
+#### 禁止行为
+
+- scheduler 不得直接调用 publish-xhs.js（必须通过 publisher.publish()）
+- publisher 不得直接处理 state/文件夹（由 caller 负责）
+- 任何模块不得绕过前置检查直接写 PUBLISHED
 
 ### 错误码
 

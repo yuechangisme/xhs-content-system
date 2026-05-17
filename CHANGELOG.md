@@ -1,5 +1,28 @@
 # Changelog
 
+## v0.3.5 (2026-05-17)
+
+### 修复
+
+- scheduled publish 成功后缺少文件夹归档：`runDueConfirm()` 在 publisher 成功后未执行 `fs.renameSync()`，导致待发布稿件发布后仍留在 `待投递/`。已补齐文件夹移动逻辑，与手动发布路径行为一致。
+- CONTRACT.md 职责边界描述与实际架构不一致：原写"publisher 写 PUBLISHED"和"scheduler 禁止写 PUBLISHED"，但实际架构是 publisher 只返回结果，caller 负责状态更新和文件夹移动。已修正为真实描述。
+
+### 变更
+
+- CONTRACT.md：职责边界章节重写，明确 publisher.publish() 只负责执行发布，caller（pipeline.js / scheduler.js）负责状态更新和文件夹移动
+
+### 回归验证
+
+| 场景 | 结果 |
+|------|------|
+| 已发布任务 dry-run 拒绝 | ✅ |
+| 已发布任务 schedule add 拒绝 | ✅ SCHEDULE_ALREADY_PUBLISHED |
+| mock-success 文件夹移动到已投递 | ✅ |
+| mock-fail 文件夹不移动 | ✅ |
+| schedule due 无副作用 | ✅ state diff 确认 |
+
+---
+
 ## v0.3.4 (2026-05-17)
 
 ### 里程碑

@@ -405,8 +405,22 @@ async function runDueConfirm(taskDir, dryRun) {
       }
       state.save(s);
     }
-    logger.info('SCHEDULE_PUBLISH_SUCCEEDED', 'scheduler', `scheduled publish 成功: ${taskDir}`, { publishedAt: pubResult.data.publishedAt, scheduleStatus: 'SUCCEEDED' });
-    return { success: true, data: { taskDir, result: 'SUCCEEDED', publishedAt: pubResult.data.publishedAt, imageCount: pubResult.data.imageCount } };
+
+    // 移动文件夹：待投递 → 已投递
+    const fullFolderPath = path.join(config.contentDir, taskDir);
+    const folderName = path.basename(fullFolderPath);
+    const targetDir = path.join(config.contentDir, '投稿内容', '已投递', folderName);
+    let moved = false;
+    try {
+      if (fs.existsSync(targetDir)) fs.rmSync(targetDir, { recursive: true, force: true });
+      fs.renameSync(fullFolderPath, targetDir);
+      moved = true;
+    } catch (moveErr) {
+      logger.warn('PUBLISH_MOVE_FAILED', 'scheduler', `scheduled publish 成功但文件夹移动失败: ${moveErr.message}`, { source: taskDir, target: targetDir });
+    }
+
+    logger.info('SCHEDULE_PUBLISH_SUCCEEDED', 'scheduler', `scheduled publish 成功: ${taskDir}`, { publishedAt: pubResult.data.publishedAt, scheduleStatus: 'SUCCEEDED', moved });
+    return { success: true, data: { taskDir, result: 'SUCCEEDED', publishedAt: pubResult.data.publishedAt, imageCount: pubResult.data.imageCount, moved } };
   } else {
     // 失败
     s = state.load();
