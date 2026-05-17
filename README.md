@@ -9,8 +9,8 @@
 ## 版本状态
 
 ```
-当前版本: v0.2.0
-当前阶段: publisher real publish接入
+当前版本: v0.2.2
+当前阶段: 核心 MVP 执行链路闭环（HTML→PNG→QA→publish→归档）
 ```
 
 ### 已完成
@@ -23,7 +23,11 @@
 - `render.js` 1080×1440 → 1620×2160 稳定导出
 - `publish --dry-run` 安全占位（仅验证前置条件，不污染 state）
 - `publish --confirm-publish` 真实发布（调用 publish-xhs.js，写 PUBLISHED，移动文件夹）
-- 三种发布模式：dry-run / 默认安全保护 / confirm
+- `publish --mock-success` / `--mock-fail` 模拟发布测试
+- 五种发布模式：dry-run / 默认安全保护 / confirm / mock-success / mock-fail
+- publish-xhs.js 正常退出（browser.close + process.exit）
+- 真实发布 → 小红书平台确认成功
+- 状态 reconciliation：PUBLISH_FAILED 可人工修正为 PUBLISHED
 - GitHub / Gitee 双远程基线
 
 ### 未完成
@@ -196,8 +200,8 @@ xhs-content-system/
 | v0.1.1 | 配置清理 | 移除硬编码本地路径，引入 config.local.js |
 | v0.1.2 | render hotfix | 统一 viewport 1080×1440，CSS reset 注入 |
 | v0.1.3 | docs baseline | README / CHANGELOG / documentation policy |
-| v0.2 | publisher 接入 | 真实发布（三种模式：dry-run / 安全保护 / confirm） |
-| v0.3 | scheduler | 定时发布 |
+| v0.2 | publisher 接入 | 真实发布（五种模式 + 首次真实发布验证 + reconciliation） |
+| v0.3 | scheduler | 定时发布（设计阶段） |
 | v0.4 | 热点获取 | 自动选题建议 |
 | v0.5 | 数据回流 | 发布后数据追踪 |
 
