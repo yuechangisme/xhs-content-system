@@ -1,5 +1,30 @@
 # Changelog
 
+## v0.2.0 (2026-05-17)
+
+### 新增
+
+- modules/publisher.js — 真实发布模块（前置条件验证 + 子进程调用 publish-xhs.js + 状态更新）
+- publish 三种模式：
+  - `--dry-run`：仅验证前置条件，不调用发布脚本，不写 PUBLISHED
+  - 默认模式（无 flag）：安全保护，提示必须使用 `--confirm-publish`
+  - `--confirm-publish`：通过所有前置验证后，调用 publish-xhs.js，成功写入 PUBLISHED
+
+### 变更
+
+- pipeline.js publish 命令：从占位实现升级为三种模式
+- README.md：更新工作流、快速开始、已完成清单、roadmap
+- 新增错误码：PUBLISH_CONFIRM_REQUIRED, PUBLISH_SCRIPT_FAILED, PUBLISH_CHROME_NOT_FOUND, PUBLISH_COOKIE_NOT_FOUND, PUBLISH_ALREADY_DONE
+
+### 安全
+
+- 真实发布必须 `--confirm-publish` 显式确认，默认模式禁止发布
+- 发布前验证 6 项前置条件（QA 状态、manifest、PNG、Chrome、Cookie、重试次数）
+- 发布失败不写 PUBLISHED，不移动文件夹
+- 发布成功自动移动文件夹：待投递 → 已投递
+
+---
+
 ## v0.1.3 (2026-05-17)
 
 ### 新增

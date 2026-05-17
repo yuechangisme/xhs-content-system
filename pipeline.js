@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 /**
- * xhs-content-system v0.1
+ * xhs-content-system v0.2
  * pipeline.js — 主编排器
  *
  * 职责：命令路由 + 调用模块 + 汇总输出 + 更新状态
@@ -12,7 +12,9 @@
  *   node pipeline.js status <taskDir>
  *   node pipeline.js qa <taskDir>
  *   node pipeline.js schedule
- *   node pipeline.js publish <taskDir> [--dry-run]
+ *   node pipeline.js publish <taskDir> --dry-run              # 仅验证，不调用
+ *   node pipeline.js publish <taskDir>                        # 提示需要 --confirm-publish
+ *   node pipeline.js publish <taskDir> --confirm-publish      # 真实发布
  */
 
 const fs = require('fs');
@@ -21,6 +23,7 @@ const config = require('./config');
 const state = require('./modules/state');
 const logger = require('./modules/logger');
 const qa = require('./modules/qa');
+const publisher = require('./modules/publisher');
 
 // ─── 命令路由 ────────────────────────────────────────────
 
@@ -198,9 +201,10 @@ function cmdSchedule() {
 function cmdPublish() {
   const taskDir = args[0];
   const isDryRun = args.includes('--dry-run');
+  const isConfirm = args.includes('--confirm-publish');
 
   if (!taskDir) {
-    errorOut('PUBLISH_MISSING_ARGS', '请指定帖子目录: pipeline publish <taskDir> [--dry-run]', 'publisher');
+    errorOut('PUBLISH_MISSING_ARGS', '请指定帖子目录: pipeline publish <taskDir> [--dry-run|--confirm-publish]', 'publisher');
     return;
   }
 
@@ -211,57 +215,169 @@ function cmdPublish() {
     return;
   }
 
-  // 验证 output 目录
-  const outputDir = path.join(fullPath, 'output');
-  if (!fs.existsSync(outputDir)) {
-    errorOut('PUBLISH_IMAGES_NOT_FOUND', `output/ 目录不存在: ${outputDir}`, 'publisher');
-    return;
-  }
-
-  // 验证 manifest.json
-  const manifestPath = path.join(fullPath, 'manifest.json');
-  if (!fs.existsSync(manifestPath)) {
-    errorOut('PUBLISH_MANIFEST_NOT_FOUND', `manifest.json 不存在: ${manifestPath}`, 'publisher');
-    return;
-  }
-
-  // 检查 state.json 中 QA 状态
+  // 加载 state
   let s = state.load();
-  const post = state.findPost(s, taskDir);
-  if (post && post.status !== 'QA_PASSED') {
+  const post = state.findOrCreatePost(s, taskDir);
+
+  // ─── 模式 A: dry-run ─────────────────────────────
+  if (isDryRun) {
+    return cmdPublishDryRun(taskDir, fullPath, post);
+  }
+
+  // ─── 模式 B: 默认模式（无 flag）───────────────────
+  if (!isConfirm) {
+    errorOut('PUBLISH_CONFIRM_REQUIRED',
+      '安全保护：真实发布需要 --confirm-publish 确认。使用 --dry-run 进行前置检查', 'publisher');
+    return;
+  }
+
+  // ─── 模式 C: confirm 模式 ─────────────────────────
+  return cmdPublishConfirm(taskDir, fullPath, s, post);
+}
+
+// ─── 模式 A: dry-run ──────────────────────────────────
+
+function cmdPublishDryRun(taskDir, fullPath, post) {
+  const outputDir = path.join(fullPath, 'output');
+  const manifestPath = path.join(fullPath, 'manifest.json');
+  const checks = [];
+
+  checks.push({ name: 'dir_exists', pass: fs.existsSync(fullPath) });
+  checks.push({ name: 'manifest_exists', pass: fs.existsSync(manifestPath) });
+
+  if (fs.existsSync(manifestPath)) {
+    try {
+      JSON.parse(fs.readFileSync(manifestPath, 'utf-8'));
+      checks.push({ name: 'manifest_valid', pass: true });
+    } catch (e) {
+      checks.push({ name: 'manifest_valid', pass: false });
+    }
+  } else {
+    checks.push({ name: 'manifest_valid', pass: false });
+  }
+
+  const outputExists = fs.existsSync(outputDir);
+  const pngCount = outputExists ? fs.readdirSync(outputDir).filter(f => /\.png$/i.test(f)).length : 0;
+  checks.push({ name: 'output_exists', pass: outputExists && pngCount > 0 });
+
+  checks.push({ name: 'qa_passed', pass: post ? post.status === 'QA_PASSED' : false });
+  checks.push({ name: 'chrome_configured', pass: !!config.chromePath });
+  checks.push({ name: 'cookie_configured', pass: !!config.cookiePath });
+
+  const allPassed = checks.every(c => c.pass);
+
+  output({
+    success: allPassed,
+    command: 'publish',
+    data: {
+      mode: 'dry-run',
+      taskDir,
+      publishedAt: null,
+      checks,
+      imageCount: pngCount,
+      note: allPassed
+        ? '[DRY-RUN] 前置条件通过，可执行 --confirm-publish 真实发布'
+        : '[DRY-RUN] 前置条件未全部满足，请修复后重试',
+    },
+  });
+}
+
+// ─── 模式 C: confirm 发布 ─────────────────────────────
+
+async function cmdPublishConfirm(taskDir, fullPath, s, post) {
+  // 前置检查
+  if (post.status !== 'QA_PASSED') {
     errorOut('PUBLISH_QA_NOT_PASSED', `QA 未通过，禁止发布 (当前状态: ${post.status})`, 'publisher');
     return;
   }
 
-  // 检查重试次数
-  if (post && post.publish.attempts >= post.publish.maxRetries) {
+  if (post.publish.status === 'PUBLISHED') {
+    errorOut('PUBLISH_ALREADY_DONE', `帖子已发布 (publishedAt: ${post.publish.publishedAt})`, 'publisher');
+    return;
+  }
+
+  if (post.publish.attempts >= post.publish.maxRetries) {
     errorOut('PUBLISH_MAX_RETRIES_EXCEEDED', `发布失败已达 ${post.publish.maxRetries} 次上限`, 'publisher');
     return;
   }
 
-  // ─── 占位实现 ─────────────────────────────────────────
-  // v0.1 MVP: 仅验证前置条件，不做真实发布
-  // 不写 PUBLISHED，不移动文件夹，不污染 schedule
-
-  const imageFiles = fs.readdirSync(outputDir).filter(f => /\.png$/i.test(f)).sort();
-
-  if (!isDryRun) {
-    // 安全占位：不使用 --dry-run 时返回未实现错误
-    errorOut('PUBLISH_NOT_IMPLEMENTED', '发布模块尚未接入真实发布。使用 --dry-run 进行前置检查', 'publisher');
+  if (!config.chromePath) {
+    errorOut('PUBLISH_CHROME_NOT_FOUND', 'config.chromePath 未配置，无法启动浏览器', 'publisher');
     return;
   }
 
-  // --dry-run 仅验证前置条件，不修改任何状态
-  output({
-    success: true,
-    command,
-    data: {
-      taskDir,
-      dryRun: true,
-      publishedAt: null,
-      manifestPath: path.join(taskDir, 'manifest.json'),
-      imageCount: imageFiles.length,
-      note: '[DRY-RUN] 前置条件通过，未执行真实发布，未修改 state.json',
-    },
+  if (!config.cookiePath || !fs.existsSync(config.cookiePath)) {
+    errorOut('PUBLISH_COOKIE_NOT_FOUND', 'config.cookiePath 未配置或文件不存在', 'publisher');
+    return;
+  }
+
+  // 标记 PUBLISHING
+  state.updatePublishResult(s, taskDir, {
+    status: 'RUNNING',
+    attempts: post.publish.attempts + 1,
+    lastAttemptAt: new Date().toISOString(),
+    error: null,
   });
+  state.updatePostStatus(s, taskDir, 'PUBLISHING');
+  state.save(s);
+
+  // 执行发布
+  const result = await publisher.publish(taskDir);
+
+  if (result.success) {
+    // 成功：写 PUBLISHED
+    state.updatePublishResult(s, taskDir, {
+      status: 'PUBLISHED',
+      publishedAt: result.data.publishedAt,
+      error: null,
+    });
+    state.updatePostStatus(s, taskDir, 'PUBLISHED');
+
+    // 更新全局 schedule
+    s.schedule.lastPublishedAt = result.data.publishedAt;
+    state.save(s);
+
+    // 移动文件夹：待投递 → 已投递
+    const parentDir = path.dirname(fullPath);
+    const folderName = path.basename(fullPath);
+    const targetDir = path.join(config.contentDir, '投稿内容', '已投递', folderName);
+
+    try {
+      // 如果目标已存在先删除
+      if (fs.existsSync(targetDir)) fs.rmSync(targetDir, { recursive: true, force: true });
+      fs.renameSync(fullPath, targetDir);
+    } catch (moveErr) {
+      logger.error('PUBLISH_MOVE_FAILED', 'publisher',
+        `发布成功但文件夹移动失败: ${moveErr.message}`, { source: fullPath, target: targetDir });
+    }
+
+    logger.info('PUBLISH_SUCCEEDED', 'publisher', `发布成功: ${taskDir}`,
+      { imageCount: result.data.imageCount });
+
+    output({
+      success: true,
+      command: 'publish',
+      data: {
+        mode: 'confirm',
+        taskDir,
+        publishedAt: result.data.publishedAt,
+        imageCount: result.data.imageCount,
+        note: '发布成功',
+      },
+    });
+
+  } else {
+    // 失败：写 PUBLISH_FAILED
+    state.updatePublishResult(s, taskDir, {
+      status: 'FAILED',
+      error: result.error,
+    });
+    state.updatePostStatus(s, taskDir, 'PUBLISH_FAILED');
+    state.save(s);
+
+    logger.error(result.error.code || 'PUBLISH_FAILED', 'publisher',
+      `发布失败: ${taskDir}`, { message: result.error.message });
+
+    errorOut(result.error.code || 'PUBLISH_FAILED', result.error.message, 'publisher', result.error.detail);
+  }
 }

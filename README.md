@@ -9,8 +9,8 @@
 ## 版本状态
 
 ```
-当前版本: v0.1.2
-当前阶段: execution baseline + render/export hotfix
+当前版本: v0.2.0
+当前阶段: publisher real publish接入
 ```
 
 ### 已完成
@@ -22,11 +22,12 @@
 - `modules/qa.js` 静态 P0 检测（字号 / border-radius / manifest / emoji）
 - `render.js` 1080×1440 → 1620×2160 稳定导出
 - `publish --dry-run` 安全占位（仅验证前置条件，不污染 state）
+- `publish --confirm-publish` 真实发布（调用 publish-xhs.js，写 PUBLISHED，移动文件夹）
+- 三种发布模式：dry-run / 默认安全保护 / confirm
 - GitHub / Gitee 双远程基线
 
 ### 未完成
 
-- publisher 真实接入
 - 自动定时发布
 - 自动热点获取
 - 数据回流
@@ -66,7 +67,10 @@ pipeline.js schedule
     ↓ 推荐发布时间
 pipeline.js publish <taskDir> --dry-run
     ↓ 验证发布前置条件
-[后续] publisher 真实接入
+pipeline.js publish <taskDir> --confirm-publish
+    ↓ 真实发布（需显式确认）
+pipeline.js publish <taskDir>
+    ↓ 安全保护：提示必须 --confirm-publish
 ```
 
 ---
@@ -109,11 +113,15 @@ node pipeline.js qa "投稿内容/待投递/你的任务目录"
 # 查看推荐发布时间
 node pipeline.js schedule
 
-# 发布前验证（仅 dry-run，不会真实发布）
+# 发布前验证（dry-run，不调用真实发布脚本）
 node pipeline.js publish "投稿内容/待投递/你的任务目录" --dry-run
-```
 
-> ⚠️ 当前 `publish` 仅支持 `--dry-run`，不会真实发布到小红书。
+# 默认模式（安全保护，提示必须 --confirm-publish）
+node pipeline.js publish "投稿内容/待投递/你的任务目录"
+
+# 真实发布（需显式确认，否则拒绝执行）
+node pipeline.js publish "投稿内容/待投递/你的任务目录" --confirm-publish
+```
 
 ---
 
@@ -182,7 +190,7 @@ xhs-content-system/
 | v0.1.1 | 配置清理 | 移除硬编码本地路径，引入 config.local.js |
 | v0.1.2 | render hotfix | 统一 viewport 1080×1440，CSS reset 注入 |
 | v0.1.3 | docs baseline | README / CHANGELOG / documentation policy |
-| v0.2 | publisher 接入 | 真实发布到小红书 |
+| v0.2 | publisher 接入 | 真实发布（三种模式：dry-run / 安全保护 / confirm） |
 | v0.3 | scheduler | 定时发布 |
 | v0.4 | 热点获取 | 自动选题建议 |
 | v0.5 | 数据回流 | 发布后数据追踪 |
