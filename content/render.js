@@ -29,13 +29,33 @@ const chromePath = config.chromePath;
   });
 
   const page = await browser.newPage();
-  // 3x 缩放，匹配 html2canvas 的 SCALE=3，输出 1620x2160
-  await page.setViewport({ width: 540, height: 720, deviceScaleFactor: 3 });
+  // viewport 匹配 HTML 设计尺寸 1080×1440, 1.5x → 输出 1620×2160
+  await page.setViewport({ width: 1080, height: 1440, deviceScaleFactor: 1.5 });
 
   const fileUrl = 'file:///' + absHtmlPath.replace(/\\/g, '/');
   await page.goto(fileUrl, { waitUntil: 'networkidle0', timeout: 30000 });
   await page.waitForSelector('.slide', { timeout: 10000 });
   await page.evaluate(() => new Promise(r => setTimeout(r, 2000)));
+
+  // 注入导出专用 CSS，覆盖 body 预览布局，确保 slide 导出不受预览样式影响
+  await page.addStyleTag({
+    content: `
+      body {
+        margin: 0 !important;
+        padding: 0 !important;
+        background: transparent !important;
+        gap: 0 !important;
+      }
+      .slide {
+        width: 1080px !important;
+        height: 1440px !important;
+        margin: 0 !important;
+        transform: none !important;
+        zoom: 1 !important;
+      }
+    `
+  });
+  await page.evaluate(() => new Promise(r => setTimeout(r, 500)));
 
   const slides = await page.$$('.slide');
   console.log('找到 ' + slides.length + ' 张卡片');
