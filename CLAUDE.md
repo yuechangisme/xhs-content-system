@@ -62,3 +62,45 @@ npx http-server -p 8080 content/ --cors
 - Node.js 20+
 - Puppeteer（自动下载 Chrome）
 - 图片来源：Pexels CDN（images.pexels.com 可直接热链）
+
+## Documentation Update Policy
+
+### 提交前检查
+
+每次提交前必须检查 README / CHANGELOG 是否需要更新。
+
+### 必须更新 README 的场景
+
+- 新增或修改 CLI 命令
+- 修改项目目录结构
+- 修改配置方式
+- 修改运行方式
+- 修改 render / QA / publish 的用户可见行为
+- 新增模块
+- 修改当前版本状态或 roadmap
+
+### 必须更新 CHANGELOG 的场景
+
+- 打 tag
+- 发布版本
+- 完成阶段性功能
+- 修复影响用户使用的 bug
+
+### 可以不更新的场景（需说明原因）
+
+- 内部小重构
+- 注释调整
+- 不影响用户行为的 bugfix
+- 测试数据修复
+
+### 提交报告必须包含
+
+- 是否更新 README：是/否
+- 是否更新 CHANGELOG：是/否
+- 如果否，说明原因
+
+### 禁止
+
+- 功能变化但 README 不同步
+- 打 tag 但 CHANGELOG 不更新
+- 修改 CLI 命令但 README 快速开始命令不更新
