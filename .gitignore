@@ -29,6 +29,9 @@ content/**/output/
 content/公共素材库/
 content/账号信息/
 
+# 清理备份（不上传）
+cleanup-backup/
+
 # 系统文件
 .DS_Store
 Thumbs.db
