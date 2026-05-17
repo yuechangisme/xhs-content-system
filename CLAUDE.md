@@ -104,3 +104,40 @@ npx http-server -p 8080 content/ --cors
 - 功能变化但 README 不同步
 - 打 tag 但 CHANGELOG 不更新
 - 修改 CLI 命令但 README 快速开始命令不更新
+
+## CLAUDE.md Update Policy
+
+CLAUDE.md 不是普通变更记录，而是 Agent 的项目行为规则文件。只有当某条规则会影响未来 Agent 的长期行为时，才应该写入 CLAUDE.md。
+
+### 每次任务完成的报告必须包含
+
+```
+## Documentation Check
+* README 是否需要更新：
+* CHANGELOG 是否需要更新：
+* CONTRACT 是否需要更新：
+* CLAUDE.md 是否需要更新：
+* 原因：
+```
+
+### 必须考虑更新 CLAUDE.md 的场景
+
+1. **项目工作流程发生变化** — QA、render、publish、schedule、git、release 流程变化
+2. **Agent 行为边界发生变化** — 新增禁止真实发布、必须 dry-run、必须确认等规则
+3. **安全规则发生变化** — 禁止提交 cookie、config.local.js、账号信息、output PNG、本地路径等
+4. **文档同步规则发生变化** — README / CHANGELOG / CONTRACT 的更新要求变化
+5. **架构职责边界发生变化** — xhs-planner skill 与 xhs-content-system 的职责划分变化
+6. **Agent 反复踩坑的问题被总结为长期规则** — 误写 PUBLISHED、忘记更新 README、误提交本地路径、跳过 QA 等
+
+### 一般不需要更新 CLAUDE.md 的场景
+
+- 单次 bug 修复
+- 单篇帖子内容修改
+- 普通 CSS / 文案调整
+- 不影响工作方式的内部代码重构
+- 一次性的测试结果
+- commit hash、tag 记录、临时日志
+
+以上内容应放在 README、CHANGELOG、CONTRACT、commit message 或任务报告中，而不是 CLAUDE.md。
+
+本规则从现在开始长期生效。
