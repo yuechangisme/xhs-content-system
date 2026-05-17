@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=540">
+<title>8个好习惯｜懒人养生手册</title>
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { background:#e8e2d4; display:flex; flex-direction:column; align-items:center; padding:30px 20px 80px; font-family:-apple-system,'PingFang SC','Microsoft YaHei',sans-serif; }
+  .slide { width:540px; height:720px; position:relative; overflow:hidden;  margin-bottom:40px; box-shadow:0 8px 32px rgba(0,0,0,0.18); }
+  .content { position:absolute; inset:0; padding:32px; z-index:2; display:flex; flex-direction:column; }
+  .noise { position:absolute; inset:0; opacity:0.03; pointer-events:none; z-index:1; background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E"); background-repeat:repeat; background-size:128px; }
+
+  .badge { display:inline-flex; align-items:center; gap:8px; font-size:15px; font-weight:700; letter-spacing:1.2px; }
+  .badge::before { content:''; width:7px; height:7px; border-radius:50%; }
+  .bd-d { color:rgba(255,255,255,0.35); } .bd-d::before { background:rgba(255,255,255,0.25); }
+  .bd-l { color:rgba(27,67,50,0.35); } .bd-l::before { background:rgba(27,67,50,0.25); }
+  .pg { position:absolute; bottom:24px; right:28px; font-size:15px; font-weight:500; z-index:3; font-family:'Georgia','Noto Serif SC',serif; }
+  .pg-d { color:rgba(255,255,255,0.15); } .pg-l { color:rgba(27,67,50,0.15); }
+  .h1 { font-size:56px; font-weight:900; line-height:1.15; } .h1-d { color:#FEFAE0; }
+  .h2 { font-size:40px; font-weight:800; line-height:1.25; } .h2-d { color:#FEFAE0; } .h2-l { color:#1B4332; }
+  .h3 { font-size:22px; font-weight:600; } .h3-o { color:#F4A261; } .h3-c { color:#E76F51; }
+  .body { font-size:22px; line-height:1.7; } .body-d { color:rgba(255,255,255,0.78); } .body-l { color:#3D4F5C; }
+  .body strong { font-weight:700; } .body-d strong { color:#FEFAE0; } .body-l strong { color:#1B4332; }
+  .hl { display:inline; padding:0 6px; line-height:1.3; }
+  .hl-o { background:linear-gradient(180deg,transparent 55%,rgba(244,162,97,0.35) 55%); }
+  .hl-c { background:linear-gradient(180deg,transparent 55%,rgba(231,111,81,0.3) 55%); }
+  .info-r { display:flex; align-items:center; gap:14px; padding:12px 16px; border-radius:10px; margin-bottom:8px; }
+  .info-r-d { background:rgba(255,255,255,0.06); } .info-r-l { background:rgba(27,67,50,0.04); }
+  .info-e { font-size:22px; width:30px; text-align:center; }
+  .info-t { font-size:19px; line-height:1.5; flex:1; } .info-t-d { color:rgba(255,255,255,0.75); } .info-t-l { color:#3D4F5C; }
+  .info-t strong { font-weight:700; } .info-t-d strong { color:#FEFAE0; } .info-t-l strong { color:#1B4332; }
+  .num-lg { font-size:76px; font-weight:900; line-height:1; } .num-o { color:#F4A261; }
+  .tag-sm { display:inline-block; font-size:16px; font-weight:700; padding:4px 12px; border-radius:20px; margin-bottom:10px; }
+  .tag-o { background:rgba(244,162,97,0.15); color:#F4A261; }
+  .toolbar { position:fixed; top:0; left:0; right:0; z-index:100; background:rgba(30,30,30,0.95); backdrop-filter:blur(10px); border-bottom:1px solid rgba(255,255,255,0.08); padding:12px 20px; display:flex; align-items:center; justify-content:center; gap:12px; }
+  .toolbar .btn { background:#3A7D44; color:#FEFAE0; border:none; padding:10px 24px; border-radius:8px; font-size:16px; font-weight:600; cursor:pointer; }
+  .toolbar .btn.acc { background:#F4A261; color:#1B4332; }
+  .toolbar .prg { color:rgba(255,255,255,0.5); font-size:15px; margin-left:8px; }
+</style>
+</head>
+<body>
+
+<div class="toolbar">
+  <button class="btn acc" onclick="downloadAll()">全部下载 (ZIP)</button>
+  <button class="btn" onclick="downloadOne()">下载当前</button>
+  <span class="prg" id="progress"></span>
+</div>
+
+<!-- 1/9 · 封面 -->
+<div class="slide">
+  <div style="position:absolute;inset:0;background:#1B4332;"></div><div class="noise"></div>
+  <svg style="position:absolute;bottom:-40px;right:-50px;z-index:1;" width="280" height="280" viewBox="0 0 280 280">
+    <circle cx="140" cy="140" r="130" fill="none" stroke="rgba(244,162,97,0.07)" stroke-width="2" stroke-dasharray="6 8"/>
+  </svg>
+  <div class="content" style="justify-content:center;">
+    <span class="badge bd-d" style="position:absolute;top:28px;left:32px;">懒人养生手册</span>
+    <div style="flex:1;display:flex;flex-direction:column;justify-content:center;padding-bottom:20px;">
+      <span class="tag-sm tag-o">人民日报推荐</span>
+      <div class="h1 h1-d">8 个好习惯<br>越活越年轻</div>
+      <div class="h3" style="margin-top:12px;font-size:22px;color:rgba(255,255,255,0.45);">坚持做，比同龄人年轻 4.6 岁 ✨</div>
+    </div>
+  </div>
+  <div class="pg pg-d">1/9</div>
+</div>
+
+<!-- 2/9 · 引入实验数据 -->
+<div class="slide">
+  <div style="position:absolute;inset:0;background:#FEFAE0;"></div><div class="noise"></div>
+  <div class="content">
+    <span class="badge bd-l" style="position:absolute;top:28px;left:32px;">懒人养生手册</span>
+    <div style="flex:1;display:flex;flex-direction:column;justify-content:center;padding-bottom:10px;">
+      <span class="hl hl-o" style="font-size:34px;font-weight:800;color:#1B4332;">年轻不是玄学，是习惯</span>
+      <div class="body body-l" style="margin-top:12px;">
+        美国营养协会做过一项实验：<br>
+        45-55 岁成年人严格坚持健康习惯 <strong>2 个月</strong>后——
+      </div>
+      <div style="margin:16px 0;text-align:center;">
+        <div class="num-lg num-o">4.6<span style="font-size:24px;font-weight:700;">岁</span></div>
+        <div style="font-size:18px;color:#5A6B7A;margin-top:4px;">平均生物年龄 <strong>年轻了 4.6 岁</strong></div>
+      </div>
+      <div class="info-r info-r-l">
+        <span class="info-e">❤️</span>
+        <span class="info-t info-t-l">心脏血管、代谢功能大大增强</span>
+      </div>
+      <div class="info-r info-r-l">
+        <span class="info-e">💪</span>
+        <span class="info-t info-t-l">睡眠、饮食干预最有效</span>
+      </div>
+      <div class="body body-l" style="margin-top:6px;font-size:18px;color:#5A6B7A;">
+        《人民日报》总结了 8 个习惯，<br>坚持下去就能越活越年轻。
+      </div>
+    </div>
+  </div>
+  <div class="pg pg-l">2/9</div>
+</div>
+
+<!-- 3/9 · ①靠墙站 + ②八分饱 -->
+<div class="slide">
+  <div style="position:absolute;inset:0;background:#1B4332;"></div><div class="noise"></div>
+  <div class="content">
+    <span class="badge bd-d" style="position:absolute;top:28px;left:32px;">懒人养生手册</span>
+    <div style="flex:1;display:flex;flex-direction:column;justify-content:center;padding-bottom:10px;">
+      <div class="info-r info-r-d" style="margin-bottom:4px;">
+        <span style="font-size:30px;font-weight:900;color:#F4A261;min-width:44px;">①</span>
+        <div><div class="h2 h2-d" style="font-size:30px;">靠墙站 10 分钟</div>
+        <div class="body body-d" style="font-size:18px;margin-top:4px;">头部贴墙、肩膀下沉，腰椎压力 <strong>下降 42%</strong><br>体态变挺拔，年轻感自然来</div></div>
+      </div>
+      <div style="height:1px;background:rgba(255,255,255,0.06);margin:12px 0;"></div>
+      <div class="info-r info-r-d" style="margin-bottom:4px;">
+        <span style="font-size:30px;font-weight:900;color:#F4A261;min-width:44px;">②</span>
+        <div><div class="h2 h2-d" style="font-size:30px;">每餐八分饱</div>
+        <div class="body body-d" style="font-size:18px;margin-top:4px;">"人言少吃多滋味，此是尊生第一方"<br>减少糖化反应，皮肤更通透</div></div>
+      </div>
+    </div>
+  </div>
+  <div class="pg pg-d">3/9</div>
+</div>
+
+<!-- 4/9 · ③防晒 + ④学新技能 -->
+<div class="slide">
+  <div style="position:absolute;inset:0;background:#FEFAE0;"></div><div class="noise"></div>
+  <div class="content">
+    <span class="badge bd-l" style="position:absolute;top:28px;left:32px;">懒人养生手册</span>
+    <div style="flex:1;display:flex;flex-direction:column;justify-content:center;padding-bottom:10px;">
+      <div class="info-r info-r-l" style="margin-bottom:4px;">
+        <span style="font-size:30px;font-weight:900;color:#E76F51;min-width:44px;">③</span>
+        <div><div class="h2 h2-l" style="font-size:30px;">做好防晒不偷懒</div>
+        <div class="body body-l" style="font-size:18px;margin-top:4px;">面部皱纹 <strong>75%</strong> 由阳光造成<br>防晒霜 + 伞 + 墨镜，比抗皱精华管用</div></div>
+      </div>
+      <div style="height:1px;background:rgba(27,67,50,0.06);margin:12px 0;"></div>
+      <div class="info-r info-r-l" style="margin-bottom:4px;">
+        <span style="font-size:30px;font-weight:900;color:#E76F51;min-width:44px;">④</span>
+        <div><div class="h2 h2-l" style="font-size:30px;">每月学点新技能</div>
+        <div class="body body-l" style="font-size:18px;margin-top:4px;">持续学习刺激大脑神经<br>大脑是"用进废退"的器官，越用越年轻</div></div>
+      </div>
+    </div>
+  </div>
+  <div class="pg pg-l">4/9</div>
+</div>
+
+<!-- 5/9 · ⑤提早睡 -->
+<div class="slide">
+  <div style="position:absolute;inset:0;background:#1a3a28;"></div><div class="noise"></div>
+  <div class="content">
+    <span class="badge bd-d" style="position:absolute;top:28px;left:32px;">懒人养生手册</span>
+    <div style="flex:1;display:flex;flex-direction:column;justify-content:center;padding-bottom:10px;">
+      <div style="font-size:30px;font-weight:900;color:rgba(244,162,97,0.5);margin-bottom:4px;">⑤</div>
+      <div class="h2 h2-d" style="font-size:40px;">
+        <span class="hl hl-o">提早睡 15 分钟</span>
+      </div>
+      <div class="body body-d" style="margin-top:14px;">
+        深度睡眠时身体分泌大量<strong>生长激素</strong>，<br>
+        加速细胞修复，让你拥有由内而外的<strong>好气色</strong>。
+      </div>
+      <div class="info-r info-r-d" style="margin-top:8px;">
+        <span class="info-e">😴</span>
+        <span class="info-t info-t-d"><strong>172</strong> 种疾病与睡眠不足有关</span>
+      </div>
+      <div class="info-r info-r-d">
+        <span class="info-e">⏰</span>
+        <span class="info-t info-t-d">从今晚开始，把睡觉时间提前 15 分钟</span>
+      </div>
+    </div>
+  </div>
+  <div class="pg pg-d">5/9</div>
+</div>
+
+<!-- 6/9 · ⑥喝够水 -->
+<div class="slide">
+  <div style="position:absolute;inset:0;background:#FEFAE0;"></div><div class="noise"></div>
+  <div class="content">
+    <span class="badge bd-l" style="position:absolute;top:28px;left:32px;">懒人养生手册</span>
+    <div style="flex:1;display:flex;flex-direction:column;justify-content:center;padding-bottom:10px;">
+      <div style="font-size:30px;font-weight:900;color:rgba(231,111,81,0.4);margin-bottom:4px;">⑥</div>
+      <div class="h2 h2-l" style="font-size:40px;">
+        <span class="hl hl-c">每天喝够水</span>
+      </div>
+      <div class="body body-l" style="margin-top:14px;">
+        感觉口渴时，身体已经<strong>轻度脱水</strong>了。<br>
+        长期饮水不足，血液变粘稠、细胞缩水，<br>
+        这是最容易被忽略的<strong>衰老加速器</strong>。
+      </div>
+      <div style="margin-top:16px;text-align:center;">
+        <div class="num-lg" style="font-size:64px;color:#E76F51;">1500<span style="font-size:22px;font-weight:700;">ml</span></div>
+        <div style="font-size:18px;color:#5A6B7A;margin-top:4px;">每日喝够量，晨起睡前都要补</div>
+      </div>
+    </div>
+  </div>
+  <div class="pg pg-l">6/9</div>
+</div>
+
+<!-- 7/9 · ⑦放空 -->
+<div class="slide">
+  <div style="position:absolute;inset:0;background:#1B4332;"></div><div class="noise"></div>
+  <div class="content">
+    <span class="badge bd-d" style="position:absolute;top:28px;left:32px;">懒人养生手册</span>
+    <div style="flex:1;display:flex;flex-direction:column;justify-content:center;padding-bottom:10px;">
+      <div style="font-size:30px;font-weight:900;color:rgba(244,162,97,0.5);margin-bottom:4px;">⑦</div>
+      <div class="h2 h2-d" style="font-size:40px;">
+        <span class="hl hl-o">每天放空 10 分钟</span>
+      </div>
+      <div class="body body-d" style="margin-top:14px;">
+        不看手机、不想工作，<br>
+        盯着窗外发呆、泡杯茶闭眼养神。<br>
+        学会放空，才能<strong>抖落一身疲惫</strong>。
+      </div>
+      <div class="body body-d" style="margin-top:12px;font-style:italic;font-size:18px;color:rgba(255,255,255,0.5);">
+        "负暄闭目坐，和气生肌肤。"<br>
+        ——白居易
+      </div>
+    </div>
+  </div>
+  <div class="pg pg-d">7/9</div>
+</div>
+
+<!-- 8/9 · ⑧练力量 + 金句 -->
+<div class="slide">
+  <div style="position:absolute;inset:0;background:#FEFAE0;"></div><div class="noise"></div>
+  <div class="content">
+    <span class="badge bd-l" style="position:absolute;top:28px;left:32px;">懒人养生手册</span>
+    <div style="flex:1;display:flex;flex-direction:column;justify-content:center;padding-bottom:10px;">
+      <div style="font-size:30px;font-weight:900;color:rgba(231,111,81,0.4);margin-bottom:4px;">⑧</div>
+      <div class="h2 h2-l" style="font-size:40px;">
+        <span class="hl hl-c">每天 15 分钟练力量</span>
+      </div>
+      <div class="body body-l" style="margin-top:10px;">
+        等电梯时踮脚尖、追剧时跳健身操<br>
+        <strong>15 分钟微运动</strong>，就能拨慢人生时钟
+      </div>
+      <div style="margin-top:18px;padding:16px 0;border-top:1px solid rgba(27,67,50,0.08);">
+        <div class="body body-l" style="font-style:italic;font-weight:600;text-align:center;">
+          "岁月光阴不会偏爱谁，<br>
+          一个人的年轻状态都有迹可循。"
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="pg pg-l">8/9</div>
+</div>
+
+<!-- 9/9 · CTA -->
+<div class="slide">
+  <div style="position:absolute;inset:0;background:#1a3a28;"></div><div class="noise"></div>
+  <div class="content" style="justify-content:center;align-items:center;">
+    <span class="badge bd-d" style="position:absolute;top:28px;left:32px;">懒人养生手册</span>
+    <div style="text-align:center;max-width:380px;z-index:2;">
+      <div style="font-size:48px;margin-bottom:12px;">⏳</div>
+      <div style="font-size:34px;font-weight:800;line-height:1.3;color:#FEFAE0;">
+        关注 <span style="color:#F4A261;">懒人养生手册</span>
+      </div>
+      <div style="font-size:19px;line-height:1.7;margin:12px 0 20px;color:rgba(255,255,255,0.5);">
+        不折腾的养生干货<br>
+        好习惯清单 · 懒人健康法 · 打工人回血指南
+      </div>
+      <div style="border:1.5px dashed rgba(244,162,97,0.3);border-radius:14px;padding:20px 24px;margin-bottom:16px;">
+        <div style="font-size:13px;letter-spacing:2px;color:rgba(255,255,255,0.3);margin-bottom:8px;">💬 评论区互动</div>
+        <div style="font-size:18px;font-weight:700;line-height:1.6;color:#F4A261;">
+          这 8 个习惯你做到了几个？<br>最难坚持的是哪一个？
+        </div>
+      </div>
+      <div style="font-size:16px;color:rgba(255,255,255,0.25);letter-spacing:1px;">点赞 ❤️　收藏 ⭐　转发 🔄</div>
+    </div>
+  </div>
+  <div class="pg pg-d">9/9</div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/file-saver@2.0.5/dist/FileSaver.min.js"></script>
+<script>
+const SCALE=3;  // 3x
+async function renderSlide(s){return html2canvas(s,{scale:SCALE,useCORS:true,backgroundColor:null,width:540,height:720,logging:false});}
+function canvasToBlob(c){return new Promise(r=>c.toBlob(r,'image/png'));}
+async function downloadAll(){
+  const slides=document.querySelectorAll('.slide');
+  const p=document.getElementById('progress');
+  const zip=new JSZip();
+  for(let i=0;i<slides.length;i++){
+    p.textContent=`渲染第 ${i+1}/${slides.length} 张...`;
+    const canvas=await renderSlide(slides[i]);
+    zip.file(`好习惯-${String(i+1).padStart(2,'0')}.png`,await canvasToBlob(canvas));
+  }
+  p.textContent='打包中...';
+  saveAs(await zip.generateAsync({type:'blob'}),'好习惯-全部.zip');
+  p.textContent=`${slides.length} 张已下载 ✅`;
+}
+async function downloadOne(){
+  const slides=document.querySelectorAll('.slide'); const vc=window.innerHeight/2;
+  let idx=0,min=Infinity;
+  slides.forEach((s,i)=>{const d=Math.abs(s.getBoundingClientRect().top+360-vc);if(d<min){min=d;idx=i;}});
+  const canvas=await renderSlide(slides[idx]);
+  saveAs(await canvasToBlob(canvas),`好习惯-${String(idx+1).padStart(2,'0')}.png`);
+}
+</script>
+</body>
+</html>

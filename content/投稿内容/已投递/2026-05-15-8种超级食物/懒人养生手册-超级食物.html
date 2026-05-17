@@ -1,0 +1,416 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=540">
+<title>8种超级食物｜懒人养生手册</title>
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body {
+    background:#e8e2d4; display:flex; flex-direction:column; align-items:center;
+    padding:30px 20px 80px; font-family:-apple-system,'PingFang SC','Microsoft YaHei',sans-serif;
+  }
+  .slide {
+    width:540px; height:720px; position:relative; overflow:hidden;
+     margin-bottom:40px; box-shadow:0 8px 32px rgba(0,0,0,0.18);
+  }
+  .content { position:absolute; inset:0; padding:32px; z-index:2; display:flex; flex-direction:column; }
+  .noise {
+    position:absolute; inset:0; opacity:0.03; pointer-events:none; z-index:1;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+    background-repeat:repeat; background-size:128px;
+  }
+  .badge { display:inline-flex; align-items:center; gap:8px; font-size:13px; font-weight:700; letter-spacing:1.2px; }
+  .badge-dr { color:rgba(255,255,255,0.35); }
+  .badge-lt { color:rgba(27,67,50,0.35); }
+  .badge::before { content:''; width:7px; height:7px; border-radius:50%; }
+  .badge-dr::before { background:rgba(255,255,255,0.25); }
+  .badge-lt::before { background:rgba(27,67,50,0.25); }
+  .pg { position:absolute; bottom:24px; right:28px; font-size:13px; font-weight:500; z-index:3; font-family:'Georgia','Noto Serif SC',serif; }
+  .pg-dr { color:rgba(255,255,255,0.15); }
+  .pg-lt { color:rgba(27,67,50,0.15); }
+
+  /* Typography */
+  .h1 { font-size:54px; font-weight:900; line-height:1.15; letter-spacing:-0.5px; }
+  .h1-d { color:#FEFAE0; }
+  .h2 { font-size:34px; font-weight:800; line-height:1.25; }
+  .h2-d { color:#FEFAE0; }
+  .h2-l { color:#1B4332; }
+  .h3 { font-size:20px; font-weight:600; line-height:1.4; }
+  .h3-d { color:#F4A261; }
+  .h3-l { color:#E76F51; }
+  .body { font-size:17px; line-height:1.8; }
+  .body-d { color:rgba(255,255,255,0.78); }
+  .body-l { color:#3D4F5C; }
+  .body strong { font-weight:700; }
+  .body-d strong { color:#FEFAE0; }
+  .body-l strong { color:#1B4332; }
+  .hl { display:inline; padding:0 6px; line-height:1.3; }
+  .hl-o { background:linear-gradient(180deg,transparent 55%,rgba(244,162,97,0.35) 55%); }
+  .hl-c { background:linear-gradient(180deg,transparent 55%,rgba(231,111,81,0.3) 55%); }
+
+  /* Components */
+  .stat-row { display:flex; gap:10px; }
+  .stat-c { flex:1; text-align:center; padding:16px 8px;  }
+  .stat-c-d { background:rgba(255,255,255,0.06); }
+  .stat-c-l { background:rgba(27,67,50,0.04); }
+  .stat-n { font-size:36px; font-weight:900; line-height:1; }
+  .stat-n-o { color:#F4A261; }
+  .stat-n-c { color:#E76F51; }
+  .stat-u { font-size:13px; font-weight:500; margin-top:4px; }
+  .stat-u-d { color:rgba(255,255,255,0.5); }
+  .stat-u-l { color:#718096; }
+
+  .info-r { display:flex; align-items:center; gap:14px; padding:12px 16px; border-radius:10px; margin-bottom:8px; }
+  .info-r-d { background:rgba(255,255,255,0.06); }
+  .info-r-l { background:rgba(27,67,50,0.04); }
+  .info-e { font-size:22px; width:30px; text-align:center; }
+  .info-t { font-size:16px; line-height:1.5; flex:1; }
+  .info-t-d { color:rgba(255,255,255,0.75); }
+  .info-t-l { color:#3D4F5C; }
+  .info-t strong { font-weight:700; }
+  .info-t-d strong { color:#FEFAE0; }
+  .info-t-l strong { color:#1B4332; }
+
+  .lazy { padding:12px 16px; border-radius:10px; margin-top:10px; }
+  .lazy-d { background:rgba(244,162,97,0.1); border-left:3px solid #F4A261; }
+  .lazy-l { background:rgba(244,162,97,0.08); border-left:3px solid #E76F51; }
+  .lazy-lb { font-size:14px; font-weight:700; margin-bottom:4px; }
+  .lazy-lb-d { color:#F4A261; }
+  .lazy-lb-l { color:#E76F51; }
+  .lazy-t { font-size:15px; line-height:1.6; }
+  .lazy-t-d { color:rgba(255,255,255,0.65); }
+  .lazy-t-l { color:#5A6B7A; }
+
+  .tl { display:flex; align-items:flex-start; gap:14px; margin-bottom:10px; }
+  .tl-dot { width:10px; height:10px; border-radius:50%; margin-top:5px; flex-shrink:0; background:#F4A261; }
+  .tl-l { font-size:16px; font-weight:700; min-width:44px; flex-shrink:0; }
+  .tl-l-d { color:#F4A261; }
+  .tl-t { font-size:16px; line-height:1.6; }
+  .tl-t-d { color:rgba(255,255,255,0.7); }
+
+  .food-r { display:flex; gap:10px; }
+  .food-c { flex:1;  padding:14px 8px; text-align:center; }
+  .food-c-d { background:rgba(255,255,255,0.06); }
+  .food-c-l { background:rgba(27,67,50,0.04); }
+  .food-i { font-size:32px; margin-bottom:4px; }
+  .food-n { font-size:16px; font-weight:700; }
+  .food-n-d { color:#FEFAE0; }
+  .food-n-l { color:#1B4332; }
+
+  /* Image styles */
+  .food-img { width:100%; height:320px; object-fit:cover;  }
+  .img-card { display:flex; flex-direction:column; }
+  .img-card .content { position:relative; padding:0; }
+  .img-overlay { position:absolute; bottom:0; left:0; right:0; padding:24px 28px; background:linear-gradient(transparent,rgba(0,0,0,0.7)); }
+
+  /* Toolbar */
+</style>
+</head>
+<body>
+
+
+<!-- ============ 1/8 · 封面 ============ -->
+<div class="slide">
+  <div style="position:absolute;inset:0;background:#1B4332;"></div>
+  <div class="noise"></div>
+  <svg style="position:absolute;bottom:-40px;right:-50px;z-index:1;" width="300" height="300" viewBox="0 0 300 300">
+    <circle cx="150" cy="150" r="140" fill="none" stroke="rgba(244,162,97,0.07)" stroke-width="2" stroke-dasharray="6 8"/>
+    <circle cx="150" cy="150" r="110" fill="none" stroke="rgba(244,162,97,0.05)" stroke-width="1.5" stroke-dasharray="4 10"/>
+  </svg>
+  <div class="content" style="justify-content:center;">
+    <span class="badge badge-dr" style="position:absolute;top:28px;left:32px;">懒人养生手册</span>
+    <div style="flex:1;display:flex;flex-direction:column;justify-content:center;padding-bottom:20px;">
+      <span style="display:inline-block;background:#F4A261;color:#1B4332;font-size:14px;font-weight:700;padding:5px 12px;border-radius:5px;margin-bottom:18px;width:fit-content;">懒人友好</span>
+      <div class="h1 h1-d" style="font-size:56px;">8 种<br>超级食物</div>
+      <div class="h3" style="margin-top:14px;font-size:18px;color:rgba(255,255,255,0.45);">懒人也能轻松吃出好气色 ✨</div>
+      <div style="display:flex;gap:6px;margin-top:18px;">
+        <div style="width:10px;height:10px;border-radius:50%;background:#F4A261;"></div>
+        <div style="width:10px;height:10px;border-radius:50%;border:1.5px solid rgba(255,255,255,0.2);"></div>
+        <div style="width:10px;height:10px;border-radius:50%;border:1.5px solid rgba(255,255,255,0.2);"></div>
+        <div style="width:10px;height:10px;border-radius:50%;border:1.5px solid rgba(255,255,255,0.2);"></div>
+        <div style="width:10px;height:10px;border-radius:50%;border:1.5px solid rgba(255,255,255,0.2);"></div>
+        <div style="width:10px;height:10px;border-radius:50%;border:1.5px solid rgba(255,255,255,0.2);"></div>
+        <div style="width:10px;height:10px;border-radius:50%;border:1.5px solid rgba(255,255,255,0.2);"></div>
+      </div>
+    </div>
+  </div>
+  <div class="pg pg-dr">1/8</div>
+</div>
+
+<!-- ============ 2/8 · 为什么超级食物 ============ -->
+<div class="slide">
+  <div style="position:absolute;inset:0;background:#FEFAE0;"></div>
+  <div class="noise"></div>
+  <div class="content">
+    <span class="badge badge-lt" style="position:absolute;top:28px;left:32px;">懒人养生手册</span>
+    <div style="flex:1;display:flex;flex-direction:column;justify-content:center;padding-bottom:10px;padding-top:20px;">
+      <div style="margin-bottom:16px;">
+        <span class="hl hl-o" style="font-size:30px;font-weight:800;color:#1B4332;">为什么吃超级食物？</span>
+      </div>
+      <div class="body body-l" style="margin-bottom:18px;">
+        现代农业让蔬菜的 <strong>营养密度</strong> 比 30 年前<br>
+        下降了 <strong>50% 以上</strong>。以前吃一口的量，<br>
+        现在得吃两口才够。
+      </div>
+      <div class="info-r info-r-l">
+        <span class="info-e">🥬</span>
+        <span class="info-t info-t-l">维生素 C 含量下降 <strong>45%</strong></span>
+      </div>
+      <div class="info-r info-r-l">
+        <span class="info-e">🧪</span>
+        <span class="info-t info-t-l">钙、铁、锌减少 <strong>30～50%</strong></span>
+      </div>
+      <div class="info-r info-r-l">
+        <span class="info-e">💡</span>
+        <span class="info-t info-t-l">解法：选 <strong>营养密度高</strong> 的超级食物</span>
+      </div>
+      <div style="margin-top:14px;display:flex;align-items:baseline;gap:6px;">
+        <span style="font-size:60px;font-weight:900;color:#F4A261;">50%</span>
+        <span class="body" style="font-size:15px;font-weight:500;color:#5A6B7A;">营养缩水，但你可以选对食物</span>
+      </div>
+    </div>
+  </div>
+  <div class="pg pg-lt">2/8</div>
+</div>
+
+<!-- ============ 3/8 · 姜黄（带真实图片） ============ -->
+<div class="slide">
+  <div style="position:absolute;inset:0;background:#1a3a28;"></div>
+  <div class="noise"></div>
+  <div style="position:absolute;top:0;left:0;width:100%;height:380px;background-image:url('images/姜黄粉-01.jpg');background-size:cover;background-position:center;z-index:1;"></div>
+  <div style="position:absolute;top:0;left:0;right:0;height:380px;background:linear-gradient(to bottom, rgba(0,0,0,0.1), rgba(0,0,0,0.35) 55%, rgba(26,58,40,1));z-index:2;"></div>
+  <div class="content">
+    <span class="badge badge-dr" style="position:absolute;top:28px;left:32px;z-index:3;">懒人养生手册</span>
+    <div style="flex:1;display:flex;flex-direction:column;justify-content:flex-end;padding-bottom:10px;z-index:3;">
+      <div style="font-size:22px;font-weight:700;color:rgba(244,162,97,0.5);margin-bottom:2px;">01</div>
+      <div class="h2 h2-d" style="font-size:38px;">
+        <span style="display:inline;position:relative;">姜黄
+          <svg style="position:absolute;left:0;bottom:-2px;width:100%;height:4px;" viewBox="0 0 120 6"><path d="M0 3 Q15 0 30 3 T60 3 T90 3 T120 3" stroke="#F4A261" stroke-width="2.5" fill="none" opacity="0.6"/></svg>
+        </span>
+      </div>
+      <div class="h3 h3-d" style="margin-top:6px;">抗炎之王</div>
+      <div class="body body-d" style="margin-top:14px;">
+        核心成分 <strong>姜黄素</strong>，天然的消炎剂。<br>
+        慢性炎症是衰老、爆痘、疲劳的<strong>隐形推手</strong>。
+      </div>
+      <div class="info-r info-r-d" style="margin-top:8px;">
+        <span class="info-e">💪</span>
+        <span class="info-t info-t-d">缓解关节炎症、改善皮肤状态</span>
+      </div>
+      <div class="info-r info-r-d">
+        <span class="info-e">⚠️</span>
+        <span class="info-t info-t-d"><strong>必须配黑胡椒</strong> — 吸收率提升 2000%</span>
+      </div>
+      <div class="lazy lazy-d">
+        <div class="lazy-lb lazy-lb-d">🥄 懒人吃法</div>
+        <div class="lazy-t lazy-t-d">煮咖喱、泡黄金奶、炒饭时撒一勺姜黄粉+黑胡椒，不费力</div>
+      </div>
+    </div>
+  </div>
+  <div class="pg pg-dr">3/8</div>
+</div>
+
+<!-- ============ 4/8 · 奇亚籽（带真实图片） ============ -->
+<div class="slide">
+  <div style="position:absolute;inset:0;background:#FEFAE0;"></div>
+  <div class="noise"></div>
+  <div style="position:absolute;top:0;left:0;width:100%;height:380px;background-image:url('images/奇亚籽布丁-01.jpg');background-size:cover;background-position:center;z-index:1;"></div>
+  <div style="position:absolute;top:0;left:0;right:0;height:380px;background:linear-gradient(to bottom, rgba(0,0,0,0.15), rgba(0,0,0,0.4) 60%, rgba(254,250,224,1));z-index:2;"></div>
+  <div class="content">
+    <span class="badge badge-dr" style="position:absolute;top:28px;left:32px;z-index:3;">懒人养生手册</span>
+    <div style="flex:1;display:flex;flex-direction:column;justify-content:flex-end;padding-bottom:10px;z-index:3;">
+      <div style="font-size:22px;font-weight:700;color:rgba(244,162,97,0.6);margin-bottom:2px;">02</div>
+      <div class="h2 h2-l" style="font-size:38px;">奇亚籽</div>
+      <div class="h3 h3-l" style="margin-top:2px;">Omega-3 炸弹</div>
+      <div class="stat-row" style="margin-top:12px;">
+        <div class="stat-c stat-c-l">
+          <div class="stat-n stat-n-o">17<span style="font-size:16px;">g</span></div>
+          <div class="stat-u stat-u-l">Omega-3 / 100g</div>
+        </div>
+        <div class="stat-c stat-c-l">
+          <div class="stat-n stat-n-o">34<span style="font-size:16px;">g</span></div>
+          <div class="stat-u stat-u-l">膳食纤维 / 100g</div>
+        </div>
+        <div class="stat-c stat-c-l">
+          <div class="stat-n stat-n-c">2<span style="font-size:16px;">x</span></div>
+          <div class="stat-u stat-u-l">超亚麻籽</div>
+        </div>
+      </div>
+      <div class="body body-l" style="margin-top:10px;">
+        <strong>Omega-3</strong> 是现代人最容易缺的营养之一。<br>
+        奇亚籽是植物源 Omega-3 的 <strong>天花板</strong>。
+      </div>
+      <div class="lazy lazy-l">
+        <div class="lazy-lb lazy-lb-l">🥄 懒人吃法</div>
+        <div class="lazy-t lazy-t-l">泡水涨开 + 酸奶/燕麦，不用开火，30 秒搞定</div>
+      </div>
+    </div>
+  </div>
+  <div class="pg pg-lt">4/8</div>
+</div>
+
+<!-- ============ 5/8 · 抹茶（带真实图片） ============ -->
+<div class="slide">
+  <div style="position:absolute;inset:0;background:#1a3a28;"></div>
+  <div class="noise"></div>
+  <div style="position:absolute;top:0;left:0;width:100%;height:380px;background-image:url('images/抹茶饮品-01.jpg');background-size:cover;background-position:center;z-index:1;"></div>
+  <div style="position:absolute;top:0;left:0;right:0;height:380px;background:linear-gradient(to bottom, rgba(0,0,0,0.1), rgba(0,0,0,0.35) 55%, rgba(26,58,40,1));z-index:2;"></div>
+  <div class="content">
+    <span class="badge badge-dr" style="position:absolute;top:28px;left:32px;z-index:3;">懒人养生手册</span>
+    <div style="flex:1;display:flex;flex-direction:column;justify-content:flex-end;padding-bottom:10px;z-index:3;">
+      <div style="font-size:22px;font-weight:700;color:rgba(244,162,97,0.5);margin-bottom:2px;">03</div>
+      <div class="h2 h2-d" style="font-size:38px;">抹茶</div>
+      <div class="h3 h3-d" style="margin-top:2px;">清醒不焦躁</div>
+      <div class="body body-d" style="margin-top:12px;">
+        抹茶的秘密是 <strong>L-茶氨酸</strong> + 咖啡因的天然组合。<br>
+        茶氨酸让你 <strong>冷静专注</strong>，咖啡因给足能量——<br>
+        没有咖啡的焦躁感，只有清醒的平静。
+      </div>
+      <div class="info-r info-r-d" style="margin-top:6px;">
+        <span class="info-e">🆚</span>
+        <span class="info-t info-t-d">抗氧化力是普通绿茶的 <strong>10 倍</strong></span>
+      </div>
+      <div class="lazy lazy-d">
+        <div class="lazy-lb lazy-lb-d">🥄 懒人吃法</div>
+        <div class="lazy-t lazy-t-d">直接冲水或燕麦奶，比做咖啡还快</div>
+      </div>
+    </div>
+  </div>
+  <div class="pg pg-dr">5/8</div>
+</div>
+
+<!-- ============ 6/8 · 发酵食物（带真实图片） ============ -->
+<div class="slide">
+  <div style="position:absolute;inset:0;background:#f7f0d6;"></div>
+  <div class="noise"></div>
+  <div style="position:absolute;top:0;left:0;width:100%;height:380px;background-image:url('images/韩式泡菜-01.jpg');background-size:cover;background-position:center;z-index:1;"></div>
+  <div style="position:absolute;top:0;left:0;right:0;height:380px;background:linear-gradient(to bottom, rgba(0,0,0,0.15), rgba(0,0,0,0.4) 60%, rgba(247,240,214,1));z-index:2;"></div>
+  <div class="content">
+    <span class="badge badge-lt" style="position:absolute;top:28px;left:32px;z-index:3;">懒人养生手册</span>
+    <div style="flex:1;display:flex;flex-direction:column;justify-content:flex-end;padding-bottom:10px;z-index:3;">
+      <div style="font-size:22px;font-weight:700;color:rgba(231,111,81,0.4);margin-bottom:2px;">04</div>
+      <div class="h2 h2-l" style="font-size:38px;">
+        <span class="hl hl-c">发酵食物</span>
+      </div>
+      <div class="h3 h3-l" style="margin-top:2px;">肠道是第二大脑</div>
+      <div class="body body-l" style="margin-top:14px;">
+        肠道菌群影响的不只是消化——<br>
+        它和你的 <strong>免疫力、情绪、皮肤</strong> 直接挂钩。<br>
+        养肠道 = 养全身。
+      </div>
+      <div class="food-r" style="margin-top:12px;">
+        <div class="food-c food-c-l">
+          <div class="food-i">🥬</div>
+          <div class="food-n food-n-l">泡菜</div>
+        </div>
+        <div class="food-c food-c-l">
+          <div class="food-i">🧊</div>
+          <div class="food-n food-n-l">康普茶</div>
+        </div>
+        <div class="food-c food-c-l">
+          <div class="food-i">🥛</div>
+          <div class="food-n food-n-l">酸奶</div>
+        </div>
+        <div class="food-c food-c-l">
+          <div class="food-i">🫘</div>
+          <div class="food-n food-n-l">纳豆</div>
+        </div>
+      </div>
+      <div class="lazy lazy-l">
+        <div class="lazy-lb lazy-lb-l">🥄 懒人吃法</div>
+        <div class="lazy-t lazy-t-l">超市冷藏柜直接买，每餐配一小份就行</div>
+      </div>
+    </div>
+  </div>
+  <div class="pg pg-lt">6/8</div>
+</div>
+
+<!-- ============ 7/8 · 懒人公式 ============ -->
+<div class="slide">
+  <div style="position:absolute;inset:0;background:#1B4332;"></div>
+  <div class="noise"></div>
+  <div class="content">
+    <span class="badge badge-dr" style="position:absolute;top:28px;left:32px;">懒人养生手册</span>
+    <div style="flex:1;display:flex;flex-direction:column;justify-content:center;padding-bottom:10px;">
+      <div class="h2 h2-d" style="font-size:32px;margin-bottom:16px;">
+        <span class="hl hl-o">懒人超级食物公式</span>
+      </div>
+      <div style="margin-bottom:14px;">
+        <div style="display:flex;align-items:center;gap:14px;padding:12px 16px;background:rgba(255,255,255,0.05);border-radius:10px;margin-bottom:8px;">
+          <span style="font-size:24px;font-weight:900;color:#F4A261;">80%</span>
+          <span style="font-size:15px;color:rgba(255,255,255,0.65);">日常均衡饮食，不用刻意改变</span>
+        </div>
+        <div style="display:flex;align-items:center;gap:14px;padding:12px 16px;background:rgba(244,162,97,0.1);border-radius:10px;border:1px solid rgba(244,162,97,0.15);">
+          <span style="font-size:24px;font-weight:900;color:#F4A261;">20%</span>
+          <span style="font-size:15px;color:rgba(255,255,255,0.65);">超级食物强化，每天顺手加一点</span>
+        </div>
+      </div>
+      <div class="tl">
+        <div style="display:flex;flex-direction:column;align-items:center;gap:2px;padding-top:2px;">
+          <div class="tl-dot"></div>
+          <div style="width:1px;height:24px;background:rgba(244,162,97,0.2);"></div>
+        </div>
+        <div><span class="tl-l tl-l-d">🌅 早</span><span class="tl-t tl-t-d">　奇亚籽 + 酸奶 / 燕麦</span></div>
+      </div>
+      <div class="tl">
+        <div style="display:flex;flex-direction:column;align-items:center;gap:2px;padding-top:2px;">
+          <div class="tl-dot"></div>
+          <div style="width:1px;height:24px;background:rgba(244,162,97,0.2);"></div>
+        </div>
+        <div><span class="tl-l tl-l-d">☕ 上午</span><span class="tl-t tl-t-d">　抹茶替代咖啡</span></div>
+      </div>
+      <div class="tl">
+        <div><div class="tl-dot"></div></div>
+        <div><span class="tl-l tl-l-d">🍛 午晚</span><span class="tl-t tl-t-d">　炒菜撒姜黄 + 配发酵小菜</span></div>
+      </div>
+      <div style="margin-top:10px;padding:14px 18px;border-left:3px solid #F4A261;background:rgba(255,255,255,0.04);border-radius:0 10px 10px 0;">
+        <div style="font-size:17px;line-height:1.8;font-style:italic;font-weight:600;color:rgba(255,255,255,0.7);">
+          "你吃的每一口食物，都在给未来的身体投票。"
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="pg pg-dr">7/8</div>
+</div>
+
+<!-- ============ 8/8 · CTA ============ -->
+<div class="slide">
+  <div style="position:absolute;inset:0;background:#FEFAE0;"></div>
+  <div class="noise"></div>
+  <svg style="position:absolute;bottom:-80px;right:-70px;z-index:1;" width="320" height="320" viewBox="0 0 320 320">
+    <circle cx="160" cy="160" r="150" fill="none" stroke="rgba(244,162,97,0.08)" stroke-width="2"/>
+    <circle cx="160" cy="160" r="120" fill="none" stroke="rgba(244,162,97,0.05)" stroke-width="1.5" stroke-dasharray="5 10"/>
+  </svg>
+  <div class="content" style="justify-content:center;align-items:center;">
+    <span class="badge badge-lt" style="position:absolute;top:28px;left:32px;">懒人养生手册</span>
+    <div style="text-align:center;max-width:380px;margin:0 auto;z-index:2;">
+      <div style="font-size:48px;margin-bottom:14px;">📖</div>
+      <div style="font-size:34px;font-weight:800;line-height:1.3;color:#1B4332;">
+        关注 <span style="color:#E76F51;">懒人养生手册</span>
+      </div>
+      <div style="font-size:16px;line-height:1.7;margin:12px 0 20px;color:#5A6B7A;">
+        更多不折腾的养生干货<br>
+        超级食物清单 · 懒人食谱 · 打工人回血指南
+      </div>
+      <div style="border:1.5px dashed rgba(27,67,50,0.2);border-radius:14px;padding:20px 24px;margin-bottom:16px;">
+        <div style="font-size:11px;letter-spacing:2px;color:rgba(27,67,50,0.3);margin-bottom:8px;">💬 评论区互动</div>
+        <div style="font-size:18px;font-weight:700;line-height:1.6;color:#E76F51;">
+          你吃过哪种超级食物？<br>或者你最想了解哪一个？
+        </div>
+      </div>
+      <div style="font-size:14px;color:#8B9D83;letter-spacing:1px;">点赞 ❤️　收藏 ⭐　转发 🔄</div>
+    </div>
+  </div>
+  <div class="pg pg-lt">8/8</div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/file-saver@2.0.5/dist/FileSaver.min.js"></script>
+<script>
+const SCALE=3;  // 3x
+async function renderSlide(s){return html2canvas(s,{scale:SCALE,useCORS:true,backgroundColor:null,width:540,height:720,logging:false});}
+function canvasToBlob(c){return new Promise(r=>c.toBlob(r,'image/png'));}
+</body>
+</html>

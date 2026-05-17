@@ -1,0 +1,21 @@
+# 依赖
+node_modules/
+content/node_modules/
+
+# Claude 配置
+.claude/
+
+# 运行时状态（每次运行变化）
+state.json
+error.log
+
+# 输出图片
+content/**/output/
+
+# 素材与账号信息（不上传）
+content/公共素材库/
+content/账号信息/
+
+# 系统文件
+.DS_Store
+Thumbs.db

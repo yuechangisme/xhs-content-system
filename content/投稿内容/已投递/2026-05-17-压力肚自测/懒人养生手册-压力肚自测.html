@@ -1,0 +1,649 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=1080">
+<title>明明不胖却有小肚子？｜懒人养生手册</title>
+<style>
+  :root {
+    --warm-white: #FEFAE0;
+    --dark-green: #1B4332;
+    --healthy-green: #3A7D44;
+    --warm-orange: #F4A261;
+    --coral: #E76F51;
+    --deep-bg: #1a3a28;
+    --text-dark: #1B4332;
+    --text-body: #3D4F5C;
+    --text-muted: #5A6B7A;
+    --card-white: #FFFFFF;
+    --slide-w: 1080px;
+    --slide-h: 1440px;
+  }
+
+  * { margin:0; padding:0; box-sizing:border-box; }
+
+  body {
+    background: #e8e2d4;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 40px 20px 80px;
+    gap: 40px;
+    font-family: -apple-system,'PingFang SC','Microsoft YaHei','Noto Sans SC',sans-serif;
+  }
+
+  .slide {
+    width: var(--slide-w);
+    height: var(--slide-h);
+    position: relative;
+    overflow: hidden;
+    flex-shrink: 0;
+  }
+
+  .noise {
+    position: absolute; inset: 0;
+    opacity: 0.03; pointer-events: none; z-index: 1;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+    background-repeat: repeat; background-size: 128px;
+  }
+
+  .content {
+    position: absolute; inset: 0;
+    height: 100%;
+    padding: 44px 56px;
+    z-index: 2;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 26px;
+    font-weight: 700;
+    letter-spacing: 1.5px;
+  }
+  .badge::before { content:''; width:10px; height:10px; border-radius:50%; }
+  .badge-dr { color:rgba(255,255,255,0.3); }
+  .badge-dr::before { background:rgba(255,255,255,0.2); }
+  .badge-lt { color:rgba(27,67,50,0.3); }
+  .badge-lt::before { background:rgba(27,67,50,0.2); }
+
+  .pg {
+    position: absolute;
+    bottom: 36px; right: 48px;
+    font-size: 26px;
+    font-weight: 500;
+    z-index: 3;
+    font-family: 'Georgia','Noto Serif SC',serif;
+  }
+  .pg-dr { color:rgba(255,255,255,0.1); }
+  .pg-lt { color:rgba(27,67,50,0.1); }
+
+  /* ===== Bg helpers ===== */
+  .bg-dark { position:absolute; inset:0; background:var(--dark-green); }
+  .bg-light { position:absolute; inset:0; background:var(--warm-white); }
+  .bg-deep { position:absolute; inset:0; background:var(--deep-bg); }
+
+  /* ===== Decorative SVG ===== */
+  .deco-circles { position:absolute; bottom:-60px; right:-70px; z-index:1; }
+  .deco-circles-sm { position:absolute; top:-40px; right:-40px; z-index:1; width:200px; height:200px; }
+
+  /* ===== Cover ===== */
+  .cover-tag {
+    display: inline-block;
+    background: var(--warm-orange);
+    color: var(--dark-green);
+    font-size: 28px;
+    font-weight: 800;
+    padding: 10px 22px;
+    border-radius: 6px;
+    margin-bottom: 32px;
+    width: fit-content;
+    letter-spacing: 1px;
+  }
+  .cover-h1 {
+    font-size: 130px;
+    font-weight: 900;
+    line-height: 1.1;
+    letter-spacing: -1px;
+    color: var(--warm-white);
+  }
+  .cover-sub {
+    font-size: 42px;
+    font-weight: 600;
+    color: rgba(255,255,255,0.4);
+    margin-top: 20px;
+  }
+  .cover-dots { display:flex; gap:12px; margin-top:32px; }
+  .cover-dots span { width:16px; height:16px; border-radius:50%; }
+  .cover-dots .dot-fill { background:var(--warm-orange); }
+  .cover-dots .dot-empty { border:2px solid rgba(255,255,255,0.2); }
+  .cover-numbers { display:flex; gap:28px; margin-top:28px; align-items:center; }
+  .cover-num-digit { font-size:60px; font-weight:900; color:var(--warm-orange); line-height:1; }
+  .cover-num-label { font-size:24px; color:rgba(255,255,255,0.35); font-weight:500; margin-left:6px; }
+
+  /* ===== Pain point (Slide 2) ===== */
+  .section-title {
+    font-size: 52px;
+    font-weight: 800;
+    line-height: 1.25;
+  }
+  .section-title-dr { color: var(--warm-white); }
+  .section-title-lt { color: var(--dark-green); }
+
+  .pain-list {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    margin-top: 36px;
+  }
+  .pain-item {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    padding: 20px 24px;
+    border-radius: 14px;
+  }
+  .pain-item-dr { background: rgba(255,255,255,0.06); }
+  .pain-item-lt { background: rgba(27,67,50,0.04); }
+  .pain-icon { font-size: 40px; width: 52px; text-align:center; flex-shrink:0; }
+  .pain-text {
+    font-size: 40px;
+    line-height: 1.5;
+    font-weight: 500;
+  }
+  .pain-text-dr { color: rgba(255,255,255,0.85); }
+  .pain-text-lt { color: var(--text-body); }
+
+  /* ===== Self-test checklist ===== */
+  .checklist {
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+    margin-top: 28px;
+  }
+  .check-item {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    padding: 18px 24px;
+    border-radius: 14px;
+  }
+  .check-item-dr { background: rgba(255,255,255,0.05); }
+  .check-item-lt { background: rgba(27,67,50,0.04); }
+  .check-box {
+    width: 34px; height: 34px;
+    border-radius: 8px;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .check-box-dr { border: 3px solid var(--warm-orange); }
+  .check-box-lt { border: 3px solid var(--coral); }
+  .check-num {
+    font-size: 28px;
+    font-weight: 800;
+    min-width: 44px;
+    flex-shrink: 0;
+  }
+  .check-num-dr { color: var(--warm-orange); }
+  .check-num-lt { color: var(--coral); }
+  .check-text {
+    font-size: 40px;
+    line-height: 1.45;
+    font-weight: 500;
+  }
+  .check-text-dr { color: rgba(255,255,255,0.88); }
+  .check-text-lt { color: var(--text-body); }
+  .check-text strong { font-weight: 700; }
+  .check-text-dr strong { color: var(--warm-white); }
+  .check-text-lt strong { color: var(--dark-green); }
+
+  .check-footnote {
+    font-size: 24px;
+    font-weight: 500;
+    margin-top: 8px;
+    text-align: right;
+  }
+  .check-footnote-dr { color: rgba(255,255,255,0.25); }
+  .check-footnote-lt { color: rgba(27,67,50,0.25); }
+
+  /* Scoring */
+  .score-row {
+    display: flex;
+    gap: 16px;
+    margin-top: 18px;
+  }
+  .score-card {
+    flex: 1;
+    text-align: center;
+    padding: 16px 12px;
+    border-radius: 12px;
+  }
+  .score-card-green { background: rgba(58,125,68,0.1); }
+  .score-card-yellow { background: rgba(244,162,97,0.12); }
+  .score-card-red { background: rgba(231,111,81,0.1); }
+  .score-dot {
+    display: inline-block;
+    width: 16px; height: 16px;
+    border-radius: 50%;
+    margin-bottom: 6px;
+  }
+  .score-dot-green { background: var(--healthy-green); }
+  .score-dot-yellow { background: var(--warm-orange); }
+  .score-dot-red { background: var(--coral); }
+  .score-range {
+    font-size: 28px;
+    font-weight: 800;
+    color: var(--text-dark);
+  }
+  .score-label {
+    font-size: 22px;
+    color: var(--text-muted);
+    margin-top: 2px;
+    font-weight: 500;
+  }
+
+  /* ===== Comfort / CTA centered ===== */
+  .center-wrap {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    min-height: 0;
+  }
+  .center-wrap-l {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    text-align: left;
+    min-height: 0;
+    max-width: 100%;
+  }
+
+  .comfort-icon { font-size: 80px; margin-bottom: 16px; }
+
+  .comfort-body {
+    font-size: 44px;
+    line-height: 1.7;
+    max-width: 760px;
+    margin-top: 20px;
+  }
+  .comfort-body-dr { color: rgba(255,255,255,0.78); }
+  .comfort-body-lt { color: var(--text-body); }
+  .comfort-body strong { font-weight: 700; }
+  .comfort-body-dr strong { color: var(--warm-white); }
+  .comfort-body-lt strong { color: var(--dark-green); }
+
+  .preview-box {
+    margin-top: 32px;
+    padding: 24px 36px;
+    border-radius: 16px;
+    border: 2px dashed;
+  }
+  .preview-box-dr { border-color: rgba(244,162,97,0.3); background: rgba(255,255,255,0.04); }
+  .preview-box-lt { border-color: rgba(27,67,50,0.15); background: rgba(27,67,50,0.03); }
+  .preview-label {
+    font-size: 20px;
+    font-weight: 600;
+    letter-spacing: 2px;
+    margin-bottom: 8px;
+  }
+  .preview-label-dr { color: rgba(255,255,255,0.3); }
+  .preview-label-lt { color: rgba(27,67,50,0.3); }
+  .preview-text {
+    font-size: 38px;
+    font-weight: 700;
+    line-height: 1.5;
+  }
+  .preview-text-dr { color: var(--warm-orange); }
+  .preview-text-lt { color: var(--coral); }
+
+  .cta-question {
+    font-size: 72px;
+    font-weight: 900;
+    line-height: 1.2;
+  }
+  .cta-question-dr { color: var(--warm-white); }
+  .cta-question-lt { color: var(--dark-green); }
+
+  .cta-options {
+    margin-top: 28px;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+  }
+  .cta-opt {
+    font-size: 38px;
+    font-weight: 600;
+    line-height: 1.5;
+  }
+  .cta-opt-dr { color: rgba(255,255,255,0.7); }
+  .cta-opt-lt { color: var(--text-body); }
+  .cta-opt strong { font-weight: 700; }
+  .cta-opt-dr strong { color: var(--warm-orange); }
+  .cta-opt-lt strong { color: var(--dark-green); }
+
+  .cta-icons {
+    display: flex;
+    gap: 32px;
+    margin-top: 36px;
+    font-size: 28px;
+    color: rgba(27,67,50,0.2);
+    letter-spacing: 2px;
+  }
+  .cta-icons-dr { color: rgba(255,255,255,0.15); }
+</style>
+</head>
+<body>
+
+<!-- ============================================================ -->
+<!-- 1/6 · 封面                                                   -->
+<!-- 深绿底 · 暖白大字 · 暖橙数字锚点                            -->
+<!-- ============================================================ -->
+<div class="slide">
+  <div class="bg-dark"></div>
+  <div class="noise"></div>
+  <svg class="deco-circles" width="420" height="420" viewBox="0 0 300 300">
+    <circle cx="150" cy="150" r="140" fill="none" stroke="rgba(244,162,97,0.07)" stroke-width="2" stroke-dasharray="8 10"/>
+    <circle cx="150" cy="150" r="110" fill="none" stroke="rgba(244,162,97,0.05)" stroke-width="1.5" stroke-dasharray="5 12"/>
+  </svg>
+
+  <div class="content" style="justify-content:center;">
+    <span class="badge badge-dr" style="position:absolute;top:40px;left:52px;">懒人养生手册</span>
+
+    <div style="flex:1;display:flex;flex-direction:column;justify-content:center;padding-bottom:40px;">
+      <span class="cover-tag">打工人自测</span>
+
+      <div class="cover-h1">
+        明明不胖<br>
+        却有小肚子？
+      </div>
+
+      <div class="cover-sub">
+        打工人"压力肚"自测 🔍
+      </div>
+
+      <div class="cover-numbers">
+        <div style="display:flex;align-items:baseline;">
+          <span class="cover-num-digit">8</span>
+          <span class="cover-num-label">道自测题</span>
+        </div>
+        <div style="width:1px;height:40px;background:rgba(255,255,255,0.08);"></div>
+        <div style="display:flex;align-items:baseline;">
+          <span class="cover-num-digit">30</span>
+          <span class="cover-num-label">秒速查</span>
+        </div>
+      </div>
+
+      <div class="cover-dots">
+        <span class="dot-fill"></span>
+        <span class="dot-empty"></span>
+        <span class="dot-empty"></span>
+        <span class="dot-empty"></span>
+        <span class="dot-empty"></span>
+        <span class="dot-empty"></span>
+      </div>
+    </div>
+  </div>
+
+  <div class="pg pg-dr">1/6</div>
+</div>
+
+<!-- ============================================================ -->
+<!-- 2/6 · 痛点共鸣                                               -->
+<!-- 暖白底 · 三行排比句                                          -->
+<!-- ============================================================ -->
+<div class="slide">
+  <div class="bg-light"></div>
+  <div class="noise"></div>
+
+  <div class="content">
+    <span class="badge badge-lt" style="position:absolute;top:40px;left:52px;">懒人养生手册</span>
+
+    <div class="center-wrap-l">
+      <div class="section-title section-title-lt">
+        有没有一种感觉：
+      </div>
+
+      <div class="pain-list">
+        <div class="pain-item pain-item-lt">
+          <span class="pain-icon">🤷</span>
+          <span class="pain-text pain-text-lt"><strong>明明体重没超标</strong>，肚子就是鼓鼓的</span>
+        </div>
+        <div class="pain-item pain-item-lt">
+          <span class="pain-icon">📋</span>
+          <span class="pain-text pain-text-lt">体检单上写着 <strong>"脂肪肝倾向"</strong></span>
+        </div>
+        <div class="pain-item pain-item-lt">
+          <span class="pain-icon">😤</span>
+          <span class="pain-text pain-text-lt">穿紧身衣服 <strong>总要吸一口气</strong></span>
+        </div>
+      </div>
+
+      <div style="margin-top:28px;padding:20px 24px;border-left:5px solid var(--warm-orange);background:rgba(244,162,97,0.06);border-radius:0 12px 12px 0;">
+        <div style="font-size:32px;font-weight:600;color:var(--text-muted);font-style:italic;">
+          "我以前也以为是久坐水肿，直到体检报告亮了红灯……"
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="pg pg-lt">2/6</div>
+</div>
+
+<!-- ============================================================ -->
+<!-- 3/6 · 自测 ① (1-4项)                                        -->
+<!-- 深绿底 · 暖橙编号 + 白色内容                                 -->
+<!-- ============================================================ -->
+<div class="slide">
+  <div class="bg-dark"></div>
+  <div class="noise"></div>
+
+  <div class="content">
+    <span class="badge badge-dr" style="position:absolute;top:40px;left:52px;">懒人养生手册</span>
+
+    <div class="center-wrap-l">
+      <div style="display:flex;align-items:center;gap:14px;">
+        <span style="font-size:32px;">⚠️</span>
+        <span class="section-title section-title-dr">内脏脂肪预警 · 8 项自测</span>
+      </div>
+
+      <div class="checklist">
+        <div class="check-item check-item-dr">
+          <div class="check-box check-box-dr"></div>
+          <span class="check-num check-num-dr">①</span>
+          <span class="check-text check-text-dr">四肢都挺细，肚子一捏一把软肉</span>
+        </div>
+        <div class="check-item check-item-dr">
+          <div class="check-box check-box-dr"></div>
+          <span class="check-num check-num-dr">②</span>
+          <span class="check-text check-text-dr">吃完外卖/午饭，困得眼皮打架</span>
+        </div>
+        <div class="check-item check-item-dr">
+          <div class="check-box check-box-dr"></div>
+          <span class="check-num check-num-dr">③</span>
+          <span class="check-text check-text-dr">明明不胖，穿紧身衣肚子鼓出来</span>
+        </div>
+        <div class="check-item check-item-dr">
+          <div class="check-box check-box-dr"></div>
+          <span class="check-num check-num-dr">④</span>
+          <span class="check-text check-text-dr">体检报告亮过红灯：<strong>脂肪肝 / 血脂偏高</strong></span>
+        </div>
+      </div>
+
+      <div class="check-footnote check-footnote-dr">符合 1 项算 1 分 · 继续下一题 →</div>
+    </div>
+  </div>
+
+  <div class="pg pg-dr">3/6</div>
+</div>
+
+<!-- ============================================================ -->
+<!-- 4/6 · 自测 ② (5-8项 + 评分)                                 -->
+<!-- 暖白底 · 珊瑚色编号 + 深绿内容 + 评分条                     -->
+<!-- ============================================================ -->
+<div class="slide">
+  <div class="bg-light"></div>
+  <div class="noise"></div>
+
+  <div class="content">
+    <span class="badge badge-lt" style="position:absolute;top:40px;left:52px;">懒人养生手册</span>
+
+    <div class="center-wrap-l">
+      <div style="display:flex;align-items:center;gap:14px;">
+        <span style="font-size:32px;">⚠️</span>
+        <span class="section-title section-title-lt">自测继续</span>
+      </div>
+
+      <div class="checklist" style="gap:14px;margin-top:18px;">
+        <div class="check-item check-item-lt">
+          <div class="check-box check-box-lt"></div>
+          <span class="check-num check-num-lt">⑤</span>
+          <span class="check-text check-text-lt">压力大时特别想暴碳（奶茶、甜点）</span>
+        </div>
+        <div class="check-item check-item-lt">
+          <div class="check-box check-box-lt"></div>
+          <span class="check-num check-num-lt">⑥</span>
+          <span class="check-text check-text-lt">坐一天腰酸背痛，肚子胀鼓鼓的</span>
+        </div>
+        <div class="check-item check-item-lt">
+          <div class="check-box check-box-lt"></div>
+          <span class="check-num check-num-lt">⑦</span>
+          <span class="check-text check-text-lt">睡够还累，第二天脸肿肚子也鼓</span>
+        </div>
+        <div class="check-item check-item-lt">
+          <div class="check-box check-box-lt"></div>
+          <span class="check-num check-num-lt">⑧</span>
+          <span class="check-text check-text-lt">裤子越来越紧，腰围快和臀围一样了</span>
+        </div>
+      </div>
+
+      <!-- 评分 -->
+      <div class="score-row">
+        <div class="score-card score-card-green">
+          <div class="score-dot score-dot-green"></div>
+          <div class="score-range">0-2 项</div>
+          <div class="score-label">🟢 风险低</div>
+        </div>
+        <div class="score-card score-card-yellow">
+          <div class="score-dot score-dot-yellow"></div>
+          <div class="score-range">3-5 项</div>
+          <div class="score-label">🟡 轻度预警</div>
+        </div>
+        <div class="score-card score-card-red">
+          <div class="score-dot score-dot-red"></div>
+          <div class="score-range">6-8 项</div>
+          <div class="score-label">🔴 高度预警</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="pg pg-lt">4/6</div>
+</div>
+
+<!-- ============================================================ -->
+<!-- 5/6 · 情绪安抚 + 下期预告                                   -->
+<!-- 深绿底 · 居中安抚                                            -->
+<!-- ============================================================ -->
+<div class="slide">
+  <div class="bg-dark"></div>
+  <div class="noise"></div>
+  <svg class="deco-circles-sm" viewBox="0 0 200 200">
+    <circle cx="100" cy="100" r="90" fill="none" stroke="rgba(244,162,97,0.06)" stroke-width="2" stroke-dasharray="6 8"/>
+  </svg>
+
+  <div class="content">
+    <span class="badge badge-dr" style="position:absolute;top:40px;left:52px;">懒人养生手册</span>
+
+    <div class="center-wrap">
+      <div style="font-size:80px;margin-bottom:10px;">🙃</div>
+
+      <div class="section-title section-title-dr" style="font-size:64px;">
+        别紧张
+      </div>
+
+      <div class="comfort-body comfort-body-dr" style="max-width:800px;">
+        内脏脂肪的好消息是：
+      </div>
+
+      <div style="font-size:56px;font-weight:900;color:var(--warm-orange);margin-top:6px;line-height:1.3;">
+        它比皮下脂肪更容易减掉
+      </div>
+
+      <div class="preview-box preview-box-dr" style="margin-top:40px;">
+        <div class="preview-label preview-label-dr">👇 下期预告</div>
+        <div class="preview-text preview-text-dr">
+          内脏脂肪最怕的 8 种食物<br>
+          不用吃草 · 菜市场就能买到
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="pg pg-dr">5/6</div>
+</div>
+
+<!-- ============================================================ -->
+<!-- 6/6 · CTA 互动                                               -->
+<!-- 暖白底 · 引导评论 + 关注                                     -->
+<!-- ============================================================ -->
+<div class="slide">
+  <div class="bg-light"></div>
+  <div class="noise"></div>
+
+  <div class="content">
+    <span class="badge badge-lt" style="position:absolute;top:40px;left:52px;">懒人养生手册</span>
+
+    <div class="center-wrap">
+      <div class="cta-question cta-question-lt">
+        评论区告诉我 👇
+      </div>
+
+      <div class="cta-options">
+        <div class="cta-opt cta-opt-lt">
+          🔢 你中了 <strong>几个</strong>？
+        </div>
+        <div class="cta-opt cta-opt-lt">
+          💬 你最想减哪里？
+        </div>
+        <div class="cta-opt cta-opt-lt" style="margin-top:8px;padding:16px 28px;border:2px dashed rgba(27,67,50,0.12);border-radius:14px;width:fit-content;margin-left:auto;margin-right:auto;">
+          👇 想看下期「内脏脂肪最怕的食物」<strong>扣 1</strong>
+        </div>
+      </div>
+
+      <!-- 三部曲导航 -->
+      <div style="margin-top:24px;padding:14px 28px;background:rgba(27,67,50,0.03);border-radius:14px;width:fit-content;">
+        <div style="font-size:18px;font-weight:600;color:rgba(27,67,50,0.3);letter-spacing:1px;margin-bottom:8px;">📌 三部曲 · 进度</div>
+        <div style="display:flex;gap:8px;justify-content:center;">
+          <span style="padding:5px 14px;border-radius:20px;font-size:16px;font-weight:600;background:var(--warm-orange);color:var(--dark-green);">① 压力肚自测 ⬅</span>
+          <span style="padding:5px 14px;border-radius:20px;font-size:16px;font-weight:600;background:rgba(244,162,97,0.12);color:var(--warm-orange);">② 8种食物</span>
+          <span style="padding:5px 14px;border-radius:20px;font-size:16px;font-weight:600;background:rgba(27,67,50,0.06);color:rgba(27,67,50,0.25);">③ 6个习惯</span>
+        </div>
+      </div>
+
+      <div style="margin-top:28px;padding:20px 0;border-top:1px solid rgba(27,67,50,0.06);width:80%;">
+        <div style="font-size:30px;font-weight:700;color:var(--dark-green);letter-spacing:1px;">
+          关注 <span style="color:var(--warm-orange);">懒人养生手册</span>
+        </div>
+        <div style="font-size:22px;color:var(--text-muted);margin-top:4px;">
+          不折腾的养生干货 · 打工人友好
+        </div>
+      </div>
+
+      <div class="cta-icons">点赞 ❤️　收藏 ⭐　转发 🔄</div>
+    </div>
+  </div>
+
+  <div class="pg pg-lt">6/6</div>
+</div>
+
+</body>
+</html>
