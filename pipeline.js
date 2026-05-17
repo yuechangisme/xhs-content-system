@@ -15,6 +15,8 @@
  *   node pipeline.js publish <taskDir> --dry-run              # 仅验证，不调用
  *   node pipeline.js publish <taskDir>                        # 提示需要 --confirm-publish
  *   node pipeline.js publish <taskDir> --confirm-publish      # 真实发布
+ *   node pipeline.js publish <taskDir> --mock-success         # 模拟发布成功（仅测试用）
+ *   node pipeline.js publish <taskDir> --mock-fail            # 模拟发布失败（仅测试用）
  */
 
 const fs = require('fs');
@@ -202,6 +204,8 @@ function cmdPublish() {
   const taskDir = args[0];
   const isDryRun = args.includes('--dry-run');
   const isConfirm = args.includes('--confirm-publish');
+  const isMockSuccess = args.includes('--mock-success');
+  const isMockFail = args.includes('--mock-fail');
 
   if (!taskDir) {
     errorOut('PUBLISH_MISSING_ARGS', '请指定帖子目录: pipeline publish <taskDir> [--dry-run|--confirm-publish]', 'publisher');
@@ -224,14 +228,26 @@ function cmdPublish() {
     return cmdPublishDryRun(taskDir, fullPath, post);
   }
 
-  // ─── 模式 B: 默认模式（无 flag）───────────────────
+  // ─── 模式 B: mock 模式（仅测试用）────────────────
+  if (isMockSuccess || isMockFail) {
+    // 安全限制：只能用于测试任务
+    if (!taskDir.includes('测试') && !taskDir.includes('mock')) {
+      errorOut('PUBLISH_MOCK_TASK_REQUIRED',
+        'mock 模式只能用于名称包含"测试"或"mock"的任务目录', 'publisher');
+      return;
+    }
+    if (isMockSuccess) return cmdPublishMockSuccess(taskDir, fullPath, s, post);
+    return cmdPublishMockFail(taskDir, fullPath, s, post);
+  }
+
+  // ─── 模式 C: 默认模式（无 flag）───────────────────
   if (!isConfirm) {
     errorOut('PUBLISH_CONFIRM_REQUIRED',
       '安全保护：真实发布需要 --confirm-publish 确认。使用 --dry-run 进行前置检查', 'publisher');
     return;
   }
 
-  // ─── 模式 C: confirm 模式 ─────────────────────────
+  // ─── 模式 D: confirm 模式 ─────────────────────────
   return cmdPublishConfirm(taskDir, fullPath, s, post);
 }
 
@@ -282,7 +298,71 @@ function cmdPublishDryRun(taskDir, fullPath, post) {
   });
 }
 
-// ─── 模式 C: confirm 发布 ─────────────────────────────
+// ─── 模式 B1: mock-success ─────────────────────────────
+
+function cmdPublishMockSuccess(taskDir, fullPath, s, post) {
+  const outputDir = path.join(fullPath, 'output');
+  const pngFiles = fs.existsSync(outputDir) ? fs.readdirSync(outputDir).filter(f => /\.png$/i.test(f)) : [];
+
+  state.updatePublishResult(s, taskDir, { status: 'PUBLISHED', publishedAt: new Date().toISOString(), error: null, attempts: 1 });
+  state.updatePostStatus(s, taskDir, 'PUBLISHED');
+  s.schedule.lastPublishedAt = new Date().toISOString();
+  state.save(s);
+
+  // 移动文件夹
+  const folderName = path.basename(fullPath);
+  const targetDir = path.join(config.contentDir, '投稿内容', '已投递', folderName);
+  try {
+    if (fs.existsSync(targetDir)) fs.rmSync(targetDir, { recursive: true, force: true });
+    fs.renameSync(fullPath, targetDir);
+    logger.info('PUBLISH_MOCK_SUCCESS', 'publisher', `mock 发布成功: ${taskDir}`, { targetDir });
+  } catch (moveErr) {
+    logger.warn('PUBLISH_MOVE_FAILED', 'publisher', `mock 成功但文件夹移动失败: ${moveErr.message}`, { targetDir });
+  }
+
+  output({
+    success: true,
+    command: 'publish',
+    data: {
+      mode: 'mock-success',
+      taskDir,
+      publishedAt: new Date().toISOString(),
+      imageCount: pngFiles.length,
+      note: 'MOCK 发布成功：未调用真实 publish-xhs.js，state 已更新为 PUBLISHED，文件夹已移动',
+    },
+  });
+}
+
+// ─── 模式 B2: mock-fail ────────────────────────────────
+
+function cmdPublishMockFail(taskDir, fullPath, s, post) {
+  const outputDir = path.join(fullPath, 'output');
+  const pngFiles = fs.existsSync(outputDir) ? fs.readdirSync(outputDir).filter(f => /\.png$/i.test(f)) : [];
+  const attempts = (post.publish.attempts || 0) + 1;
+
+  state.updatePublishResult(s, taskDir, {
+    status: 'FAILED', error: { code: 'MOCK_PUBLISH_FAILED', message: 'mock 模拟发布失败' },
+    attempts,
+  });
+  state.updatePostStatus(s, taskDir, 'PUBLISH_FAILED');
+  state.save(s);
+
+  logger.error('MOCK_PUBLISH_FAILED', 'publisher', `mock 发布失败: ${taskDir}`, { attempts });
+
+  output({
+    success: false,
+    command: 'publish',
+    error: {
+      code: 'MOCK_PUBLISH_FAILED',
+      message: `MOCK 模拟发布失败 (attempt ${attempts})：未调用真实 publish-xhs.js`,
+      module: 'publisher',
+      timestamp: new Date().toISOString(),
+      detail: { taskDir, attempts },
+    },
+  });
+}
+
+// ─── 模式 D: confirm 发布 ─────────────────────────────
 
 async function cmdPublishConfirm(taskDir, fullPath, s, post) {
   // 前置检查

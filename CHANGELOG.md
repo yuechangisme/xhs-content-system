@@ -1,5 +1,24 @@
 # Changelog
 
+## v0.2.1 (2026-05-17)
+
+### 新增
+
+- publish `--mock-success` 模式：模拟发布成功（不调用 publish-xhs.js，写 PUBLISHED，移动文件夹）
+- publish `--mock-fail` 模式：模拟发布失败（不调用 publish-xhs.js，写 PUBLISH_FAILED，增加 attempts）
+- 安全限制：mock 模式仅允许 taskDir 包含 "测试" 或 "mock" 字样
+- 新增错误码：PUBLISH_MOCK_TASK_REQUIRED、MOCK_PUBLISH_FAILED
+
+### 测试验证
+
+- dry-run：7 项前置检查通过/未通过
+- 默认模式：返回 PUBLISH_CONFIRM_REQUIRED
+- mock-success：state → PUBLISHED，文件夹移入 已投递
+- mock-fail：state → PUBLISH_FAILED，attempts +1，文件夹不移
+- 安全限制：真实 taskDir 拒绝 mock 模式
+
+---
+
 ## v0.2.0 (2026-05-17)
 
 ### 新增

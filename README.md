@@ -121,6 +121,12 @@ node pipeline.js publish "投稿内容/待投递/你的任务目录"
 
 # 真实发布（需显式确认，否则拒绝执行）
 node pipeline.js publish "投稿内容/待投递/你的任务目录" --confirm-publish
+
+# 模拟发布成功（仅测试用，不调真实脚本）
+node pipeline.js publish "投稿内容/待投递/mock-发布测试" --mock-success
+
+# 模拟发布失败（仅测试用，不调真实脚本）
+node pipeline.js publish "投稿内容/待投递/mock-发布测试" --mock-fail
 ```
 
 ---
