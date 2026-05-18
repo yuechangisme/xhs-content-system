@@ -27,6 +27,7 @@ const logger = require('./modules/logger');
 const qa = require('./modules/qa');
 const publisher = require('./modules/publisher');
 const scheduler = require('./modules/scheduler');
+const topicStore = require('./modules/topic-store');
 
 // ─── 命令路由 ────────────────────────────────────────────
 
@@ -73,6 +74,11 @@ switch (command) {
   // ─── publish ───────────────────────────────────────────
   case 'publish':
     cmdPublish();
+    break;
+
+  // ─── topic ────────────────────────────────────────────
+  case 'topic':
+    cmdTopic();
     break;
 
   default:
@@ -302,6 +308,152 @@ function cmdScheduleRunDue() {
 function getArgValue(flag) {
   const idx = args.indexOf(flag);
   return idx >= 0 ? args[idx + 1] : null;
+}
+
+// ─── topic ─────────────────────────────────────────────
+
+function cmdTopic() {
+  const sub = args[0];
+  if (!sub) {
+    errorOut('TOPIC_MISSING_ARGS', '用法: pipeline topic <add|list|show|shortlist|approve|reject|export> [...]', 'topic-store');
+    return;
+  }
+
+  switch (sub) {
+    case 'add':
+      return cmdTopicAdd();
+    case 'list':
+      return cmdTopicList();
+    case 'show':
+      return cmdTopicShow();
+    case 'shortlist':
+      return cmdTopicShortlist();
+    case 'approve':
+      return cmdTopicApprove();
+    case 'reject':
+      return cmdTopicReject();
+    case 'export':
+      return cmdTopicExport();
+    default:
+      errorOut('UNKNOWN_COMMAND', `未知 topic 子命令: ${sub}。可用命令: add, list, show, shortlist, approve, reject, export`, 'topic-store');
+  }
+}
+
+function cmdTopicAdd() {
+  const title = getArgValue('--title');
+  if (!title) {
+    errorOut('TOPIC_TITLE_REQUIRED', '用法: pipeline topic add --title "..." [--source manual] [--raw "..."] [--reason "..."] [--angle "..."]', 'topic-store');
+    return;
+  }
+
+  const result = topicStore.add({
+    title,
+    source: getArgValue('--source') || 'manual',
+    rawSignal: getArgValue('--raw') || '',
+    trendReason: getArgValue('--reason') || '',
+    accountFitReason: getArgValue('--fit') || '',
+    contentAngle: getArgValue('--angle') || '',
+    note: getArgValue('--note') || null,
+  });
+
+  if (!result.success) {
+    errorOut(result.error.code, result.error.message, 'topic-store', result.error.detail);
+    return;
+  }
+  output({ success: true, command, data: result.data, ...(result.warning ? { warning: result.warning } : {}) });
+}
+
+function cmdTopicList() {
+  const statusFilter = getArgValue('--status');
+  const includeAll = args.includes('--all');
+
+  const result = topicStore.list({
+    status: statusFilter || undefined,
+    hideRejected: !includeAll,
+    hideExported: !includeAll,
+  });
+
+  if (!result.success) {
+    errorOut(result.error.code, result.error.message, 'topic-store');
+    return;
+  }
+  output({ success: true, command, data: result.data });
+}
+
+function cmdTopicShow() {
+  const topicId = args[1];
+  if (!topicId) {
+    errorOut('TOPIC_MISSING_ARGS', '用法: pipeline topic show <topicId>', 'topic-store');
+    return;
+  }
+
+  const result = topicStore.show(topicId);
+  if (!result.success) {
+    errorOut(result.error.code, result.error.message, 'topic-store');
+    return;
+  }
+  output({ success: true, command, data: result.data });
+}
+
+function cmdTopicShortlist() {
+  const topicId = args[1];
+  if (!topicId) {
+    errorOut('TOPIC_MISSING_ARGS', '用法: pipeline topic shortlist <topicId>', 'topic-store');
+    return;
+  }
+
+  const result = topicStore.shortlist(topicId);
+  if (!result.success) {
+    errorOut(result.error.code, result.error.message, 'topic-store', result.error.detail);
+    return;
+  }
+  output({ success: true, command, data: result.data, ...(result.warning ? { warning: result.warning } : {}) });
+}
+
+function cmdTopicApprove() {
+  const topicId = args[1];
+  if (!topicId) {
+    errorOut('TOPIC_MISSING_ARGS', '用法: pipeline topic approve <topicId>', 'topic-store');
+    return;
+  }
+
+  const result = topicStore.approve(topicId);
+  if (!result.success) {
+    errorOut(result.error.code, result.error.message, 'topic-store', result.error.detail);
+    return;
+  }
+  output({ success: true, command, data: result.data, ...(result.warning ? { warning: result.warning } : {}) });
+}
+
+function cmdTopicReject() {
+  const topicId = args[1];
+  if (!topicId) {
+    errorOut('TOPIC_MISSING_ARGS', '用法: pipeline topic reject <topicId> --reason "..."', 'topic-store');
+    return;
+  }
+
+  const reason = getArgValue('--reason') || 'Rejected without reason';
+  const result = topicStore.reject(topicId, reason);
+  if (!result.success) {
+    errorOut(result.error.code, result.error.message, 'topic-store', result.error.detail);
+    return;
+  }
+  output({ success: true, command, data: result.data, ...(result.warning ? { warning: result.warning } : {}) });
+}
+
+function cmdTopicExport() {
+  const topicId = args[1];
+  if (!topicId) {
+    errorOut('TOPIC_MISSING_ARGS', '用法: pipeline topic export <topicId>', 'topic-store');
+    return;
+  }
+
+  const result = topicStore.exportTopic(topicId);
+  if (!result.success) {
+    errorOut(result.error.code, result.error.message, 'topic-store', result.error.detail);
+    return;
+  }
+  output({ success: true, command, data: result.data, ...(result.warning ? { warning: result.warning } : {}) });
 }
 
 function cmdPublish() {

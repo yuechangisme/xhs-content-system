@@ -1,5 +1,37 @@
 # Changelog
 
+## v0.5.1 (2026-05-18)
+
+### 新增
+
+- **本地选题候选池（Local Topic Pool）**：`modules/topic-store.js` + `pipeline.js topic` 子命令
+  - `topic add` — 手动录入候选选题（CANDIDATE）
+  - `topic list` — 查看候选列表（默认隐藏 REJECTED / EXPORTED，支持 `--all`）
+  - `topic show` — 查看单个候选完整信息
+  - `topic shortlist` — 初筛通过（CANDIDATE → SHORTLISTED）
+  - `topic approve` — 确认选题（SHORTLISTED → APPROVED）
+  - `topic reject` — 否决选题（CANDIDATE/SHORTLISTED → REJECTED，必须带理由）
+  - `topic export` — 导出已确认选题给 xhs-planner（APPROVED → EXPORTED，写入 `topics/exported/`）
+- 新增 7 个 TOPIC_* 错误码（TOPIC_NOT_FOUND, TOPIC_INVALID_STATUS, TOPIC_TITLE_REQUIRED, TOPIC_STORE_INVALID, TOPIC_EXPORT_NOT_APPROVED, TOPIC_ALREADY_EXPORTED, TOPIC_STATE_WRITE_FAILED）
+- `topics/` 目录管理：`candidates.json`（候选池）+ `exported/`（导出目录）
+- `.gitignore` 新增 `topics/`（运行时状态，不上传）
+
+### 安全边界
+
+- topic discovery 只生成候选，不生成帖子、不发布
+- CANDIDATE 不允许直接 export
+- REJECTED 不允许 approve
+- EXPORTED 不允许重复导出
+- `topic-store.js` 不调用 render / QA / publisher / scheduler / state.json
+
+### 变更
+
+- `pipeline.js`：新增 topic 子命令路由
+- `README.md`：更新版本状态、目录结构、工作流、新增 topic CLI 命令
+- `.gitignore`：排除 `topics/`
+
+---
+
 ## v0.5.0 (2026-05-18)
 
 ### 新增

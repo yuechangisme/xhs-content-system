@@ -32,6 +32,9 @@ content/账号信息/
 # 清理备份（不上传）
 cleanup-backup/
 
+# 选题候选池（运行时状态）
+topics/
+
 # 系统文件
 .DS_Store
 Thumbs.db
