@@ -1,5 +1,32 @@
 # Changelog
 
+## v0.4.2 (2026-05-18)
+
+### 新增
+
+- **Destructive Operation Safety Policy**（CLAUDE.md）：10 条长期安全规则，覆盖删除操作全流程
+  - 删除前必须 dry-run audit（列出完整路径、数量、大小、Git 跟踪状态、风险等级）
+  - 未跟踪文件删除前必须先本地备份到 `cleanup-backup/`
+  - 逐项确认，禁止宽泛通配符批量删除
+  - 删除后必须回归验证核心命令
+  - 删除后报告必须区分 Git 已提交 / 工作区删除 / 未跟踪删除
+- **state.json 与物理归档职责说明**（CONTRACT.md 附录）
+  - state.json 不是内容归档唯一事实来源
+  - 已发布内容归档完整性以物理目录（HTML + manifest + output PNG）为准
+  - 物理目录归档与 state.json 必须分别审计、分别描述
+  - 发现不一致时暂停开发，先做 reconciliation audit
+
+### 变更
+
+- CLAUDE.md：新增 Destructive Operation Safety Policy 章节
+- CONTRACT.md：新增附录，明确 state.json 边界与归档完整性标准
+
+### 背景
+
+v0.4.0 cleanup 执行过程中暴露了流程风险：对 state.json 与物理目录的区分不清、worktree 删除与 git 提交混淆。本轮纯规则沉淀，不修改代码、不修改 state.json、不涉及功能变更。
+
+---
+
 ## v0.3.5 (2026-05-17)
 
 ### 修复

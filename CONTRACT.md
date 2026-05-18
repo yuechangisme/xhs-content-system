@@ -188,3 +188,38 @@ caller 收到 publisher 失败:
 | `SCHEDULE_TASK_NOT_IN_DUE` | --task 不在到期列表中 |
 | `SCHEDULE_NO_DUE_TASKS` | 没有到期任务 |
 | `SCHEDULE_PRECHECK_FAILED` | 前置检查未通过 |
+
+---
+
+## 附录：state.json 与物理归档的职责说明
+
+### state.json 的边界
+
+state.json 只记录**进入 pipeline 管理后**的帖子运行状态。它的设计目标是管线状态机，不是完整历史内容数据库。
+
+具体边界：
+- **进入时机**：`pipeline qa <taskDir>` 首次运行（通过 `findOrCreatePost`）时，帖子才进入 state.json
+- **前置发布的帖子不追溯**：在 state 系统上线前已发布的历史帖子（如早期的好习惯、超级食物、高考饮食），可能在 `已投递/` 目录中归档完整，但 state.json 中无记录
+- **已发布帖子不自动同步**：手动将帖子移入 `已投递/` 不会自动创建 state 记录
+
+### 归档完整性标准
+
+内容归档完整性应以物理目录检查为准：
+
+```
+已投递/<taskDir>/
+├── 懒人养生手册-<主题>.html    ✅
+├── manifest.json                ✅（v0.2+ 新增）
+└── output/
+    ├── <主题>-01.png             ✅
+    ├── <主题>-02.png             ✅
+    └── ...                       ✅ 全部 PNG
+```
+
+state.json 用于运行控制（QA 状态 / 发布状态 / 排期状态 / 重试次数），**不等同于完整历史内容数据库**。
+
+### 实践建议
+
+- 审计归档完整性时，以 `已投递/` 物理目录为准
+- 审计运行状态一致性时，以 state.json 为准
+- 如果后续需要做历史内容管理或 analytics，应单独设计 state backfill 方案，不在日常维护中手动补录
