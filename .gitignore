@@ -35,6 +35,9 @@ cleanup-backup/
 # 选题候选池（运行时状态）
 topics/
 
+# 发布后数据（运行时状态，每次录入变化）
+analytics/post-metrics.json
+
 # 投稿内容资产：运行时生成/发布内容，不进入 Git
 content/投稿内容/待制作/**
 content/投稿内容/制作中/**

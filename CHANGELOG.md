@@ -1,5 +1,49 @@
 # Changelog
 
+## v0.5.4 (2026-05-18)
+
+### 新增
+
+- **发布后数据手动录入（Post Performance Analytics）**：`analytics/` 目录 + `modules/analytics.js`
+  - `analytics add` — 手动录入互动指标（views/likes/favorites/comments/shares/followersGained）
+  - `analytics list` — 查看所有指标记录，按 recordedAt 倒序
+  - `analytics summary` — 汇总统计（总互动量、平均互动率、收藏率/评论率/点赞数 Top 3）
+  - 衍生指标自动计算：likeRate、favRate、commentRate（views=0 时安全处理为 0）
+
+- **6 个 ANALYTICS_* 错误码**：`ANALYTICS_TASKDIR_REQUIRED`、`ANALYTICS_TITLE_REQUIRED`、`ANALYTICS_METRIC_INVALID`、`ANALYTICS_STORE_INVALID`、`ANALYTICS_WRITE_FAILED`、`ANALYTICS_NO_DATA`
+
+### 安全边界
+
+- 不登录小红书后台、不读取 cookie、不读取 session
+- 不使用 Puppeteer 自动读取后台
+- 不自动抓取评论、不自动生成 TopicCandidate
+- 不修改 state.json、不修改 topics/candidates.json、不修改 content/投稿内容/
+
+### 变更
+
+- `modules/analytics.js`：新增发布后数据录入与分析模块
+- `pipeline.js`：新增 analytics 子命令路由
+- `.gitignore`：追加 `analytics/post-metrics.json`
+- `analytics/.gitkeep`：保留目录骨架
+- `README.md`：更新版本状态、目录结构、已完成清单、CLI 示例
+
+### 测试验证
+
+| 场景 | 结果 |
+|------|------|
+| analytics add 录入有效记录 | ✅ |
+| 同一 taskDir 追加第二条记录（不覆盖） | ✅ |
+| analytics list 正常显示 | ✅ |
+| analytics summary 正常计算 | ✅ |
+| views=0 → 所有 rate 为 0（安全处理） | ✅ |
+| 负数指标 → ANALYTICS_METRIC_INVALID | ✅ |
+| 缺 taskDir → ANALYTICS_TASKDIR_REQUIRED | ✅ |
+| 缺 title → ANALYTICS_TITLE_REQUIRED | ✅ |
+| analytics/post-metrics.json 未被 Git 跟踪 | ✅ |
+| 未修改 state.json / topics / content | ✅ |
+
+---
+
 ## v0.5.3 (2026-05-18)
 
 ### 新增

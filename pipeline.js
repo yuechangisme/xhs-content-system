@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 /**
- * xhs-content-system v0.5.2
+ * xhs-content-system v0.5.4
  * pipeline.js — 主编排器
  *
  * 职责：命令路由 + 调用模块 + 汇总输出 + 更新状态
@@ -14,6 +14,7 @@
  *   node pipeline.js schedule
  *   node pipeline.js topic add/list/show/shortlist/approve/reject/export
  *   node pipeline.js topic seasonal list/generate
+ *   node pipeline.js analytics add/list/summary
  *   node pipeline.js publish <taskDir> --dry-run              # 仅验证，不调用
  *   node pipeline.js publish <taskDir>                        # 提示需要 --confirm-publish
  *   node pipeline.js publish <taskDir> --confirm-publish      # 真实发布
@@ -31,6 +32,7 @@ const publisher = require('./modules/publisher');
 const scheduler = require('./modules/scheduler');
 const topicStore = require('./modules/topic-store');
 const seasonalGen = require('./modules/seasonal-generator');
+const analytics = require('./modules/analytics');
 
 // ─── 命令路由 ────────────────────────────────────────────
 
@@ -82,6 +84,11 @@ switch (command) {
   // ─── topic ────────────────────────────────────────────
   case 'topic':
     cmdTopic();
+    break;
+
+  // ─── analytics ────────────────────────────────────────
+  case 'analytics':
+    cmdAnalytics();
     break;
 
   default:
@@ -858,4 +865,83 @@ async function cmdPublishConfirm(taskDir, fullPath, s, post) {
 
     errorOut(result.error.code || 'PUBLISH_FAILED', result.error.message, 'publisher', result.error.detail);
   }
+}
+
+// ─── analytics ─────────────────────────────────────────
+
+function cmdAnalytics() {
+  const sub = args[0];
+  if (!sub) {
+    errorOut('ANALYTICS_MISSING_ARGS', '用法: pipeline analytics <add|list|summary> [...]', 'analytics');
+    return;
+  }
+
+  switch (sub) {
+    case 'add':
+      return cmdAnalyticsAdd();
+    case 'list':
+      return cmdAnalyticsList();
+    case 'summary':
+      return cmdAnalyticsSummary();
+    default:
+      errorOut('UNKNOWN_COMMAND', `未知 analytics 子命令: ${sub}。可用命令: add, list, summary`, 'analytics');
+  }
+}
+
+function cmdAnalyticsAdd() {
+  const taskDir = getArgValue('--taskDir');
+  const title = getArgValue('--title');
+
+  if (!taskDir) {
+    errorOut('ANALYTICS_TASKDIR_REQUIRED', '用法: pipeline analytics add --taskDir "..." --title "..." [--views N] [--likes N] [--favorites N] [--comments N] [--shares N] [--followers-gained N] [--notes "..."]', 'analytics');
+    return;
+  }
+  if (!title) {
+    errorOut('ANALYTICS_TITLE_REQUIRED', '用法: pipeline analytics add --taskDir "..." --title "..." [--views N] [--likes N] [--favorites N] [--comments N] [--shares N] [--followers-gained N] [--notes "..."]', 'analytics');
+    return;
+  }
+
+  function parseNum(val) {
+    return val !== null ? parseFloat(val) : undefined;
+  }
+
+  const result = analytics.add({
+    taskDir,
+    title,
+    postId: getArgValue('--post-id') || undefined,
+    publishedAt: getArgValue('--published-at') || undefined,
+    topicSource: getArgValue('--topic-source') || undefined,
+    topicTitle: getArgValue('--topic-title') || undefined,
+    views: parseNum(getArgValue('--views')),
+    likes: parseNum(getArgValue('--likes')),
+    favorites: parseNum(getArgValue('--favorites')),
+    comments: parseNum(getArgValue('--comments')),
+    shares: parseNum(getArgValue('--shares')),
+    followersGained: parseNum(getArgValue('--followers-gained')),
+    notes: getArgValue('--notes') || null,
+  });
+
+  if (!result.success) {
+    errorOut(result.error.code, result.error.message, 'analytics', result.error.detail);
+    return;
+  }
+  output({ success: true, command: 'analytics', data: result.data, ...(result.warning ? { warning: result.warning } : {}) });
+}
+
+function cmdAnalyticsList() {
+  const result = analytics.list();
+  if (!result.success) {
+    errorOut(result.error.code, result.error.message, 'analytics');
+    return;
+  }
+  output({ success: true, command: 'analytics', data: result.data });
+}
+
+function cmdAnalyticsSummary() {
+  const result = analytics.summary();
+  if (!result.success) {
+    errorOut(result.error.code, result.error.message, 'analytics');
+    return;
+  }
+  output({ success: true, command: 'analytics', data: result.data });
 }

@@ -9,8 +9,8 @@
 ## 版本状态
 
 ```
-当前版本: v0.5.3
-当前阶段: manual trend import enhancement（手动热点导入）
+当前版本: v0.5.4
+当前阶段: manual post analytics metrics（发布后数据手动录入）
 ```
 
 ### 已完成
@@ -43,6 +43,12 @@
 - **topic add 手动热点导入增强（v0.5.3）**：新增 `--url`、`--platform`、`--observed-at`、`--trend-score`、`--fit-score` 参数
 - **多平台 manual source**：xhs-manual、youtube-manual、baidu-manual、weibo-manual、news-manual、other-manual
 - **分数越界校验**：`TOPIC_SCORE_INVALID` 错误码
+- **发布后数据手动录入（v0.5.4）**：`analytics/` 目录 + `modules/analytics.js`
+- **analytics add**：手动录入 views/likes/favorites/comments/shares/followersGained
+- **analytics list**：查看所有指标记录
+- **analytics summary**：汇总统计（平均互动率、Top 3 排名）
+- **衍生指标自动计算**：likeRate、favRate、commentRate
+- **6 个 ANALYTICS_* 错误码**
 
 ### 未完成
 
@@ -182,6 +188,11 @@ node pipeline.js topic seasonal generate --term "立夏" --confirm-generate     
 node pipeline.js topic seasonal generate --month 6 --confirm-generate                                          # 写入6月选题候选
 node pipeline.js topic seasonal generate --range "2026-06-01:2026-06-30" --confirm-generate                    # 写入指定日期范围的选题候选
 
+# 发布后数据（v0.5.4）
+node pipeline.js analytics add --taskDir "2026-05-17-内脏脂肪食物" --title "..." --views 12500 --likes 892 --favorites 2341 --comments 156            # 手动录入指标
+node pipeline.js analytics list                                                                                # 查看所有记录
+node pipeline.js analytics summary                                                                             # 数据汇总分析
+
 # 发布前验证（dry-run，不调用真实发布脚本）
 node pipeline.js publish "投稿内容/待投递/你的任务目录" --dry-run
 
@@ -212,12 +223,16 @@ xhs-content-system/
 ├── README.md
 ├── CHANGELOG.md
 │
+├── analytics/               ← 发布后数据（运行时，不上传）
+│   └── post-metrics.json    ← 互动指标记录
+│
 ├── modules/
 │   ├── state.js             ← state.json 状态管理
 │   ├── qa.js                ← P0 静态检测
 │   ├── logger.js            ← error.log 日志
 │   ├── topic-store.js       ← TopicCandidate 选题候选池管理
-│   └── seasonal-generator.js ← 季节/节气选题生成器
+│   ├── seasonal-generator.js ← 季节/节气选题生成器
+│   └── analytics.js         ← 发布后数据录入与分析
 │
 ├── topics/                  ← 选题候选池（运行时状态，不上传）
 │   ├── candidates.json      ← TopicCandidate 列表
@@ -248,6 +263,7 @@ xhs-content-system/
 | `content/账号信息/` | 品牌元素 |
 | `content/node_modules/` | 依赖 |
 | `topics/` | 选题候选池，运行时状态 |
+| `analytics/post-metrics.json` | 发布后数据，每次录入更新 |
 | `.claude/` | Claude 配置 |
 
 ---
