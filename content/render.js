@@ -71,4 +71,5 @@ const chromePath = config.chromePath;
 
   await browser.close();
   console.log('\n✅ 完成！' + slides.length + ' 张图片已保存');
+  process.exit(0);
 })().catch(err => { console.error('❌', err.message); process.exit(1); });

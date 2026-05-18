@@ -1,5 +1,18 @@
 # Changelog
 
+## v0.5.5 (2026-05-18)
+
+### 修复
+
+- **render.js 成功路径退出码修复**：成功导出全部 PNG 后未显式调用 `process.exit(0)`，导致 Node.js 可能因 Puppeteer/Chrome 子进程残留 handle 返回非零退出码。修复后 `pipeline` 排期自动发布不再因误判 exit code 1 而失败。
+- 不改变视觉输出，不改变 render 参数，不影响发布逻辑。
+
+### 变更
+
+- `content/render.js`：成功路径补上 `process.exit(0)`
+
+---
+
 ## v0.5.4 (2026-05-18)
 
 ### 新增
