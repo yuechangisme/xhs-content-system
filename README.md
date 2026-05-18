@@ -10,7 +10,7 @@
 
 ```
 当前版本: v0.5.2
-当前阶段: seasonal calendar dry-run generator（季节节点预览 + 选题抽取）
+当前阶段: seasonal calendar confirm-generate（季节节点 → 写入候选池）
 ```
 
 ### 已完成
@@ -35,13 +35,14 @@
 - `modules/topic-store.js` 本地选题候选池（add/list/show/shortlist/approve/reject/export）
 - 7 个 TOPIC_* 错误码
 - TopicCandidate 5 状态流转 + 人工确认规则
-- `modules/seasonal-generator.js` 季节/节气选题生成器（预览候选，不写入）
+- `modules/seasonal-generator.js` 季节/节气选题生成器（dry-run 预览 + confirm-generate 写入）
 - `seasonal-calendar.json` 季节节点参考数据（24 节气 + 节日 + 场景节点）
+- 防重复写入（同一年、同一节点、同一标题自动跳过）
+- `topic-store.js` `importSeasonalCandidates()` 批量导入含防重复
 - 6 个 SEASONAL_* / TOPIC_GENERATE_* 错误码
 
 ### 未完成
 
-- 节气/季节选题写入候选池（--confirm-generate）
 - 公开热点适配器（微博热搜、百度热搜）
 - trend-pulse 可行性验证
 - 小红书平台内热点采集（暂缓）
@@ -165,6 +166,9 @@ node pipeline.js topic seasonal list --season summer                            
 node pipeline.js topic seasonal list --type solar_term                                                        # 查看节气节点
 node pipeline.js topic seasonal generate --term "立夏" --dry-run                                               # 预览立夏选题候选
 node pipeline.js topic seasonal generate --month 6 --dry-run                                                  # 预览6月选题候选
+node pipeline.js topic seasonal generate --term "立夏" --confirm-generate                                      # 写入立夏选题候选
+node pipeline.js topic seasonal generate --month 6 --confirm-generate                                          # 写入6月选题候选
+node pipeline.js topic seasonal generate --range "2026-06-01:2026-06-30" --confirm-generate                    # 写入指定日期范围的选题候选
 
 # 发布前验证（dry-run，不调用真实发布脚本）
 node pipeline.js publish "投稿内容/待投递/你的任务目录" --dry-run

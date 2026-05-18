@@ -341,4 +341,92 @@ function exportTopic(topicId) {
   };
 }
 
-module.exports = { add, list, show, shortlist, approve, reject, exportTopic };
+/**
+ * 批量导入 seasonal 候选选题（含防重复检查）
+ *
+ * 同一年、同一 seasonalId、同一 title 视为重复，跳过写入
+ *
+ * @param {Array} candidates - 由 seasonal-generator 生成的候选列表
+ * @returns {object} { success, data: { added: [], skipped: [] } }
+ */
+function importSeasonalCandidates(candidates) {
+  if (!candidates || candidates.length === 0) {
+    return { success: true, data: { added: [], skipped: [] } };
+  }
+
+  const store = load();
+  if (!store) {
+    return { success: false, error: { code: 'TOPIC_STORE_INVALID', message: 'candidates.json 解析失败' } };
+  }
+
+  const added = [];
+  const skipped = [];
+
+  for (const c of candidates) {
+    const cSeasonalId = c.sourceMeta && c.sourceMeta.seasonalId;
+    const cDate = (c.sourceMeta && c.sourceMeta.date) || '';
+    const cYear = cDate.slice(0, 4);
+
+    // 查重：同一年、同一 seasonalId、同一 title
+    const duplicate = store.candidates.find(existing => {
+      if (existing.source !== 'seasonal') return false;
+      const eSeasonalId = existing.sourceMeta && existing.sourceMeta.seasonalId;
+      if (!eSeasonalId || !cSeasonalId) return false;
+      if (eSeasonalId !== cSeasonalId) return false;
+
+      // 跨年不视为重复
+      const eDate = (existing.sourceMeta && existing.sourceMeta.date) || '';
+      if (eDate.slice(0, 4) !== cYear) return false;
+
+      // 标题一致视为重复
+      if (existing.title === c.title) return true;
+
+      return false;
+    });
+
+    if (duplicate) {
+      skipped.push({
+        title: c.title,
+        seasonalId: cSeasonalId,
+        status: duplicate.status,
+        reason: {
+          code: 'SEASONAL_DUPLICATE_TOPIC',
+          message: `"${c.title}" 已存在（${duplicate.id}，status=${duplicate.status}）`,
+        },
+      });
+      continue;
+    }
+
+    const candidate = {
+      id: generateId('seasonal', store),
+      title: c.title,
+      source: 'seasonal',
+      sourceMeta: c.sourceMeta || null,
+      rawSignal: c.rawSignal || '',
+      trendReason: c.trendReason || '',
+      accountFitReason: c.accountFitReason || '',
+      contentAngle: c.contentAngle || '',
+      scores: c.scores || defaultScores(),
+      status: 'CANDIDATE',
+      createdAt: now(),
+      approvedAt: null,
+      exportedAt: null,
+      note: c.note || `由 seasonal generator 基于 ${(c.sourceMeta && c.sourceMeta.name) || '未知节点'} 生成并写入候选池`,
+    };
+
+    store.candidates.push(candidate);
+    added.push(candidate);
+  }
+
+  if (added.length > 0) {
+    const warning = save(store);
+    if (warning) return { success: false, error: warning };
+  }
+
+  return {
+    success: true,
+    data: { added, skipped },
+  };
+}
+
+module.exports = { add, list, show, shortlist, approve, reject, exportTopic, importSeasonalCandidates };

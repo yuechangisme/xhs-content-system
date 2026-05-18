@@ -2,7 +2,8 @@
  * xhs-content-system v0.5.2
  * seasonal-generator 模块 — 季节/节气选题生成器
  *
- * 职责：读取 seasonal-calendar.json，按条件查询节点，生成 dry-run TopicCandidate 预览
+ * 职责：读取 seasonal-calendar.json，按条件查询节点，生成 TopicCandidate 候选
+ * 支持 dry-run（预览）和 confirm-generate（配合 topic-store 写入）两种模式
  * 不包含：写入 candidates.json、调用 topic-store、生成帖子
  *
  * 所有函数直接返回 result 对象。
@@ -254,14 +255,15 @@ function listNodes(filters) {
 }
 
 /**
- * 生成 dry-run TopicCandidate 预览
+ * 生成 TopicCandidate 候选（支持 dry-run 和 confirm-generate 两种模式）
  *
  * @param {object} opts
  * @param {string} [opts.term] - 节点名称
  * @param {number} [opts.month] - 月份
  * @param {string} [opts.range] - 日期范围 "YYYY-MM-DD:YYYY-MM-DD"
  * @param {boolean} [opts.all] - 全部未过期节点
- * @param {boolean} [opts.dryRun] - dry-run 模式
+ * @param {boolean} [opts.dryRun] - dry-run 模式（预览，不写入）
+ * @param {boolean} [opts.confirmGenerate] - 确认写入模式
  * @returns {object}
  */
 function generatePreview(opts) {
@@ -270,8 +272,8 @@ function generatePreview(opts) {
     return { success: false, error: { code: 'SEASONAL_CALENDAR_INVALID', message: 'seasonal-calendar.json 解析失败' } };
   }
 
-  // 确认模式检查
-  if (!opts || !opts.dryRun) {
+  // 必须指定 dry-run 或 confirm-generate
+  if (!opts || (!opts.dryRun && !opts.confirmGenerate)) {
     return {
       success: false,
       error: {
@@ -337,6 +339,9 @@ function generatePreview(opts) {
   const MAX_CANDIDATES = opts.all ? 30 : 99;
   let totalGenerated = 0;
 
+  const isDryRun = opts.dryRun;
+  const noteSuffix = isDryRun ? '生成（dry-run 预览）' : '生成并写入候选池';
+
   const candidates = [];
   for (const node of nodes) {
     if (totalGenerated >= MAX_CANDIDATES) break;
@@ -374,7 +379,7 @@ function generatePreview(opts) {
         },
         status: 'CANDIDATE',
         createdAt: now(),
-        note: `由 seasonal generator 基于 ${node.name} 生成（dry-run 预览）`,
+        note: `由 seasonal generator 基于 ${node.name} ${noteSuffix}`,
       };
 
       candidates.push(candidate);
@@ -382,14 +387,17 @@ function generatePreview(opts) {
     }
   }
 
+  const mode = isDryRun ? 'dry-run' : 'confirm';
   const result = {
     success: true,
     data: {
-      mode: 'dry-run',
+      mode,
       matchedNodes: nodes.length,
       generated: candidates.length,
       note: candidates.length > 0
-        ? `[DRY-RUN] 预览 ${candidates.length} 条候选选题。使用 --confirm-generate 写入候选池`
+        ? (isDryRun
+          ? `[DRY-RUN] 预览 ${candidates.length} 条候选选题。使用 --confirm-generate 写入候选池`
+          : `生成了 ${candidates.length} 条候选选题（已预备写入候选池）`)
         : '没有符合条件的节点',
       candidates,
     },

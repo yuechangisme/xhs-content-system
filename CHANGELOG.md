@@ -2,7 +2,7 @@
 
 ## v0.5.2 (2026-05-18)
 
-### 新增
+### Phase 1 — Dry-run（已完成）
 
 - **季节/节气选题生成器（Phase 1 — Dry-run）**：`seasonal-calendar.json` + `modules/seasonal-generator.js`
   - `topic seasonal list` — 查询季节节点（支持 `--month`、`--season`、`--type`、`--term` 过滤）
@@ -14,20 +14,48 @@
 - **评分机制**：`trendScore`（时效性）+ `fitScore`（账号匹配度）+ `overallScore`（综合）
 - 新增 6 个错误码：`TOPIC_GENERATE_CONFIRM_REQUIRED`、`SEASONAL_NODE_NOT_FOUND`、`SEASONAL_DATE_INVALID`、`SEASONAL_DUPLICATE_TOPIC`、`SEASONAL_CALENDAR_INVALID`、`SEASONAL_ACCOUNT_PROFILE_MISSING`
 
-### 安全边界
+### Phase 1 安全边界
 
 - dry-run 不写入 `candidates.json`
 - generate 无 `--dry-run` 或 `--confirm-generate` 时拒绝执行
 - seasonal generator 不调用任何执行层模块
-- `--confirm-generate` 将在 v0.5.2 Phase 2 实现
+
+### Phase 2 — confirm-generate（本轮新增）
+
+- **`generate --confirm-generate` 模式**：将 seasonal TopicCandidate 正式写入 `topics/candidates.json`
+  - 支持 `--term`、`--month`、`--range` 参数
+  - 写入的候选状态为 `CANDIDATE`
+  - 不生成帖子、不调用 xhs-planner、不修改 state.json
+- **防重复写入**：`topic-store.js` 新增 `importSeasonalCandidates()`
+  - 同一年、同一 `seasonalId`、同一 `title` 自动跳过
+  - 跳过时不阻断，返回 `skipped` 列表含 `SEASONAL_DUPLICATE_TOPIC`
+  - 跨年同节点允许重新生成
+  - 已 CANDIDATE / SHORTLISTED / APPROVED / EXPORTED / REJECTED 均跳过
+- **管线编排**：`pipeline.js` `cmdTopicSeasonalGenerate()` 增加 confirm-generate 路由
+  - 生成 → 批量写入 → 返回 added/skipped 数量
+- **dry-run 行为保持不变**：无 `--confirm-generate` 时不写入
+
+### 测试验证
+
+| 场景 | 结果 |
+|------|------|
+| `generate --term "立夏" --dry-run` | 不写入 candidates.json ✅ |
+| `generate --term "立夏" --confirm-generate` | 写入 3 条 CANDIDATE ✅ |
+| 再次执行同一命令 | 跳过 3 条 duplicate ✅ |
+| `topic list` 可见 seasonal 候选 | ✅ |
+| `topic show` 字段完整 | ✅ |
+| `topic shortlist / approve / export` | 状态流转正常 ✅ |
+| 无 flag 的 generate | TOPIC_GENERATE_CONFIRM_REQUIRED ✅ |
+| `pipeline status` 回归正常 | ✅ |
+| 未修改 state.json | ✅ |
+| 未调用执行层模块 | ✅ |
 
 ### 变更
 
-- `pipeline.js`：新增 `topic seasonal` 子命令路由
-- `README.md`：更新版本状态、目录结构、工作流、新增 seasonal CLI
-- `seasonal-calendar.json`：新增季节节点参考数据文件
-- `modules/seasonal-generator.js`：新增季节选题生成模块
-- `CONTRACT.md`：新增 v0.5.2 Seasonal Topic Generator Contract
+- `modules/seasonal-generator.js`：generatePreview 新增 confirmGenerate 模式支持
+- `modules/topic-store.js`：新增 `importSeasonalCandidates()` 批量导入含防重复
+- `pipeline.js`：`cmdTopicSeasonalGenerate()` 实现 confirm-generate 完整路由
+- `README.md`：更新版本状态、已完成清单、新增 confirm-generate CLI 示例
 
 ---
 

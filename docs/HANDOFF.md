@@ -35,7 +35,7 @@
 | v0.4 | 清理 + 安全规则 + 归档一致性 | ✅ 完成 |
 | v0.5.0 | Topic Discovery Contract | ✅ 完成 |
 | v0.5.1 | Local Topic Pool（add/list/show/shortlist/approve/reject/export） | ✅ 完成 |
-| **v0.5.2** | **Seasonal Topic Generator** | **Phase 1 完成，Phase 2 进行中** |
+| **v0.5.2** | **Seasonal Topic Generator** | **✅ Phase 1 + Phase 2 完成，待打 tag** |
 | v0.5.3 | 公开热点适配器 | ⏳ 未开始 |
 | v0.5.4 | trend-pulse 可行性验证 | ⏳ 未开始 |
 | v0.5.5 | 外部源适配器原型 | ⏳ 未开始 |
@@ -82,6 +82,8 @@
 - 7 个 TOPIC_* 错误码
 - v0.5.2 Phase 1 seasonal-calendar.json（34 个节点：24 节气 + 4 节日 + 6 场景）
 - v0.5.2 Phase 1 seasonal-generator.js（list/generate dry-run）
+- v0.5.2 Phase 2 confirm-generate（`--confirm-generate` 写入候选池）
+- v0.5.2 Phase 2 防重复写入（importSeasonalCandidates，同一年/seasonalId/title 跳过）
 - 6 个 SEASONAL_* 错误码
 - 评分机制（trendScore/fitScore/overallScore）
 
@@ -124,9 +126,10 @@
 
 ## v0.5.2 当前状态
 
-**当前任务：** v0.5.2 Seasonal Topic Generator
+**当前任务：** v0.5.2 Seasonal Topic Generator **✅ 完成**
 
-**当前阶段：** Phase 1 已完成，Phase 2 未完成
+**最新正式 tag：** v0.5.1
+**v0.5.2 tag：** 尚未创建（等待 Phase 2 完成、测试通过、文档同步后再打）
 
 ### Phase 1 已完成
 - seasonal-calendar.json（34 个节点）
@@ -137,10 +140,20 @@
 - 无 accountProfile 时只 warning，不阻断
 - 不调用执行层模块
 
-### Phase 2 未完成
+### Phase 2 已完成
 - `--confirm-generate` 模式
-- 写入 topics/candidates.json
-- 防重复写入真实验证（与 topic-store 集成）
+- 写入 topics/candidates.json（CANDIDATE 状态）
+- 防重复写入：同一年、同一 seasonalId、同一 title 自动跳过
+- 跳过时不阻断，返回 skipped 列表含 SEASONAL_DUPLICATE_TOPIC
+- 跨年同节点允许重新生成
+- topic-store.importSeasonalCandidates() 批量导入
+- 管线编排：pipeline.js 生成 → 写入 → 返回 added/skipped
+- dry-run 行为保持不变
+- 不生成帖子、不调用 xhs-planner、不修改 state.json
+- 完整测试验证通过
+- 文档同步（README / CHANGELOG / HANDOFF）
+
+### 待打 tag
 - v0.5.2 tag
 
 ## 重要文件说明

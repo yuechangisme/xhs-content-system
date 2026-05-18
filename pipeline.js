@@ -510,21 +510,15 @@ function cmdTopicSeasonalGenerate() {
     return;
   }
 
-  // 本轮只实现 dry-run
-  if (isConfirm) {
-    errorOut('TOPIC_GENERATE_CONFIRM_REQUIRED',
-      '--confirm-generate 模式将在 v0.5.2 后续阶段实现。当前只支持 --dry-run',
-      'seasonal-generator');
-    return;
-  }
-
   const term = getArgValue('--term');
   const month = parseInt(getArgValue('--month'), 10);
   const range = getArgValue('--range');
   const all = args.includes('--all');
 
   // 收集参数
-  const opts = { dryRun: true };
+  const opts = {};
+  if (isDryRun) opts.dryRun = true;
+  if (isConfirm) opts.confirmGenerate = true;
   if (term) opts.term = term;
   if (!isNaN(month)) opts.month = month;
   if (range) opts.range = range;
@@ -543,7 +537,57 @@ function cmdTopicSeasonalGenerate() {
     errorOut(result.error.code, result.error.message, 'seasonal-generator', result.error.detail);
     return;
   }
-  output({ success: true, command, data: result.data, ...(result.warnings ? { warnings: result.warnings } : {}) });
+
+  // ─── confirm-generate 模式：写入候选池 ─────────────
+  if (isConfirm) {
+    if (!result.data.candidates || result.data.candidates.length === 0) {
+      output({
+        success: true,
+        command,
+        data: {
+          mode: 'confirm',
+          matchedNodes: result.data.matchedNodes,
+          generated: 0,
+          added: 0,
+          skipped: [],
+          note: '没有符合条件的候选选题可写入',
+        },
+      });
+      return;
+    }
+
+    const importResult = topicStore.importSeasonalCandidates(result.data.candidates);
+    if (!importResult.success) {
+      errorOut(importResult.error.code, importResult.error.message, 'topic-store');
+      return;
+    }
+
+    output({
+      success: true,
+      command,
+      data: {
+        mode: 'confirm',
+        matchedNodes: result.data.matchedNodes,
+        generated: result.data.generated,
+        added: importResult.data.added.length,
+        addedCandidates: importResult.data.added,
+        skipped: importResult.data.skipped,
+        note: importResult.data.added.length > 0
+          ? `已写入 ${importResult.data.added.length} 条候选选题到 candidates.json（CANDIDATE 状态）`
+          : '所有候选均已存在，无新写入',
+      },
+      ...(result.warnings ? { warnings: result.warnings } : {}),
+    });
+    return;
+  }
+
+  // ─── dry-run 模式：只预览 ─────────────────────────
+  output({
+    success: true,
+    command,
+    data: result.data,
+    ...(result.warnings ? { warnings: result.warnings } : {}),
+  });
 }
 
 function cmdPublish() {
