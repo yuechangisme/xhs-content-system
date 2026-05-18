@@ -1,5 +1,30 @@
 # Changelog
 
+## v0.5.0 (2026-05-18)
+
+### 新增
+
+- **v0.5 Topic Discovery Contract**（CONTRACT.md）：热点/选题线索发现层合约，覆盖数据源分级、Source Adapter Contract、TopicCandidate 结构、状态流转、人工确认规则
+  - 明确 topic discovery 只负责热点/选题线索，不生成帖子、不发布
+  - 热点来源 4 级分级策略（Tier 0 本地/人工 → Tier 1 公开热点 → Tier 2 第三方工具 → Tier 3 高风险采集）
+  - 明确 v0.5 MVP 只支持 Tier 0，Tier 3 小红书爬虫暂缓
+  - 新增 Source Adapter Contract：统一接口定义，任何外部来源必须先转换为 TopicCandidate
+  - 新增 TopicCandidate 最小结构（14 字段）
+  - 新增 Topic 5 状态流转：CANDIDATE → SHORTLISTED → APPROVED → EXPORTED / REJECTED
+  - 明确人工确认规则：APPROVED 后才能进入 xhs-planner，topic discovery 不得直接发布
+  - 明确 trend-pulse 12 项验证清单
+  - 明确小红书爬虫 7 项暂缓理由，列为 Tier 3 高风险
+
+### 变更
+
+- CONTRACT.md：新增 v0.5 Topic Discovery Contract 章节
+
+### 背景
+
+v0.5 是热点搜集 / 选题线索发现阶段。本轮只做策略冻结和数据契约设计，不写代码、不实现 topic pool、不接入任何外部来源。
+
+---
+
 ## v0.4.2 (2026-05-18)
 
 ### 新增
