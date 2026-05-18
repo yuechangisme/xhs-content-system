@@ -35,6 +35,18 @@ cleanup-backup/
 # 选题候选池（运行时状态）
 topics/
 
+# 投稿内容资产：运行时生成/发布内容，不进入 Git
+content/投稿内容/待制作/**
+content/投稿内容/制作中/**
+content/投稿内容/待投递/**
+content/投稿内容/已投递/**
+
+# 保留目录骨架
+!content/投稿内容/待制作/.gitkeep
+!content/投稿内容/制作中/.gitkeep
+!content/投稿内容/待投递/.gitkeep
+!content/投稿内容/已投递/.gitkeep
+
 # 系统文件
 .DS_Store
 Thumbs.db
