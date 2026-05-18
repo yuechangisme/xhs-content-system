@@ -1,5 +1,36 @@
 # Changelog
 
+## v0.5.2 (2026-05-18)
+
+### 新增
+
+- **季节/节气选题生成器（Phase 1 — Dry-run）**：`seasonal-calendar.json` + `modules/seasonal-generator.js`
+  - `topic seasonal list` — 查询季节节点（支持 `--month`、`--season`、`--type`、`--term` 过滤）
+  - `topic seasonal generate --dry-run` — 预览候选选题（不写入，不修改文件）
+  - 支持 `--term`、`--month`、`--range`、`--all` 四种生成模式
+- **季节节点参考数据**：`seasonal-calendar.json` 包含 33 个节点（24 节气 + 4 节日 + 5 场景节点），可提交 Git
+- **节气日期浮动支持**：通过 `yearlyDates` 字段覆盖年份特定日期
+- **账号定位解耦**：从 `config.local.js` 的 `accountProfile` 读取，无配置时返回 warning 不阻断
+- **评分机制**：`trendScore`（时效性）+ `fitScore`（账号匹配度）+ `overallScore`（综合）
+- 新增 6 个错误码：`TOPIC_GENERATE_CONFIRM_REQUIRED`、`SEASONAL_NODE_NOT_FOUND`、`SEASONAL_DATE_INVALID`、`SEASONAL_DUPLICATE_TOPIC`、`SEASONAL_CALENDAR_INVALID`、`SEASONAL_ACCOUNT_PROFILE_MISSING`
+
+### 安全边界
+
+- dry-run 不写入 `candidates.json`
+- generate 无 `--dry-run` 或 `--confirm-generate` 时拒绝执行
+- seasonal generator 不调用任何执行层模块
+- `--confirm-generate` 将在 v0.5.2 Phase 2 实现
+
+### 变更
+
+- `pipeline.js`：新增 `topic seasonal` 子命令路由
+- `README.md`：更新版本状态、目录结构、工作流、新增 seasonal CLI
+- `seasonal-calendar.json`：新增季节节点参考数据文件
+- `modules/seasonal-generator.js`：新增季节选题生成模块
+- `CONTRACT.md`：新增 v0.5.2 Seasonal Topic Generator Contract
+
+---
+
 ## v0.5.1 (2026-05-18)
 
 ### 新增

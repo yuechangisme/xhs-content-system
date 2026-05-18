@@ -9,8 +9,8 @@
 ## 版本状态
 
 ```
-当前版本: v0.5.1
-当前阶段: local topic pool（选题候选池 + 状态流转 + 人工确认）
+当前版本: v0.5.2
+当前阶段: seasonal calendar dry-run generator（季节节点预览 + 选题抽取）
 ```
 
 ### 已完成
@@ -35,10 +35,13 @@
 - `modules/topic-store.js` 本地选题候选池（add/list/show/shortlist/approve/reject/export）
 - 7 个 TOPIC_* 错误码
 - TopicCandidate 5 状态流转 + 人工确认规则
+- `modules/seasonal-generator.js` 季节/节气选题生成器（预览候选，不写入）
+- `seasonal-calendar.json` 季节节点参考数据（24 节气 + 节日 + 场景节点）
+- 6 个 SEASONAL_* / TOPIC_GENERATE_* 错误码
 
 ### 未完成
 
-- 节气/季节选题生成器
+- 节气/季节选题写入候选池（--confirm-generate）
 - 公开热点适配器（微博热搜、百度热搜）
 - trend-pulse 可行性验证
 - 小红书平台内热点采集（暂缓）
@@ -71,9 +74,13 @@ xhs-content-system   = 执行层 / 身体
 ## 当前工作流
 
 ```
+seasonal-calendar.json
+    ↓
+module: seasonal-generator    ← v0.5.2 新增：季节节点预览候选
+    ↓ dry-run → 用户检查质量
 手动录入 / 节气节点 / 外部热点
     ↓
-module: topic-store          ← v0.5 新增：本地选题候选池
+module: topic-store          ← v0.5.1 新增：本地选题候选池
     ↓ 人工确认（CANDIDATE → SHORTLISTED → APPROVED → EXPORTED）
 Agent / xhs-planner skill
     ↓ 生成 HTML + manifest
@@ -151,6 +158,14 @@ node pipeline.js topic approve <topicId>                                        
 node pipeline.js topic reject <topicId> --reason "原因"                                                       # 否决选题
 node pipeline.js topic export <topicId>                                                                       # 导出给 xhs-planner
 
+# 季节选题生成器（v0.5.2）
+node pipeline.js topic seasonal list                                                                          # 查看所有季节节点
+node pipeline.js topic seasonal list --month 6                                                                # 查看6月节点
+node pipeline.js topic seasonal list --season summer                                                          # 查看夏季节点
+node pipeline.js topic seasonal list --type solar_term                                                        # 查看节气节点
+node pipeline.js topic seasonal generate --term "立夏" --dry-run                                               # 预览立夏选题候选
+node pipeline.js topic seasonal generate --month 6 --dry-run                                                  # 预览6月选题候选
+
 # 发布前验证（dry-run，不调用真实发布脚本）
 node pipeline.js publish "投稿内容/待投递/你的任务目录" --dry-run
 
@@ -185,11 +200,14 @@ xhs-content-system/
 │   ├── state.js             ← state.json 状态管理
 │   ├── qa.js                ← P0 静态检测
 │   ├── logger.js            ← error.log 日志
-│   └── topic-store.js       ← TopicCandidate 选题候选池管理
+│   ├── topic-store.js       ← TopicCandidate 选题候选池管理
+│   └── seasonal-generator.js ← 季节/节气选题生成器
 │
 ├── topics/                  ← 选题候选池（运行时状态，不上传）
 │   ├── candidates.json      ← TopicCandidate 列表
 │   └── exported/            ← 已导出选题（供 xhs-planner 参考）
+│
+├── seasonal-calendar.json   ← 季节节点参考数据（可提交 Git）
 │
 ├── content/
 │   ├── render.js            ← HTML → PNG 导出

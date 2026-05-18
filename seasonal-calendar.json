@@ -1,0 +1,521 @@
+{
+  "version": "v0.5.2",
+  "description": "季节节点参考数据 — 用于 Seasonal Topic Generator 生成选题候选",
+  "updatedAt": "2026-05-18",
+  "nodes": [
+    {
+      "id": "sc-lichun",
+      "name": "立春",
+      "type": "solar_term",
+      "defaultDate": "02-04",
+      "season": "spring",
+      "weekOffset": 2,
+      "userNeeds": "立春后进入春季，用户关注春季养肝、换季抵抗力、春困缓解",
+      "topicHints": [
+        "立春后最该吃的3种养肝食物",
+        "春天怎么睡不春困",
+        "立春养生做好这3件事就够了"
+      ],
+      "riskNotes": "避免极端排毒推荐"
+    },
+    {
+      "id": "sc-jingzhe",
+      "name": "惊蛰",
+      "type": "solar_term",
+      "defaultDate": "03-05",
+      "season": "spring",
+      "weekOffset": 2,
+      "userNeeds": "惊蛰后气温回升，用户关注春季过敏预防、免疫力提升",
+      "topicHints": [
+        "惊蛰后容易过敏？可能是这3件事没做对",
+        "春天免疫力提升的懒人方法",
+        "换季保养记住这几点"
+      ],
+      "riskNotes": "避免药物推荐，过敏严重应就医"
+    },
+    {
+      "id": "sc-chunfen",
+      "name": "春分",
+      "type": "solar_term",
+      "defaultDate": "03-20",
+      "season": "spring",
+      "weekOffset": 2,
+      "userNeeds": "春分昼夜平分，用户关注阴阳平衡、春季饮食调理",
+      "topicHints": [
+        "春分后饮食记住3个原则",
+        "春天最好的养生方式其实很简单",
+        "春分养生的懒人指南"
+      ],
+      "riskNotes": ""
+    },
+    {
+      "id": "sc-qingming",
+      "name": "清明",
+      "type": "solar_term",
+      "defaultDate": "04-04",
+      "season": "spring",
+      "weekOffset": 2,
+      "userNeeds": "清明时节雨纷纷，用户关注祛湿、春季踏青运动",
+      "topicHints": [
+        "清明前后湿气重？这3种食物帮你去湿",
+        "春天最适合的懒人运动",
+        "清明养生记住这几点"
+      ],
+      "riskNotes": "避免极端祛湿方法"
+    },
+    {
+      "id": "sc-guyu",
+      "name": "谷雨",
+      "type": "solar_term",
+      "defaultDate": "04-20",
+      "season": "spring",
+      "weekOffset": 2,
+      "userNeeds": "谷雨后雨水增多，用户关注健脾祛湿、换季皮肤护理",
+      "topicHints": [
+        "谷雨过后湿气加重，这3个习惯帮你调理",
+        "春季最后一个节气该做什么",
+        "换季皮肤状态差的真正原因"
+      ],
+      "riskNotes": ""
+    },
+    {
+      "id": "sc-lixia",
+      "name": "立夏",
+      "type": "solar_term",
+      "defaultDate": "05-05",
+      "yearlyDates": {
+        "2026": "05-05",
+        "2027": "05-06"
+      },
+      "season": "summer",
+      "weekOffset": 2,
+      "userNeeds": "立夏后气温升高，用户关注清热祛湿、夏季饮食调整、防暑",
+      "topicHints": [
+        "立夏后最该吃的3种食材",
+        "夏天怎么吃不容易犯困",
+        "立夏养生记住这几点就够了"
+      ],
+      "riskNotes": "避免极端节食推荐"
+    },
+    {
+      "id": "sc-xiaoman",
+      "name": "小满",
+      "type": "solar_term",
+      "defaultDate": "05-21",
+      "season": "summer",
+      "weekOffset": 2,
+      "userNeeds": "小满后气温明显升高，用户关注清热解暑、清淡饮食",
+      "topicHints": [
+        "小满后饮食记住3个原则",
+        "夏天不想吃饭怎么办",
+        "夏季清淡饮食的懒人搭配"
+      ],
+      "riskNotes": ""
+    },
+    {
+      "id": "sc-mangzhong",
+      "name": "芒种",
+      "type": "solar_term",
+      "defaultDate": "06-05",
+      "season": "summer",
+      "weekOffset": 2,
+      "userNeeds": "芒种后高温多雨，用户关注消暑祛湿、夏季作息调整",
+      "topicHints": [
+        "芒种后最养人的3种食物",
+        "夏天怎么调整作息更精神",
+        "高温天不折腾的养生方法"
+      ],
+      "riskNotes": ""
+    },
+    {
+      "id": "sc-xiazhi",
+      "name": "夏至",
+      "type": "solar_term",
+      "defaultDate": "06-21",
+      "season": "summer",
+      "weekOffset": 2,
+      "userNeeds": "夏至是一年中白昼最长，用户关注夏季养生全面指南",
+      "topicHints": [
+        "夏至养生的3个关键",
+        "夏天最好的养生方式",
+        "夏至后这几种食物要多吃"
+      ],
+      "riskNotes": ""
+    },
+    {
+      "id": "sc-xiaoshu",
+      "name": "小暑",
+      "type": "solar_term",
+      "defaultDate": "07-07",
+      "season": "summer",
+      "weekOffset": 2,
+      "userNeeds": "小暑后炎热加剧，用户关注防暑降温、夏季饮食安全",
+      "topicHints": [
+        "小暑后这样吃最舒服",
+        "夏天不吹空调也能凉快的懒人方法",
+        "三伏天前的最后准备"
+      ],
+      "riskNotes": "注意高温防暑提示"
+    },
+    {
+      "id": "sc-dashu",
+      "name": "大暑",
+      "type": "solar_term",
+      "defaultDate": "07-22",
+      "season": "summer",
+      "weekOffset": 2,
+      "userNeeds": "大暑是最热节气，用户关注极端高温应对、夏季饮食调理",
+      "topicHints": [
+        "大暑天最该吃的3种食物",
+        "高温天不伤身体的懒人习惯",
+        "三伏天养生别做这3件事"
+      ],
+      "riskNotes": "注意热射病风险提示"
+    },
+    {
+      "id": "sc-liqiu",
+      "name": "立秋",
+      "type": "solar_term",
+      "defaultDate": "08-07",
+      "season": "autumn",
+      "weekOffset": 2,
+      "userNeeds": "立秋后暑热未退，用户关注秋季润燥、贴秋膘的正确方式",
+      "topicHints": [
+        "立秋后不该急着贴秋膘",
+        "秋季润燥最便宜的3种食物",
+        "夏秋换季的懒人养生指南"
+      ],
+      "riskNotes": "贴秋膘需注意适量"
+    },
+    {
+      "id": "sc-chushu",
+      "name": "处暑",
+      "type": "solar_term",
+      "defaultDate": "08-23",
+      "season": "autumn",
+      "weekOffset": 2,
+      "userNeeds": "处暑后暑热渐退，用户关注秋季饮食调整、换季健康",
+      "topicHints": [
+        "处暑后饮食该调整了",
+        "夏秋换季最容易忽略的3件事",
+        "入秋后的懒人养生指南"
+      ],
+      "riskNotes": ""
+    },
+    {
+      "id": "sc-bailu",
+      "name": "白露",
+      "type": "solar_term",
+      "defaultDate": "09-07",
+      "season": "autumn",
+      "weekOffset": 2,
+      "userNeeds": "白露后天气转凉，用户关注秋季润肺、防秋燥",
+      "topicHints": [
+        "白露后最润肺的3种食物",
+        "秋天干燥怎么办",
+        "秋季养生的正确打开方式"
+      ],
+      "riskNotes": ""
+    },
+    {
+      "id": "sc-qiufen",
+      "name": "秋分",
+      "type": "solar_term",
+      "defaultDate": "09-23",
+      "season": "autumn",
+      "weekOffset": 2,
+      "userNeeds": "秋分昼夜平分，用户关注秋季全面养生、免疫力提升",
+      "topicHints": [
+        "秋分后养生记住3个原则",
+        "秋天最好的养生方式",
+        "秋季提高免疫力的懒人方法"
+      ],
+      "riskNotes": ""
+    },
+    {
+      "id": "sc-hanlu",
+      "name": "寒露",
+      "type": "solar_term",
+      "defaultDate": "10-08",
+      "season": "autumn",
+      "weekOffset": 2,
+      "userNeeds": "寒露后气温骤降，用户关注保暖防寒、秋季进补",
+      "topicHints": [
+        "寒露后最该保暖的3个部位",
+        "秋天怎么吃不容易感冒",
+        "入冬前的懒人养生准备"
+      ],
+      "riskNotes": ""
+    },
+    {
+      "id": "sc-shuangjiang",
+      "name": "霜降",
+      "type": "solar_term",
+      "defaultDate": "10-23",
+      "season": "autumn",
+      "weekOffset": 2,
+      "userNeeds": "霜降是秋季最后节气，用户关注深秋进补、冬季前调理",
+      "topicHints": [
+        "霜降后最该吃的3种食物",
+        "秋冬换季最容易生病？做好这3点",
+        "入冬前的最后养生准备"
+      ],
+      "riskNotes": ""
+    },
+    {
+      "id": "sc-lidong",
+      "name": "立冬",
+      "type": "solar_term",
+      "defaultDate": "11-07",
+      "season": "winter",
+      "weekOffset": 2,
+      "userNeeds": "立冬后正式入冬，用户关注冬季进补、保暖养生",
+      "topicHints": [
+        "立冬后最该吃的3种暖身食物",
+        "冬天不折腾的养生方法",
+        "冬季进补的正确打开方式"
+      ],
+      "riskNotes": "进补需适量，避免高油高糖"
+    },
+    {
+      "id": "sc-xiaoxue",
+      "name": "小雪",
+      "type": "solar_term",
+      "defaultDate": "11-22",
+      "season": "winter",
+      "weekOffset": 2,
+      "userNeeds": "小雪后气温进一步下降，用户关注温补饮食、冬季作息",
+      "topicHints": [
+        "小雪后饮食记住3个原则",
+        "冬天怎么调整作息更健康",
+        "冬季温补的懒人食谱"
+      ],
+      "riskNotes": ""
+    },
+    {
+      "id": "sc-daxue",
+      "name": "大雪",
+      "type": "solar_term",
+      "defaultDate": "12-07",
+      "season": "winter",
+      "weekOffset": 2,
+      "userNeeds": "大雪后严寒，用户关注冬季保暖、免疫力提升",
+      "topicHints": [
+        "大雪后最暖身的3种食物",
+        "冬天不生病的方法",
+        "严寒天气的懒人养生指南"
+      ],
+      "riskNotes": "注意保暖防寒"
+    },
+    {
+      "id": "sc-dongzhi",
+      "name": "冬至",
+      "type": "solar_term",
+      "defaultDate": "12-21",
+      "season": "winter",
+      "weekOffset": 2,
+      "userNeeds": "冬至是一年中白昼最短，用户关注冬季全面养生",
+      "topicHints": [
+        "冬至养生的3个关键",
+        "冬天最好的养生方式",
+        "冬至后这几种食物要多吃"
+      ],
+      "riskNotes": ""
+    },
+    {
+      "id": "sc-xiaohan",
+      "name": "小寒",
+      "type": "solar_term",
+      "defaultDate": "01-05",
+      "season": "winter",
+      "weekOffset": 2,
+      "userNeeds": "小寒是全年最冷时段之一，用户关注极寒天气养生",
+      "topicHints": [
+        "小寒天最该注意的3件事",
+        "最冷的时候怎么养生",
+        "寒冬里的懒人保暖指南"
+      ],
+      "riskNotes": "注意低温健康风险"
+    },
+    {
+      "id": "sc-dahan",
+      "name": "大寒",
+      "type": "solar_term",
+      "defaultDate": "01-20",
+      "season": "winter",
+      "weekOffset": 2,
+      "userNeeds": "大寒是全年最后节气，用户关注冬季养生总结、春节前健康",
+      "topicHints": [
+        "大寒后做好这3点迎接春节",
+        "全年最后一个节气的养生重点",
+        "春节前的懒人养生准备"
+      ],
+      "riskNotes": ""
+    },
+    {
+      "id": "sc-chunjie",
+      "name": "春节",
+      "type": "festival",
+      "defaultDate": "01-29",
+      "yearlyDates": {
+        "2026": "02-17",
+        "2027": "02-06"
+      },
+      "season": "winter",
+      "weekOffset": 3,
+      "userNeeds": "春节期间饮食不规律，用户关注节日健康饮食、节后调理",
+      "topicHints": [
+        "春节期间怎么吃不容易胖",
+        "节后排毒的懒人方法",
+        "春节健康指南"
+      ],
+      "riskNotes": "不推荐极端节食排毒"
+    },
+    {
+      "id": "sc-duanwu",
+      "name": "端午节",
+      "type": "festival",
+      "defaultDate": "05-05",
+      "yearlyDates": {
+        "2026": "06-19",
+        "2027": "06-09"
+      },
+      "season": "summer",
+      "weekOffset": 2,
+      "userNeeds": "端午前后用户关注传统养生、粽子食用健康",
+      "topicHints": [
+        "粽子怎么吃更健康",
+        "端午节的养生传统",
+        "夏季时令饮食指南"
+      ],
+      "riskNotes": "粽子高热量，提醒适量"
+    },
+    {
+      "id": "sc-zhongqiu",
+      "name": "中秋节",
+      "type": "festival",
+      "defaultDate": "09-15",
+      "yearlyDates": {
+        "2026": "09-28",
+        "2027": "09-17"
+      },
+      "season": "autumn",
+      "weekOffset": 2,
+      "userNeeds": "中秋前后用户关注秋季养生、月饼健康食用",
+      "topicHints": [
+        "月饼怎么吃不伤胃",
+        "中秋养生记住这几点",
+        "秋季时令饮食指南"
+      ],
+      "riskNotes": "月饼高糖高油，提醒适量"
+    },
+    {
+      "id": "sc-guoging",
+      "name": "国庆节",
+      "type": "festival",
+      "defaultDate": "10-01",
+      "season": "autumn",
+      "weekOffset": 2,
+      "userNeeds": "国庆长假用户关注出行健康、假期作息调整",
+      "topicHints": [
+        "长假期间怎么保持作息",
+        "假期旅行健康指南",
+        "假期后快速恢复状态的懒人方法"
+      ],
+      "riskNotes": ""
+    },
+    {
+      "id": "sc-sanfutian",
+      "name": "三伏天",
+      "type": "seasonal_scene",
+      "defaultDate": "07-15",
+      "yearlyDates": {
+        "2026": "07-13"
+      },
+      "season": "summer",
+      "weekOffset": 2,
+      "userNeeds": "三伏天是一年中最热时段，用户关注防暑祛湿、冬病夏治",
+      "topicHints": [
+        "三伏天最该做的3件事",
+        "冬病夏治到底怎么做",
+        "三伏天不折腾的养生方法"
+      ],
+      "riskNotes": "冬病夏治需遵医嘱，不做医疗建议"
+    },
+    {
+      "id": "sc-meiyu",
+      "name": "梅雨季",
+      "type": "seasonal_scene",
+      "defaultDate": "06-10",
+      "season": "summer",
+      "weekOffset": 1,
+      "userNeeds": "梅雨季节潮湿闷热，用户关注除湿、饮食调理",
+      "topicHints": [
+        "梅雨季怎么除湿最有效",
+        "潮湿天气的饮食建议",
+        "梅雨季不难受的懒人方法"
+      ],
+      "riskNotes": ""
+    },
+    {
+      "id": "sc-kaixue",
+      "name": "开学季",
+      "type": "seasonal_scene",
+      "defaultDate": "09-01",
+      "season": "autumn",
+      "weekOffset": 2,
+      "userNeeds": "开学前后用户关注作息调整、学生健康、早餐营养",
+      "topicHints": [
+        "开学后怎么调整作息",
+        "学生早餐的懒人搭配",
+        "开学季的健康指南"
+      ],
+      "riskNotes": ""
+    },
+    {
+      "id": "sc-kaoshiji",
+      "name": "考试季",
+      "type": "seasonal_scene",
+      "defaultDate": "06-01",
+      "season": "summer",
+      "weekOffset": 3,
+      "userNeeds": "高考中考前后用户关注考生饮食、精力管理、减压",
+      "topicHints": [
+        "考试期间怎么吃更精神",
+        "考前减压的3个方法",
+        "考生家长的懒人营养指南"
+      ],
+      "riskNotes": "不做药物/补剂推荐"
+    },
+    {
+      "id": "sc-huanyi-chun",
+      "name": "春季换季",
+      "type": "seasonal_scene",
+      "defaultDate": "03-15",
+      "season": "spring",
+      "weekOffset": 2,
+      "userNeeds": "冬春换季用户关注抵抗力、过敏预防、作息调整",
+      "topicHints": [
+        "换季就生病？问题出在这3点",
+        "春季换季保养指南",
+        "换季不难受的懒人方法"
+      ],
+      "riskNotes": ""
+    },
+    {
+      "id": "sc-huanyi-qiu",
+      "name": "秋季换季",
+      "type": "seasonal_scene",
+      "defaultDate": "09-15",
+      "season": "autumn",
+      "weekOffset": 2,
+      "userNeeds": "夏秋换季用户关注感冒预防、秋季干燥、作息调整",
+      "topicHints": [
+        "换季不感冒的3个习惯",
+        "秋季干燥怎么办",
+        "夏秋换季的懒人养生指南"
+      ],
+      "riskNotes": ""
+    }
+  ]
+}

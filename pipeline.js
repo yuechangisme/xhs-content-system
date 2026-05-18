@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 /**
- * xhs-content-system v0.2
+ * xhs-content-system v0.5.2
  * pipeline.js — 主编排器
  *
  * 职责：命令路由 + 调用模块 + 汇总输出 + 更新状态
@@ -12,6 +12,8 @@
  *   node pipeline.js status <taskDir>
  *   node pipeline.js qa <taskDir>
  *   node pipeline.js schedule
+ *   node pipeline.js topic add/list/show/shortlist/approve/reject/export
+ *   node pipeline.js topic seasonal list/generate
  *   node pipeline.js publish <taskDir> --dry-run              # 仅验证，不调用
  *   node pipeline.js publish <taskDir>                        # 提示需要 --confirm-publish
  *   node pipeline.js publish <taskDir> --confirm-publish      # 真实发布
@@ -28,6 +30,7 @@ const qa = require('./modules/qa');
 const publisher = require('./modules/publisher');
 const scheduler = require('./modules/scheduler');
 const topicStore = require('./modules/topic-store');
+const seasonalGen = require('./modules/seasonal-generator');
 
 // ─── 命令路由 ────────────────────────────────────────────
 
@@ -334,8 +337,10 @@ function cmdTopic() {
       return cmdTopicReject();
     case 'export':
       return cmdTopicExport();
+    case 'seasonal':
+      return cmdTopicSeasonal();
     default:
-      errorOut('UNKNOWN_COMMAND', `未知 topic 子命令: ${sub}。可用命令: add, list, show, shortlist, approve, reject, export`, 'topic-store');
+      errorOut('UNKNOWN_COMMAND', `未知 topic 子命令: ${sub}。可用命令: add, list, show, shortlist, approve, reject, export, seasonal`, 'topic-store');
   }
 }
 
@@ -454,6 +459,91 @@ function cmdTopicExport() {
     return;
   }
   output({ success: true, command, data: result.data, ...(result.warning ? { warning: result.warning } : {}) });
+}
+
+function cmdTopicSeasonal() {
+  const subSeasonal = args[1];
+  if (!subSeasonal) {
+    errorOut('TOPIC_MISSING_ARGS', '用法: pipeline topic seasonal <list|generate> [...]', 'seasonal-generator');
+    return;
+  }
+
+  switch (subSeasonal) {
+    case 'list':
+      return cmdTopicSeasonalList();
+    case 'generate':
+      return cmdTopicSeasonalGenerate();
+    default:
+      errorOut('UNKNOWN_COMMAND', `未知 topic seasonal 子命令: ${subSeasonal}。可用命令: list, generate`, 'seasonal-generator');
+  }
+}
+
+function cmdTopicSeasonalList() {
+  const month = parseInt(getArgValue('--month'), 10);
+  const season = getArgValue('--season');
+  const type = getArgValue('--type');
+  const term = getArgValue('--term');
+
+  const filters = {};
+  if (!isNaN(month)) filters.month = month;
+  if (season) filters.season = season;
+  if (type) filters.type = type;
+  if (term) filters.term = term;
+
+  const result = seasonalGen.listNodes(Object.keys(filters).length > 0 ? filters : undefined);
+  if (!result.success) {
+    errorOut(result.error.code, result.error.message, 'seasonal-generator');
+    return;
+  }
+  output({ success: true, command, data: result.data });
+}
+
+function cmdTopicSeasonalGenerate() {
+  const isDryRun = args.includes('--dry-run');
+  const isConfirm = args.includes('--confirm-generate');
+
+  // 无 flag → 要求指定模式
+  if (!isDryRun && !isConfirm) {
+    errorOut('TOPIC_GENERATE_CONFIRM_REQUIRED',
+      'seasonal generate 需要指定操作模式: --dry-run（预览，不写入）或 --confirm-generate（确认后写入）',
+      'seasonal-generator');
+    return;
+  }
+
+  // 本轮只实现 dry-run
+  if (isConfirm) {
+    errorOut('TOPIC_GENERATE_CONFIRM_REQUIRED',
+      '--confirm-generate 模式将在 v0.5.2 后续阶段实现。当前只支持 --dry-run',
+      'seasonal-generator');
+    return;
+  }
+
+  const term = getArgValue('--term');
+  const month = parseInt(getArgValue('--month'), 10);
+  const range = getArgValue('--range');
+  const all = args.includes('--all');
+
+  // 收集参数
+  const opts = { dryRun: true };
+  if (term) opts.term = term;
+  if (!isNaN(month)) opts.month = month;
+  if (range) opts.range = range;
+  if (all) opts.all = true;
+
+  // 验证至少有一个参数
+  if (!term && isNaN(month) && !range && !all) {
+    errorOut('SEASONAL_DATE_INVALID',
+      '请指定 --term, --month, --range, 或 --all',
+      'seasonal-generator');
+    return;
+  }
+
+  const result = seasonalGen.generatePreview(opts);
+  if (!result.success) {
+    errorOut(result.error.code, result.error.message, 'seasonal-generator', result.error.detail);
+    return;
+  }
+  output({ success: true, command, data: result.data, ...(result.warnings ? { warnings: result.warnings } : {}) });
 }
 
 function cmdPublish() {
