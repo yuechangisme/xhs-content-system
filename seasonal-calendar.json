@@ -19,6 +19,21 @@
       "riskNotes": "避免极端排毒推荐"
     },
     {
+      "id": "sc-yushui",
+      "name": "雨水",
+      "type": "solar_term",
+      "defaultDate": "02-18",
+      "season": "spring",
+      "weekOffset": 2,
+      "userNeeds": "雨水后降雨增多，用户关注春季祛湿、养肝健脾",
+      "topicHints": [
+        "雨水后湿气加重怎么办",
+        "春季养肝最该吃的3种食物",
+        "初春养生的懒人指南"
+      ],
+      "riskNotes": ""
+    },
+    {
       "id": "sc-jingzhe",
       "name": "惊蛰",
       "type": "solar_term",
