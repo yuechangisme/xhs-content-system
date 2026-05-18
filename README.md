@@ -9,8 +9,8 @@
 ## 版本状态
 
 ```
-当前版本: v0.5.2
-当前阶段: seasonal calendar confirm-generate（季节节点 → 写入候选池）
+当前版本: v0.5.3
+当前阶段: manual trend import enhancement（手动热点导入）
 ```
 
 ### 已完成
@@ -40,10 +40,20 @@
 - 防重复写入（同一年、同一节点、同一标题自动跳过）
 - `topic-store.js` `importSeasonalCandidates()` 批量导入含防重复
 - 6 个 SEASONAL_* / TOPIC_GENERATE_* 错误码
+- **topic add 手动热点导入增强（v0.5.3）**：新增 `--url`、`--platform`、`--observed-at`、`--trend-score`、`--fit-score` 参数
+- **多平台 manual source**：xhs-manual、youtube-manual、baidu-manual、weibo-manual、news-manual、other-manual
+- **分数越界校验**：`TOPIC_SCORE_INVALID` 错误码
 
 ### 未完成
 
-- 公开热点适配器（微博热搜、百度热搜）
+- topic import 批量导入（JSON / Markdown）
+- 公开热点适配器（经评估暂缓：匹配度低、生命周期短）
+- trend-pulse 可行性验证
+- 小红书平台内热点采集（暂缓）
+- 自动热点获取
+- 数据回流
+- 多账号管理
+- Web 管理界面
 - trend-pulse 可行性验证
 - 小红书平台内热点采集（暂缓）
 - 自动热点获取
@@ -151,7 +161,9 @@ node pipeline.js schedule run-due --confirm-scheduled-publish        # 列出到
 node pipeline.js schedule run-due --confirm-scheduled-publish --dry-run --task "<taskDir>"  # 发布前验证
 
 # 本地选题池（v0.5.1）
-node pipeline.js topic add --title "夏季养生" --source manual --raw "灵感来源" --reason "节气热点"           # 创建候选
+node pipeline.js topic add --title "夏季养生" --source manual --raw "灵感来源" --reason "节气热点"                                                          # 创建候选（基础）
+node pipeline.js topic add --source xhs-manual --title "打工人养生" --url "https://..." --raw "观察到互动量高" --reason "热度原因" --fit "账号匹配理由"        # 创建候选（手动热点导入）
+node pipeline.js topic add --source xhs-manual --title "办公室养生" --trend-score 70 --fit-score 85                                                     # 创建候选（含评分）
 node pipeline.js topic list                                                                                   # 查看候选列表
 node pipeline.js topic show <topicId>                                                                         # 查看单个候选
 node pipeline.js topic shortlist <topicId>                                                                    # 初筛通过

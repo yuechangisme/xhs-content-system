@@ -35,7 +35,8 @@
 | v0.4 | 清理 + 安全规则 + 归档一致性 | ✅ 完成 |
 | v0.5.0 | Topic Discovery Contract | ✅ 完成 |
 | v0.5.1 | Local Topic Pool（add/list/show/shortlist/approve/reject/export） | ✅ 完成 |
-| **v0.5.2** | **Seasonal Topic Generator** | **✅ Phase 1 + Phase 2 完成，待打 tag** |
+| **v0.5.2** | **Seasonal Topic Generator** | **✅ 完成** |
+| **v0.5.3** | **Manual Trend Import Enhancement** | **✅ 完成** |
 | v0.5.3 | 公开热点适配器 | ⏳ 未开始 |
 | v0.5.4 | trend-pulse 可行性验证 | ⏳ 未开始 |
 | v0.5.5 | 外部源适配器原型 | ⏳ 未开始 |
@@ -86,6 +87,9 @@
 - v0.5.2 Phase 2 防重复写入（importSeasonalCandidates，同一年/seasonalId/title 跳过）
 - 6 个 SEASONAL_* 错误码
 - 评分机制（trendScore/fitScore/overallScore）
+- v0.5.3 topic add 手动热点导入增强（--url/--platform/--observed-at/--trend-score/--fit-score）
+- v0.5.3 多平台 manual source（xhs-manual / youtube-manual / baidu-manual / weibo-manual / news-manual / other-manual）
+- v0.5.3 分数越界校验（TOPIC_SCORE_INVALID 错误码）
 
 ## 当前关键规则
 
@@ -124,37 +128,29 @@
 - 不接入小红书爬虫
 - 不调用 trend-pulse
 
-## v0.5.2 当前状态
+## v0.5.3 当前状态
 
-**当前任务：** v0.5.2 Seasonal Topic Generator **✅ 完成**
+**当前任务：** v0.5.3 Manual Trend Import Enhancement **✅ 完成**
 
-**最新正式 tag：** v0.5.1
-**v0.5.2 tag：** 尚未创建（等待 Phase 2 完成、测试通过、文档同步后再打）
+**最新正式 tag：** v0.5.2
+**v0.5.3 tag：** 尚未创建（等待确认后打 tag）
 
 ### Phase 1 已完成
-- seasonal-calendar.json（34 个节点）
-- modules/seasonal-generator.js
-- topic seasonal list（--month/--season/--type/--term）
-- topic seasonal generate --term/--month/--range/--all --dry-run
-- dry-run 不写 candidates.json
-- 无 accountProfile 时只 warning，不阻断
-- 不调用执行层模块
+- topic add 增强支持 `--url`、`--platform`、`--observed-at`、`--trend-score`、`--fit-score`
+- 6 个 new manual sources：xhs-manual / youtube-manual / baidu-manual / weibo-manual / news-manual / other-manual
+- platform 自动推断（xhs-manual → 小红书等）
+- sourceMeta 规范化（platform / platformSource / url / observedAt）
+- 分数越界校验（TOPIC_SCORE_INVALID）
+- overallScore 自动计算（trendScore×0.4 + fitScore×0.6）
+- 验证：新增 topic 可正常 list / show / shortlist / approve / export
+- 不修改 state.json、不调用执行层模块
+- 文档同步（README / CHANGELOG / CONTRACT / HANDOFF）
 
-### Phase 2 已完成
-- `--confirm-generate` 模式
-- 写入 topics/candidates.json（CANDIDATE 状态）
-- 防重复写入：同一年、同一 seasonalId、同一 title 自动跳过
-- 跳过时不阻断，返回 skipped 列表含 SEASONAL_DUPLICATE_TOPIC
-- 跨年同节点允许重新生成
-- topic-store.importSeasonalCandidates() 批量导入
-- 管线编排：pipeline.js 生成 → 写入 → 返回 added/skipped
-- dry-run 行为保持不变
-- 不生成帖子、不调用 xhs-planner、不修改 state.json
-- 完整测试验证通过
-- 文档同步（README / CHANGELOG / HANDOFF）
+### 未实现（后续按需追加）
+- topic import 批量导入（JSON / Markdown）
 
 ### 待打 tag
-- v0.5.2 tag
+- v0.5.3 tag（本轮不带 tag，仅做代码和文档更新后确认）
 
 ## 重要文件说明
 

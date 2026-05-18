@@ -1,5 +1,5 @@
 /**
- * xhs-content-system v0.5.1
+ * xhs-content-system v0.5.3
  * topic-store 模块 — TopicCandidate 候选池管理
  *
  * 职责：topic add / list / show / shortlist / approve / reject / export
@@ -16,7 +16,20 @@ const TOPICS_DIR = path.join(path.dirname(config.stateJsonPath), 'topics');
 const TOPICS_FILE = path.join(TOPICS_DIR, 'candidates.json');
 const EXPORT_DIR = path.join(TOPICS_DIR, 'exported');
 
-const VALID_SOURCES = ['manual', 'seasonal', 'weibo', 'baidu', 'trend-pulse', 'xhs-search'];
+const VALID_SOURCES = [
+  'manual', 'seasonal', 'weibo', 'baidu', 'trend-pulse', 'xhs-search',
+  'xhs-manual', 'youtube-manual', 'baidu-manual', 'weibo-manual', 'news-manual', 'other-manual',
+];
+
+/** source -> 中文平台名映射（未列出的使用 source 本身） */
+const SOURCE_PLATFORM_MAP = {
+  'xhs-manual': '小红书',
+  'youtube-manual': 'YouTube',
+  'baidu-manual': '百度',
+  'weibo-manual': '微博',
+  'news-manual': '新闻',
+  'other-manual': '其他',
+};
 
 // ─── 状态流转规则 ──────────────────────────────────────
 
@@ -110,6 +123,11 @@ function find(store, topicId) {
  * @param {string} [opts.contentAngle='']
  * @param {object} [opts.scores]
  * @param {object} [opts.sourceMeta]
+ * @param {string} [opts.url] - 原始内容 URL（v0.5.3）
+ * @param {string} [opts.platform] - 中文平台名（v0.5.3）
+ * @param {string} [opts.observedAt] - 观察到的时间（v0.5.3）
+ * @param {number} [opts.trendScore] - 时效性评分 0-100（v0.5.3）
+ * @param {number} [opts.fitScore] - 匹配度评分 0-100（v0.5.3）
  * @returns {object} { success, data?, error? }
  */
 function add(opts) {
@@ -122,21 +140,55 @@ function add(opts) {
     return { success: false, error: { code: 'TOPIC_INVALID_SOURCE', message: `无效来源: ${source}。有效值: ${VALID_SOURCES.join(', ')}` } };
   }
 
+  // 分数越界检查
+  const trendScore = opts.trendScore;
+  const fitScore = opts.fitScore;
+  if (trendScore !== undefined && (typeof trendScore !== 'number' || trendScore < 0 || trendScore > 100)) {
+    return { success: false, error: { code: 'TOPIC_SCORE_INVALID', message: `trend-score 必须在 0-100 之间，收到: ${trendScore}` } };
+  }
+  if (fitScore !== undefined && (typeof fitScore !== 'number' || fitScore < 0 || fitScore > 100)) {
+    return { success: false, error: { code: 'TOPIC_SCORE_INVALID', message: `fit-score 必须在 0-100 之间，收到: ${fitScore}` } };
+  }
+
   const store = load();
   if (!store) {
     return { success: false, error: { code: 'TOPIC_STORE_INVALID', message: 'candidates.json 解析失败' } };
   }
 
+  // 构建 sourceMeta
+  let sourceMeta = opts.sourceMeta || null;
+  const hasExtraMeta = opts.url || opts.platform || opts.observedAt;
+  if (hasExtraMeta) {
+    const deducedPlatform = opts.platform || SOURCE_PLATFORM_MAP[source] || source;
+    sourceMeta = {
+      ...(sourceMeta || {}),
+      platform: deducedPlatform,
+      platformSource: source,
+      ...(opts.url ? { url: opts.url } : {}),
+      observedAt: opts.observedAt || (new Date().toISOString()),
+    };
+  }
+
+  // 构建 scores
+  let scores = opts.scores || null;
+  if (trendScore !== undefined || fitScore !== undefined) {
+    const ts = trendScore !== undefined ? trendScore : (scores ? scores.trendScore : 0);
+    const fs = fitScore !== undefined ? fitScore : (scores ? scores.fitScore : 0);
+    const overallScore = Math.round(ts * 0.4 + fs * 0.6);
+    scores = { trendScore: ts, fitScore: fs, overallScore };
+  }
+  if (!scores) scores = defaultScores();
+
   const candidate = {
     id: generateId(source, store),
     title: opts.title.trim(),
     source,
-    sourceMeta: opts.sourceMeta || null,
+    sourceMeta,
     rawSignal: opts.rawSignal || '',
     trendReason: opts.trendReason || '',
     accountFitReason: opts.accountFitReason || '',
     contentAngle: opts.contentAngle || '',
-    scores: opts.scores || defaultScores(),
+    scores,
     status: 'CANDIDATE',
     createdAt: now(),
     approvedAt: null,

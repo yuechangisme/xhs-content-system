@@ -1,5 +1,51 @@
 # Changelog
 
+## v0.5.3 (2026-05-18)
+
+### 新增
+
+- **topic add 手动热点导入增强**：支持手动录入来自多平台的热点线索
+  - 新增 6 个 manual source：`xhs-manual`、`youtube-manual`、`baidu-manual`、`weibo-manual`、`news-manual`、`other-manual`
+  - 新增参数：`--url`（原始内容 URL）、`--platform`（中文平台名）、`--observed-at`（观察到的时间）
+  - 新增评分参数：`--trend-score`（0-100）、`--fit-score`（0-100），自动计算 `overallScore`
+  - platform 自动推断：xhs-manual → 小红书、youtube-manual → YouTube 等
+  - observedAt 未提供时自动使用当前时间
+  - sourceMeta 规范化：含 platform、platformSource、url、observedAt
+
+- **分数越界校验**：`TOPIC_SCORE_INVALID` 错误码，trend-score / fit-score 超出 0-100 时拒绝
+
+### 安全边界
+
+- 不自动抓取、不联网、不爬虫
+- 不读取 session、不读取 cookie
+- 不调用平台 API
+- 不调用 render / QA / publish / schedule
+- 不修改 state.json
+
+### 变更
+
+- `modules/topic-store.js`：VALID_SOURCES 扩展、add() 新增 url/platform/observedAt/trendScore/fitScore 参数、sourceMeta 规范化构建、分数越界校验
+- `pipeline.js`：cmdTopicAdd() 传递新参数
+- `CONTRACT.md`：新增 v0.5.3 Manual Trend Import Enhancement 章节、登录态来源暂缓规则、更新路线图
+- `README.md`：更新版本状态、已完成清单、topic add CLI 示例
+
+### 测试验证
+
+| 场景 | 结果 |
+|------|------|
+| topic add --source xhs-manual --url --trend-score 70 --fit-score 85 | 写入 CANDIDATE，sourceMeta完整，overallScore=79 ✅ |
+| topic add --source youtube-manual --url | 写入 CANDIDATE，platform自动推断为"YouTube" ✅ |
+| topic add --source news-manual | 写入 CANDIDATE ✅ |
+| topic show | sourceMeta.url / observedAt / scores 可见 ✅ |
+| topic list | 新增 topic 正常显示 ✅ |
+| trend-score > 100 | TOPIC_SCORE_INVALID 拒绝 ✅ |
+| fit-score < 0 | TOPIC_SCORE_INVALID 拒绝 ✅ |
+| pipeline status 回归 | ✅ |
+| 未修改 state.json | ✅ |
+| 未调用执行层模块 | ✅ |
+
+---
+
 ## v0.5.2 (2026-05-18)
 
 ### Phase 1 — Dry-run（已完成）

@@ -347,17 +347,25 @@ function cmdTopic() {
 function cmdTopicAdd() {
   const title = getArgValue('--title');
   if (!title) {
-    errorOut('TOPIC_TITLE_REQUIRED', '用法: pipeline topic add --title "..." [--source manual] [--raw "..."] [--reason "..."] [--angle "..."]', 'topic-store');
+    errorOut('TOPIC_TITLE_REQUIRED', '用法: pipeline topic add --title "..." [--source manual] [--url "..."] [--raw "..."] [--reason "..."] [--fit "..."] [--angle "..."] [--trend-score N] [--fit-score N] [--platform "..."] [--observed-at "..."] [--note "..."]', 'topic-store');
     return;
   }
+
+  const trendScoreStr = getArgValue('--trend-score');
+  const fitScoreStr = getArgValue('--fit-score');
 
   const result = topicStore.add({
     title,
     source: getArgValue('--source') || 'manual',
+    url: getArgValue('--url') || undefined,
+    platform: getArgValue('--platform') || undefined,
+    observedAt: getArgValue('--observed-at') || undefined,
     rawSignal: getArgValue('--raw') || '',
     trendReason: getArgValue('--reason') || '',
     accountFitReason: getArgValue('--fit') || '',
     contentAngle: getArgValue('--angle') || '',
+    trendScore: trendScoreStr !== null ? parseFloat(trendScoreStr) : undefined,
+    fitScore: fitScoreStr !== null ? parseFloat(fitScoreStr) : undefined,
     note: getArgValue('--note') || null,
   });
 
