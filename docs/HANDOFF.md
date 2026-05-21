@@ -38,10 +38,11 @@
 | **v0.5.2** | **Seasonal Topic Generator** | **✅ 完成** |
 | **v0.5.3** | **Manual Trend Import Enhancement** | **✅ 完成** |
 | **v0.5.4** | **Post Performance Analytics** | **✅ 完成** |
-| v0.5.3 | 公开热点适配器 | ⏳ 未开始 |
-| v0.5.4 | trend-pulse 可行性验证 | ⏳ 未开始 |
-| v0.5.5 | 外部源适配器原型 | ⏳ 未开始 |
-| v0.6+ | 小红书平台内采集评估 | ⏳ 暂缓 |
+| **v0.5.5** | **Render Exit Code Hotfix** | **✅ 完成** |
+| **v0.5.6** | **Publish Precheck Hotfix** | **✅ 最新** |
+| v0.6.0 | 无人值守自动发布 | ⏳ 已设计合约，暂未实现 |
+| — | 公开热点适配器 | ❌ 经评估暂缓 |
+| — | 小红书爬虫/平台内采集 | ❌ 暂缓 |
 
 ## 已完成能力清单
 
@@ -131,31 +132,43 @@
 - 不接入小红书爬虫
 - 不调用 trend-pulse
 
-## v0.5.4 当前状态
+## v0.5.6 当前状态
 
-**当前任务：** v0.5.4 Post Performance Analytics **✅ 完成**
+**最新正式 tag：** v0.5.6
+**当前阶段：** 发布前置检查已增强，完整链路已验证通过（analytics → xhs-planner → render → QA → schedule → scheduled publish）
 
-**最新正式 tag：** v0.5.3
-**v0.5.4 tag：** 尚未创建（等待完成、测试通过、文档同步后再打）
+### 全流程闭环验证完成
+- analytics 真实数据录入（6 篇帖子）
+- analytics summary 复盘 → 数据驱动选题
+- TopicCandidate → shortlist → approve → export
+- xhs-planner 策划方案
+- HTML + manifest 生成
+- render 9 张 PNG（1620×2160）
+- QA PASSED
+- schedule add → scheduled publish dry-run → scheduled real publish
+- 小红书平台确认发布成功
 
-### 已完成
-- analytics/ 目录 + analytics/.gitkeep
-- modules/analytics.js（add/list/summary）
-- pipeline.js analytics 子命令路由
-- 衍生指标自动计算（likeRate/favRate/commentRate）
-- 数值校验与异常处理（负数/空值/views=0）
-- 6 个 ANALYTICS_* 错误码
-- .gitignore 排除 analytics/post-metrics.json
-- 不修改 state.json、不修改 topics、不调用执行层模块
-- 完整测试验证通过
-- 文档同步（README / CHANGELOG / HANDOFF）
+### v0.5.6 发布前置检查增强（最新）
+- publish dry-run / scheduled dry-run 新增 5 项检查：
+  - `chrome_exists` — 验证 Chrome 文件真实存在
+  - `manifest_valid` — 验证 manifest.json 可解析
+  - `manifest_xiaohongshu_title` — 检查 outputs.xiaohongshu.copy.title
+  - `manifest_xiaohongshu_body` — 检查 outputs.xiaohongshu.copy.body
+  - `manifest_xiaohongshu_tags` — 检查 tags 非空且 ≤ 10
+- 三个入口已覆盖：pipeline.js dry-run / publisher.js 真实发布 / scheduler.js runDueConfirm
 
-### 未实现（后续按需追加）
-- CSV 导出导入（Tier 1）
-- 创作者后台自动采集（Tier 2，暂缓）
+### 当前仍为受控排期发布
+- schedule add 只是创建排期
+- schedule due 只是查询到期任务
+- schedule run-due 需要手动执行
+- 没有后台常驻 scheduler
+- 没有接入 Windows Task Scheduler
+- 到点不会自动发布
 
-### 待打 tag
-- v0.5.4 tag（功能实现完成后再打）
+### v0.6.0 无人值守发布（已设计合约，暂未实现）
+- 合约已设计但未实现代码
+- 依赖本次发布的 precheck 增强作为安全基线
+- 进入前需先确认本次 scheduled publish 稳定
 
 ## 重要文件说明
 
