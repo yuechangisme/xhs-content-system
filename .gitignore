@@ -44,6 +44,8 @@ content/投稿内容/制作中/**
 content/投稿内容/待投递/**
 content/投稿内容/已投递/**
 
+content/视觉实验/
+
 # 保留目录骨架
 !content/投稿内容/待制作/.gitkeep
 !content/投稿内容/制作中/.gitkeep

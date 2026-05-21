@@ -1,0 +1,1012 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>V6.1 Codex Full - 便利店考研搭子</title>
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body {
+    background:#1B4332;
+    font-family:-apple-system, BlinkMacSystemFont, "PingFang SC", "Microsoft YaHei", sans-serif;
+    padding:24px;
+  }
+
+  .slide {
+    width:1080px;
+    height:1440px;
+    position:relative;
+    overflow:hidden;
+    margin:0 auto 40px;
+  }
+  .slide-inner {
+    position:absolute;
+    inset:0;
+    display:flex;
+    flex-direction:column;
+  }
+
+  .bg-dark { background:#1B4332; }
+  .bg-warm { background:#FEFAE0; }
+  .text-white { color:#FFFFFF; }
+  .text-dim { color:rgba(255,255,255,0.48); }
+  .text-soft { color:rgba(255,255,255,0.76); }
+  .text-dark { color:#344552; }
+  .text-gray { color:#5F6F79; }
+  .text-green { color:#3A7D44; }
+  .text-orange { color:#F4A261; }
+  .brand { font-size:24px; font-weight:800; letter-spacing:2px; }
+
+  .topbar {
+    height:86px;
+    padding:28px 64px 0;
+    display:flex;
+    justify-content:space-between;
+    align-items:flex-start;
+    flex-shrink:0;
+  }
+  .topbar .left { font-size:26px; font-weight:800; letter-spacing:1px; }
+  .topbar .right { font-size:24px; font-weight:700; }
+  .topbar.dark .left,
+  .topbar.dark .right { color:rgba(255,255,255,0.34); }
+  .topbar.warm .left,
+  .topbar.warm .right { color:rgba(52,69,82,0.22); }
+
+  .content {
+    flex:1;
+    padding:0 64px;
+    display:flex;
+    flex-direction:column;
+  }
+  .footer {
+    height:62px;
+    display:flex;
+    align-items:flex-start;
+    justify-content:center;
+    flex-shrink:0;
+  }
+
+  .title-block { margin-top:20px; }
+  .title-row { display:flex; align-items:baseline; gap:18px; }
+  .num {
+    font-size:92px;
+    line-height:0.95;
+    font-weight:900;
+    color:#F4A261;
+  }
+  .page-title {
+    font-size:58px;
+    line-height:1.18;
+    font-weight:900;
+  }
+  .subtitle {
+    margin-top:6px;
+    font-size:36px;
+    line-height:1.35;
+    font-weight:600;
+  }
+
+  /* Cover */
+  .cover-content {
+    flex:1;
+    padding:0 76px;
+    display:flex;
+    flex-direction:column;
+    justify-content:center;
+  }
+  .cover-kicker {
+    color:rgba(255,255,255,0.52);
+    font-size:32px;
+    line-height:1.35;
+    font-weight:800;
+    letter-spacing:2px;
+    margin-bottom:30px;
+  }
+  .cover-title {
+    color:#FFFFFF;
+    font-size:128px;
+    line-height:1.12;
+    font-weight:950;
+  }
+  .cover-sub {
+    margin-top:34px;
+    color:#F4A261;
+    font-size:44px;
+    line-height:1.35;
+    font-weight:900;
+  }
+  .cover-offers {
+    margin-top:56px;
+    display:grid;
+    grid-template-columns:1fr 1fr 1fr;
+    gap:18px;
+  }
+  .cover-offer {
+    min-height:148px;
+    border-radius:28px;
+    background:rgba(255,255,255,0.10);
+    border:2px solid rgba(254,250,224,0.12);
+    padding:22px 18px 20px;
+    text-align:center;
+  }
+  .cover-offer .icon {
+    width:54px;
+    height:54px;
+    margin:0 auto 13px;
+    border-radius:18px;
+    background:#F4A261;
+    color:#1B4332;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-size:28px;
+    font-weight:950;
+  }
+  .cover-offer .name {
+    color:#FFFFFF;
+    font-size:31px;
+    line-height:1.18;
+    font-weight:950;
+  }
+  .cover-offer .hint {
+    margin-top:7px;
+    color:rgba(255,255,255,0.62);
+    font-size:21px;
+    line-height:1.25;
+    font-weight:650;
+  }
+
+  /* Overview */
+  .overview-grid {
+    margin-top:30px;
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:18px;
+  }
+  .principle-card {
+    height:262px;
+    border-radius:26px;
+    background:#FFFFFF;
+    padding:26px 28px;
+    box-shadow:0 10px 28px rgba(52,69,82,0.08);
+    display:flex;
+    flex-direction:column;
+    justify-content:space-between;
+  }
+  .principle-top {
+    display:flex;
+    align-items:center;
+    gap:14px;
+  }
+  .principle-icon {
+    width:52px;
+    height:52px;
+    border-radius:18px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-size:30px;
+    background:rgba(244,162,97,0.15);
+  }
+  .principle-title {
+    color:#3A7D44;
+    font-size:33px;
+    line-height:1.18;
+    font-weight:900;
+  }
+  .principle-main {
+    color:#344552;
+    font-size:32px;
+    line-height:1.32;
+    font-weight:750;
+  }
+  .principle-note {
+    color:#5F6F79;
+    font-size:25px;
+    line-height:1.3;
+    font-weight:600;
+  }
+  .overview-memory {
+    margin-top:26px;
+    border-radius:28px;
+    background:#3A7D44;
+    color:#FFFFFF;
+    padding:28px 32px 30px;
+    box-shadow:0 14px 32px rgba(58,125,68,0.18);
+  }
+  .memory-head {
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:24px;
+    padding-bottom:18px;
+    border-bottom:2px solid rgba(254,250,224,0.18);
+  }
+  .memory-label {
+    color:#F4A261;
+    font-size:25px;
+    line-height:1.2;
+    font-weight:900;
+  }
+  .memory-rule {
+    font-size:37px;
+    line-height:1.18;
+    font-weight:950;
+  }
+  .memory-lines {
+    margin-top:20px;
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:14px 18px;
+  }
+  .memory-line {
+    border-radius:18px;
+    background:rgba(254,250,224,0.11);
+    padding:14px 16px;
+    font-size:25px;
+    line-height:1.25;
+    font-weight:750;
+  }
+
+  /* Tutorial template */
+  .tutorial-main {
+    margin-top:30px;
+    width:100%;
+    height:466px;
+    border-radius:28px;
+    background:#FEFAE0;
+    padding:32px 34px;
+    box-shadow:0 16px 42px rgba(0,0,0,0.14);
+  }
+  .food-grid {
+    height:100%;
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    grid-template-rows:1fr 1fr;
+    gap:20px;
+  }
+  .food-item {
+    border-radius:20px;
+    padding:22px 22px;
+    display:flex;
+    align-items:center;
+    gap:18px;
+    min-width:0;
+  }
+  .food-a { background:rgba(244,162,97,0.13); }
+  .food-b { background:rgba(58,125,68,0.08); }
+  .food-c { background:rgba(52,69,82,0.05); }
+  .food-d { background:rgba(244,162,97,0.08); }
+  .food-icon {
+    font-size:54px;
+    line-height:1;
+    width:62px;
+    flex-shrink:0;
+    text-align:center;
+  }
+  .food-name {
+    font-size:39px;
+    line-height:1.12;
+    font-weight:950;
+    color:#344552;
+  }
+  .food-desc {
+    margin-top:6px;
+    font-size:25px;
+    line-height:1.28;
+    color:#5F6F79;
+    font-weight:600;
+  }
+  .food-tag {
+    display:inline-block;
+    margin-top:8px;
+    padding:3px 14px;
+    border-radius:999px;
+    background:rgba(58,125,68,0.10);
+    color:#3A7D44;
+    font-size:20px;
+    line-height:1.25;
+    font-weight:750;
+  }
+  .note-cards {
+    margin-top:24px;
+    display:grid;
+    gap:12px;
+  }
+  .note-card {
+    min-height:112px;
+    border-radius:20px;
+    padding:20px 26px;
+    display:flex;
+    align-items:center;
+    gap:24px;
+    background:rgba(254,250,224,0.08);
+    box-shadow:inset 0 0 0 1px rgba(254,250,224,0.06);
+  }
+  .note-label {
+    min-width:150px;
+    color:#F4A261;
+    font-size:32px;
+    line-height:1.2;
+    font-weight:900;
+  }
+  .note-value {
+    color:rgba(255,255,255,0.90);
+    font-size:33px;
+    line-height:1.34;
+    font-weight:680;
+  }
+  .bottom-tip {
+    margin-top:16px;
+    padding-top:14px;
+    border-top:1px solid rgba(255,255,255,0.10);
+    font-size:29px;
+    line-height:1.35;
+    color:rgba(255,255,255,0.48);
+    font-weight:600;
+    font-style:italic;
+  }
+
+  /* Compare page */
+  .compare-card {
+    margin-top:30px;
+    height:408px;
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:20px;
+  }
+  .compare-col {
+    border-radius:28px;
+    padding:30px 30px;
+    display:flex;
+    flex-direction:column;
+    justify-content:space-between;
+  }
+  .avoid-col { background:rgba(231,111,81,0.10); }
+  .good-col { background:#FFFFFF; box-shadow:0 10px 28px rgba(52,69,82,0.08); }
+  .compare-head {
+    font-size:35px;
+    line-height:1.2;
+    font-weight:950;
+  }
+  .avoid-col .compare-head { color:#E76F51; }
+  .good-col .compare-head { color:#3A7D44; }
+  .compare-list {
+    display:grid;
+    gap:14px;
+  }
+  .compare-line {
+    font-size:31px;
+    line-height:1.28;
+    font-weight:760;
+    color:#344552;
+  }
+  .compare-line .muted {
+    color:#5F6F79;
+    font-size:25px;
+    font-weight:600;
+  }
+  .method-card {
+    margin-top:24px;
+    border-radius:28px;
+    background:#FFFFFF;
+    padding:30px 34px;
+    box-shadow:0 10px 28px rgba(52,69,82,0.08);
+  }
+  .method-title {
+    color:#F4A261;
+    font-size:36px;
+    line-height:1.2;
+    font-weight:950;
+    margin-bottom:18px;
+  }
+  .method-steps {
+    display:grid;
+    gap:16px;
+  }
+  .method-step {
+    display:flex;
+    gap:18px;
+    align-items:flex-start;
+  }
+  .method-num {
+    width:42px;
+    height:42px;
+    border-radius:50%;
+    background:rgba(244,162,97,0.16);
+    color:#F4A261;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-size:25px;
+    font-weight:950;
+    flex-shrink:0;
+  }
+  .method-text {
+    color:#344552;
+    font-size:34px;
+    line-height:1.32;
+    font-weight:700;
+  }
+  .lunch-tip {
+    margin-top:20px;
+    padding-top:16px;
+    border-top:1px solid rgba(52,69,82,0.10);
+    color:#5F6F79;
+    font-size:29px;
+    line-height:1.35;
+    font-weight:600;
+    font-style:italic;
+  }
+
+  /* Menu page */
+  .menu-stack {
+    margin-top:28px;
+    display:grid;
+    gap:18px;
+  }
+  .menu-card {
+    height:244px;
+    border-radius:26px;
+    background:#FFFFFF;
+    padding:27px 34px;
+    box-shadow:0 10px 28px rgba(52,69,82,0.08);
+    display:flex;
+    flex-direction:column;
+    justify-content:center;
+    border:1px solid rgba(52,69,82,0.04);
+  }
+  .menu-head { display:flex; align-items:center; gap:18px; margin-bottom:14px; }
+  .badge {
+    width:58px;
+    height:48px;
+    border-radius:18px;
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    font-size:30px;
+    line-height:1;
+    font-weight:950;
+  }
+  .badge.a { background:rgba(244,162,97,0.18); color:#F4A261; }
+  .badge.b { background:rgba(58,125,68,0.13); color:#3A7D44; }
+  .badge.c { background:rgba(231,111,81,0.10); color:#E76F51; }
+  .menu-name {
+    color:#344552;
+    font-size:38px;
+    line-height:1.2;
+    font-weight:950;
+  }
+  .menu-foods {
+    color:#344552;
+    font-size:40px;
+    line-height:1.28;
+    font-weight:850;
+  }
+  .menu-fit {
+    margin-top:10px;
+    color:#5F6F79;
+    font-size:28px;
+    line-height:1.3;
+    font-weight:650;
+  }
+  .cta-card {
+    margin-top:22px;
+    border-radius:24px;
+    background:#3A7D44;
+    min-height:138px;
+    padding:24px 34px;
+    display:flex;
+    flex-direction:column;
+    justify-content:center;
+    align-items:center;
+    text-align:center;
+    box-shadow:0 12px 28px rgba(58,125,68,0.18);
+  }
+  .cta-card .big {
+    color:#FFFFFF;
+    font-size:38px;
+    line-height:1.25;
+    font-weight:950;
+  }
+  .cta-card .small {
+    margin-top:8px;
+    color:rgba(255,255,255,0.84);
+    font-size:30px;
+    line-height:1.3;
+    font-weight:680;
+  }
+
+  /* Summary */
+  .summary-title { margin-top:28px; }
+  .summary-card {
+    margin-top:28px;
+    height:596px;
+    border-radius:28px;
+    background:#FFFFFF;
+    overflow:hidden;
+    box-shadow:0 18px 44px rgba(0,0,0,0.17);
+  }
+  .summary-row {
+    min-height:149px;
+    padding:0 34px;
+    display:flex;
+    align-items:center;
+    gap:22px;
+    border-bottom:1px solid rgba(52,69,82,0.08);
+  }
+  .summary-row:last-child { border-bottom:none; }
+  .check {
+    width:44px;
+    height:44px;
+    border-radius:50%;
+    background:#3A7D44;
+    color:#FFFFFF;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-size:30px;
+    font-weight:950;
+    flex-shrink:0;
+  }
+  .sum-label {
+    min-width:104px;
+    color:#3A7D44;
+    font-size:34px;
+    line-height:1.2;
+    font-weight:950;
+  }
+  .sum-value {
+    color:#344552;
+    font-size:34px;
+    line-height:1.36;
+    font-weight:700;
+  }
+  .save-area {
+    margin-top:22px;
+    padding:18px 0 0;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+  }
+  .save-btn {
+    min-width:520px;
+    border-radius:999px;
+    background:#FFFFFF;
+    color:#3A7D44;
+    padding:22px 54px;
+    text-align:center;
+    font-size:38px;
+    line-height:1.2;
+    font-weight:950;
+    box-shadow:0 12px 34px rgba(0,0,0,0.18);
+  }
+  .save-sub {
+    margin-top:10px;
+    color:rgba(255,255,255,0.62);
+    font-size:28px;
+    line-height:1.3;
+    font-weight:650;
+  }
+</style>
+</head>
+<body>
+
+<!-- P1 封面 -->
+<div class="slide bg-dark">
+  <div class="slide-inner">
+    <div class="cover-content">
+      <div class="cover-kicker">懒人养生手册</div>
+      <div class="cover-title">便利店<br>考研搭子</div>
+      <div class="cover-sub">5 分钟搭配，不饿不困版</div>
+      <div class="cover-offers">
+        <div class="cover-offer">
+          <div class="icon">5</div>
+          <div class="name">省时间</div>
+          <div class="hint">进店不用绕</div>
+        </div>
+        <div class="cover-offer">
+          <div class="icon">✓</div>
+          <div class="name">少纠结</div>
+          <div class="hint">先看组合</div>
+        </div>
+        <div class="cover-offer">
+          <div class="icon">买</div>
+          <div class="name">照着买</div>
+          <div class="hint">截图就能用</div>
+        </div>
+      </div>
+    </div>
+    <div class="footer">
+      <div class="brand text-white" style="opacity:0.55;">懒人养生手册</div>
+    </div>
+  </div>
+</div>
+
+<!-- P2 总览页 -->
+<div class="slide bg-warm">
+  <div class="slide-inner">
+    <div class="topbar warm">
+      <div class="left">懒人养生手册 · 便利店考研搭子</div>
+      <div class="right">02 / 07</div>
+    </div>
+    <div class="content">
+      <section class="title-block">
+        <div class="page-title text-dark">便利店这样买</div>
+        <div class="subtitle text-gray">别再乱搭，先记住 4 个原则</div>
+      </section>
+
+      <section class="overview-grid">
+        <div class="principle-card">
+          <div class="principle-top">
+            <div class="principle-icon">①</div>
+            <div class="principle-title">早餐先补蛋白</div>
+          </div>
+          <div class="principle-main">饭团/三明治 + 牛奶/豆浆</div>
+          <div class="principle-note">不要空腹冲咖啡，上午更稳一点</div>
+        </div>
+        <div class="principle-card">
+          <div class="principle-top">
+            <div class="principle-icon">②</div>
+            <div class="principle-title">午餐先看蛋白</div>
+          </div>
+          <div class="principle-main">鸡/鱼/蛋 + 蔬菜 + 主食</div>
+          <div class="principle-note">少碰炒面泡面，下午不容易困</div>
+        </div>
+        <div class="principle-card">
+          <div class="principle-top">
+            <div class="principle-icon">③</div>
+            <div class="principle-title">加餐提前备好</div>
+          </div>
+          <div class="principle-main">酸奶 / 香蕉 / 坚果</div>
+          <div class="principle-note">别等饿到发抖，临时乱买</div>
+        </div>
+        <div class="principle-card">
+          <div class="principle-top">
+            <div class="principle-icon">④</div>
+            <div class="principle-title" style="color:#E76F51;">少踩雷</div>
+          </div>
+          <div class="principle-main">甜饮 · 炸物 · 薯片 · 泡面</div>
+          <div class="principle-note">不是不能吃，别天天当正餐</div>
+        </div>
+      </section>
+
+      <section class="overview-memory">
+        <div class="memory-head">
+          <div>
+            <div class="memory-label">不会选时先看这 4 条</div>
+            <div class="memory-rule">主食 + 蛋白 + 少甜饮</div>
+          </div>
+          <div class="memory-label">截图速记</div>
+        </div>
+        <div class="memory-lines">
+          <div class="memory-line">早上：先拿饭团/三明治</div>
+          <div class="memory-line">中午：先看鸡鱼蛋和菜</div>
+          <div class="memory-line">加餐：一次只选一个</div>
+          <div class="memory-line">实在懒：翻到第 6 页</div>
+        </div>
+      </section>
+    </div>
+    <div class="footer">
+      <div class="brand text-dark" style="opacity:0.22;">懒人养生手册</div>
+    </div>
+  </div>
+</div>
+
+<!-- P3 早餐页 -->
+<div class="slide bg-dark">
+  <div class="slide-inner">
+    <div class="topbar dark">
+      <div class="left">懒人养生手册 · 便利店考研搭子</div>
+      <div class="right">03 / 07</div>
+    </div>
+    <div class="content">
+      <section class="title-block">
+        <div class="title-row">
+          <div class="num">①</div>
+          <div class="page-title text-white">早餐搭配</div>
+        </div>
+        <div class="subtitle text-dim">吃饱了才有力气刷题</div>
+      </section>
+
+      <section class="tutorial-main">
+        <div class="food-grid">
+          <div class="food-item food-a">
+            <div class="food-icon">🍙</div>
+            <div>
+              <div class="food-name">饭团</div>
+              <div class="food-desc">优先金枪鱼/三文鱼</div>
+              <span class="food-tag">抗饿</span>
+            </div>
+          </div>
+          <div class="food-item food-b">
+            <div class="food-icon">🥪</div>
+            <div>
+              <div class="food-name">三明治</div>
+              <div class="food-desc">选鸡蛋/全麦</div>
+              <span class="food-tag">方便</span>
+            </div>
+          </div>
+          <div class="food-item food-c">
+            <div class="food-icon">🥛</div>
+            <div>
+              <div class="food-name">牛奶/豆浆</div>
+              <div class="food-desc">无糖或低糖</div>
+              <span class="food-tag">补蛋白</span>
+            </div>
+          </div>
+          <div class="food-item food-d">
+            <div class="food-icon">🥚</div>
+            <div>
+              <div class="food-name">茶叶蛋</div>
+              <div class="food-desc">没时间补一个</div>
+              <span class="food-tag">应急</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="note-cards">
+        <div class="note-card">
+          <div class="note-label">怎么选</div>
+          <div class="note-value">饭团/三明治 + 牛奶/豆浆，保证一份蛋白质</div>
+        </div>
+        <div class="note-card">
+          <div class="note-label">少吃什么</div>
+          <div class="note-value">甜面包、含糖果汁、奶茶，吃完很快又饿</div>
+        </div>
+        <div class="note-card">
+          <div class="note-label">懒人做法</div>
+          <div class="note-value">前一晚买好放冰箱，早上直接带走</div>
+        </div>
+      </section>
+
+      <div class="bottom-tip">早餐别太甜，不然上午容易犯困</div>
+    </div>
+    <div class="footer">
+      <div class="brand text-white" style="opacity:0.24;">懒人养生手册</div>
+    </div>
+  </div>
+</div>
+
+<!-- P4 午餐避坑页 -->
+<div class="slide bg-warm">
+  <div class="slide-inner">
+    <div class="topbar warm">
+      <div class="left">懒人养生手册 · 便利店考研搭子</div>
+      <div class="right">04 / 07</div>
+    </div>
+    <div class="content">
+      <section class="title-block">
+        <div class="title-row">
+          <div class="num">②</div>
+          <div class="page-title text-dark">午餐避坑</div>
+        </div>
+        <div class="subtitle text-gray">下午还要学，别吃完就困</div>
+      </section>
+
+      <section class="compare-card">
+        <div class="compare-col avoid-col">
+          <div class="compare-head">少吃什么</div>
+          <div class="compare-list">
+            <div class="compare-line">泡面 <span class="muted">油盐偏重</span></div>
+            <div class="compare-line">炒面 <span class="muted">碳水扎堆</span></div>
+            <div class="compare-line">炸物 <span class="muted">容易腻</span></div>
+            <div class="compare-line">甜饮 <span class="muted">喝完更想睡</span></div>
+          </div>
+        </div>
+        <div class="compare-col good-col">
+          <div class="compare-head">可以换成</div>
+          <div class="compare-list">
+            <div class="compare-line">鸡肉便当 <span class="muted">有菜有肉</span></div>
+            <div class="compare-line">关东煮 <span class="muted">负担轻点</span></div>
+            <div class="compare-line">饭团 <span class="muted">份量刚好</span></div>
+            <div class="compare-line">无糖茶/水 <span class="muted">不加糖</span></div>
+          </div>
+        </div>
+      </section>
+
+      <section class="method-card">
+        <div class="method-title">懒人顺序</div>
+        <div class="method-steps">
+          <div class="method-step">
+            <div class="method-num">1</div>
+            <div class="method-text">先看蛋白质：鸡、鱼、蛋优先</div>
+          </div>
+          <div class="method-step">
+            <div class="method-num">2</div>
+            <div class="method-text">再看有没有蔬菜，最后补主食</div>
+          </div>
+          <div class="method-step">
+            <div class="method-num">3</div>
+            <div class="method-text">实在没得选，就便当 + 无糖茶</div>
+          </div>
+        </div>
+        <div class="lunch-tip">午餐选得稳，下午复习不容易犯困</div>
+      </section>
+    </div>
+    <div class="footer">
+      <div class="brand text-dark" style="opacity:0.22;">懒人养生手册</div>
+    </div>
+  </div>
+</div>
+
+<!-- P5 加餐页 -->
+<div class="slide bg-dark">
+  <div class="slide-inner">
+    <div class="topbar dark">
+      <div class="left">懒人养生手册 · 便利店考研搭子</div>
+      <div class="right">05 / 07</div>
+    </div>
+    <div class="content">
+      <section class="title-block">
+        <div class="title-row">
+          <div class="num">③</div>
+          <div class="page-title text-white">加餐别乱买</div>
+        </div>
+        <div class="subtitle text-dim">饿了补一点，不要硬撑到崩</div>
+      </section>
+
+      <section class="tutorial-main">
+        <div class="food-grid">
+          <div class="food-item food-a">
+            <div class="food-icon">🥛</div>
+            <div>
+              <div class="food-name">酸奶</div>
+              <div class="food-desc">优先无糖/低糖</div>
+              <span class="food-tag">省事</span>
+            </div>
+          </div>
+          <div class="food-item food-b">
+            <div class="food-icon">🍌</div>
+            <div>
+              <div class="food-name">香蕉</div>
+              <div class="food-desc">饿了先垫一下</div>
+              <span class="food-tag">方便</span>
+            </div>
+          </div>
+          <div class="food-item food-c">
+            <div class="food-icon">🥚</div>
+            <div>
+              <div class="food-name">鸡蛋</div>
+              <div class="food-desc">没吃饱时补一个</div>
+              <span class="food-tag">顶饿</span>
+            </div>
+          </div>
+          <div class="food-item food-d">
+            <div class="food-icon">🥜</div>
+            <div>
+              <div class="food-name">坚果</div>
+              <div class="food-desc">小包就够，别一大袋</div>
+              <span class="food-tag">随身</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="note-cards">
+        <div class="note-card">
+          <div class="note-label">怎么选</div>
+          <div class="note-value">酸奶/香蕉/鸡蛋/坚果，一次选一个就够</div>
+        </div>
+        <div class="note-card">
+          <div class="note-label">少吃什么</div>
+          <div class="note-value">薯片、甜饮、巧克力别当加餐主力</div>
+        </div>
+        <div class="note-card">
+          <div class="note-label">懒人做法</div>
+          <div class="note-value">包里常备小坚果，晚自习前先垫一下</div>
+        </div>
+      </section>
+
+      <div class="bottom-tip">加餐是防饿，不是再吃一顿正餐</div>
+    </div>
+    <div class="footer">
+      <div class="brand text-white" style="opacity:0.24;">懒人养生手册</div>
+    </div>
+  </div>
+</div>
+
+<!-- P6 直接照着买页 -->
+<div class="slide bg-warm">
+  <div class="slide-inner">
+    <div class="topbar warm">
+      <div class="left">懒人养生手册 · 便利店考研搭子</div>
+      <div class="right">06 / 07</div>
+    </div>
+    <div class="content">
+      <section class="title-block">
+        <div class="title-row">
+          <div class="num">④</div>
+          <div class="page-title text-dark">直接照着买</div>
+        </div>
+        <div class="subtitle text-gray">3 套懒人组合，不知道买什么就翻这页</div>
+      </section>
+
+      <section class="menu-stack">
+        <div class="menu-card">
+          <div class="menu-head">
+            <span class="badge a">A</span>
+            <span class="menu-name">赶时间早餐</span>
+          </div>
+          <div class="menu-foods">饭团 + 茶叶蛋 + 无糖豆浆</div>
+          <div class="menu-fit">适合：赶早八 / 图书馆抢座</div>
+        </div>
+        <div class="menu-card">
+          <div class="menu-head">
+            <span class="badge b">B</span>
+            <span class="menu-name">下午不困午餐</span>
+          </div>
+          <div class="menu-foods">鸡肉便当 + 关东煮 + 无糖茶</div>
+          <div class="menu-fit">适合：午休短 / 下午还有课</div>
+        </div>
+        <div class="menu-card">
+          <div class="menu-head">
+            <span class="badge c">C</span>
+            <span class="menu-name">晚自习加餐</span>
+          </div>
+          <div class="menu-foods">酸奶 + 香蕉 / 鸡蛋 + 坚果</div>
+          <div class="menu-fit">适合：晚上还要学 / 怕饿到睡不着</div>
+        </div>
+      </section>
+
+      <section class="cta-card">
+        <div class="big">不知道买什么？</div>
+        <div class="small">直接照这 3 套选，不纠结</div>
+      </section>
+    </div>
+    <div class="footer">
+      <div class="brand text-dark" style="opacity:0.22;">懒人养生手册</div>
+    </div>
+  </div>
+</div>
+
+<!-- P7 总结页 -->
+<div class="slide bg-dark">
+  <div class="slide-inner">
+    <div class="topbar dark">
+      <div class="left">懒人养生手册 · 便利店考研搭子</div>
+      <div class="right">07 / 07</div>
+    </div>
+    <div class="content">
+      <section class="summary-title">
+        <div class="page-title text-white">懒人总结</div>
+        <div class="subtitle text-dim">便利店考研搭子，照着买就行</div>
+      </section>
+
+      <section class="summary-card">
+        <div class="summary-row">
+          <div class="check">✓</div>
+          <div class="sum-label">早餐</div>
+          <div class="sum-value">饭团/三明治 + 牛奶/豆浆 + 鸡蛋</div>
+        </div>
+        <div class="summary-row">
+          <div class="check">✓</div>
+          <div class="sum-label">午餐</div>
+          <div class="sum-value">便当/关东煮/饭团，少碰炸物甜饮</div>
+        </div>
+        <div class="summary-row">
+          <div class="check">✓</div>
+          <div class="sum-label">加餐</div>
+          <div class="sum-value">酸奶/鸡蛋/香蕉/坚果，一次选一个</div>
+        </div>
+        <div class="summary-row">
+          <div class="check">✓</div>
+          <div class="sum-label">少踩雷</div>
+          <div class="sum-value">甜饮、薯片、泡面、炸物别天天吃</div>
+        </div>
+      </section>
+
+      <section class="save-area">
+        <div class="save-btn">存一下，下次照着买</div>
+        <div class="save-sub">不用每次站在货架前纠结</div>
+      </section>
+    </div>
+    <div class="footer">
+      <div class="brand text-white" style="opacity:0.24;">懒人养生手册</div>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>
