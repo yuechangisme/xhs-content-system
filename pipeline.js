@@ -667,14 +667,30 @@ function cmdPublishDryRun(taskDir, fullPath, post) {
   checks.push({ name: 'manifest_exists', pass: fs.existsSync(manifestPath) });
 
   if (fs.existsSync(manifestPath)) {
+    let manifest = null;
     try {
-      JSON.parse(fs.readFileSync(manifestPath, 'utf-8'));
+      manifest = JSON.parse(fs.readFileSync(manifestPath, 'utf-8'));
       checks.push({ name: 'manifest_valid', pass: true });
     } catch (e) {
       checks.push({ name: 'manifest_valid', pass: false });
     }
+
+    // xiaohongshu 配置检查
+    if (manifest) {
+      const xhs = manifest.outputs?.xiaohongshu?.copy;
+      checks.push({ name: 'manifest_xiaohongshu_title', pass: !!(xhs?.title && xhs.title.trim()) });
+      checks.push({ name: 'manifest_xiaohongshu_body', pass: !!(xhs?.body && xhs.body.trim()) });
+      checks.push({ name: 'manifest_xiaohongshu_tags', pass: Array.isArray(xhs?.tags) && xhs.tags.length > 0 && xhs.tags.length <= 10 });
+    } else {
+      checks.push({ name: 'manifest_xiaohongshu_title', pass: false });
+      checks.push({ name: 'manifest_xiaohongshu_body', pass: false });
+      checks.push({ name: 'manifest_xiaohongshu_tags', pass: false });
+    }
   } else {
     checks.push({ name: 'manifest_valid', pass: false });
+    checks.push({ name: 'manifest_xiaohongshu_title', pass: false });
+    checks.push({ name: 'manifest_xiaohongshu_body', pass: false });
+    checks.push({ name: 'manifest_xiaohongshu_tags', pass: false });
   }
 
   const outputExists = fs.existsSync(outputDir);
@@ -683,6 +699,7 @@ function cmdPublishDryRun(taskDir, fullPath, post) {
 
   checks.push({ name: 'qa_passed', pass: post ? post.status === 'QA_PASSED' : false });
   checks.push({ name: 'chrome_configured', pass: !!config.chromePath });
+  checks.push({ name: 'chrome_exists', pass: config.chromePath ? fs.existsSync(config.chromePath) : false });
   checks.push({ name: 'cookie_configured', pass: !!config.cookiePath });
 
   const allPassed = checks.every(c => c.pass);

@@ -24,14 +24,33 @@ async function publish(taskDir) {
   const fullPath = path.join(config.contentDir, taskDir);
 
   // ─── 前置条件验证 ─────────────────────────────────
+  const manifestPath = path.join(fullPath, 'manifest.json');
+  const manifestExists = fs.existsSync(manifestPath);
+  let manifest = null;
+  if (manifestExists) {
+    try { manifest = JSON.parse(fs.readFileSync(manifestPath, 'utf-8')); } catch (_) {}
+  }
+
   const prechecks = [
     { name: 'dir_exists', pass: fs.existsSync(fullPath), msg: `目录不存在: ${fullPath}` },
     { name: 'chrome_path', pass: !!config.chromePath, msg: 'config.chromePath 未配置' },
+    { name: 'chrome_exists', pass: config.chromePath ? fs.existsSync(config.chromePath) : false, msg: `Chrome 不存在: ${config.chromePath}` },
     { name: 'cookie_path', pass: !!config.cookiePath, msg: 'config.cookiePath 未配置' },
     { name: 'cookie_file', pass: config.cookiePath ? fs.existsSync(config.cookiePath) : false, msg: `cookie 文件不存在: ${config.cookiePath}` },
-    { name: 'manifest_exists', pass: fs.existsSync(path.join(fullPath, 'manifest.json')), msg: 'manifest.json 不存在' },
+    { name: 'manifest_exists', pass: manifestExists, msg: 'manifest.json 不存在' },
+    { name: 'manifest_valid', pass: !!manifest, msg: 'manifest.json 解析失败' },
     { name: 'output_exists', pass: fs.existsSync(path.join(fullPath, 'output')), msg: 'output/ 不存在' },
   ];
+
+  // xiaohongshu 配置检查（仅 manifest 存在且有效时才检查）
+  if (manifest) {
+    const xhs = manifest.outputs?.xiaohongshu?.copy;
+    prechecks.push(
+      { name: 'manifest_xiaohongshu_title', pass: !!(xhs?.title && xhs.title.trim()), msg: 'manifest.outputs.xiaohongshu.copy.title 缺失或为空' },
+      { name: 'manifest_xiaohongshu_body', pass: !!(xhs?.body && xhs.body.trim()), msg: 'manifest.outputs.xiaohongshu.copy.body 缺失或为空' },
+      { name: 'manifest_xiaohongshu_tags', pass: Array.isArray(xhs?.tags) && xhs.tags.length > 0 && xhs.tags.length <= 10, msg: 'manifest.outputs.xiaohongshu.copy.tags 必须为非空数组且 ≤ 10 个' },
+    );
+  }
 
   for (const c of prechecks) {
     if (!c.pass) {

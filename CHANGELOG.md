@@ -1,5 +1,29 @@
 # Changelog
 
+## v0.5.6 (2026-05-21)
+
+### 修复
+
+- **增强 publish / scheduled publish 前置检查**：修复本次发布中暴露的 dry-run 检查遗漏。
+  - 新增 `chrome_exists` — 验证 `config.chromePath` 文件真实存在（此前仅检查字符串非空）
+  - 新增 `manifest_xiaohongshu_title` — 验证 manifest 中 outputs.xiaohongshu.copy.title 存在且非空
+  - 新增 `manifest_xiaohongshu_body` — 验证 manifest 中 outputs.xiaohongshu.copy.body 存在且非空
+  - 新增 `manifest_xiaohongshu_tags` — 验证 tags 为非空数组且 ≤ 10 个
+  - 新增 `manifest_valid` — 验证 manifest.json 可正常解析
+- 以上检查覆盖三个入口：
+  - `publish <taskDir> --dry-run`（pipeline.js）
+  - `publish <taskDir> --confirm-publish`（publisher.js）
+  - `schedule run-due --confirm-scheduled-publish`（scheduler.js，含 dry-run 和真实发布）
+- 检查失败时：不启动 Chrome、不调用 publish-xhs.js、不写 state、不增加 attempts、不移动文件夹
+
+### 变更
+
+- `modules/publisher.js`：前置检查增加 chrome_exists、manifest_valid 及 3 项 xiaohongshu 配置检查
+- `modules/scheduler.js`：runDueConfirm 前置检查同新增 5 项
+- `pipeline.js`：cmdPublishDryRun 同新增 5 项
+
+---
+
 ## v0.5.5 (2026-05-18)
 
 ### 修复
