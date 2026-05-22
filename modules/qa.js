@@ -13,19 +13,13 @@
 const fs = require('fs');
 const path = require('path');
 const config = require('../config');
+const qaProfiles = require('./qa-profiles');
 
 // 常见 emoji 图标列表（用于 warning 检测）
 const EMOJI_PATTERN = /[\u{1F300}-\u{1F9FF}]/u;
 
 // 重点关注的食物/物品类 emoji
 const FOOD_EMOJI = /🥣|🍵|🥦|🍎|🍳|🥚|🥗|🫘|🥛|🧊|🫐|🥑|🧄|🧅|🍋|🍊|🥕|🌽|🥜|🌰|🍄|🫒|🥝|🍑|🍒|🍓|🍇|🍉|🍌|🍍|🥭|🍈|🫐|🥥|🥨|🧀|🥩|🥓|🧇|🥞|🧆|🥙|🥪|🌮|🌯|🫓|🥗|🫕|🍲|🍛|🍣|🍤|🥟|🍜|🍝|🍠|🍢|🍡|🍧|🍨|🍦|🥧|🧁|🍰|🎂|🍮|🍭|🍬|🍫|🍿|🍩|🍪|🌰|🥜|🍯|🧉|🧃|🥤|🍶|🍺|🍻|🥂|🍷|🥃|🍸|🍹|🍾|🧊|🥄|🍴|🥢|🍽️|🔪|🫙|🫖|🧂|🫗|🧊|🥛|☕|🧋/u;
-
-// 正文字号检测的目标 class 名
-const BODY_TEXT_CLASSES = [
-  'food-desc', 'check-text', 'cta-opt',
-  'comfort-body', 'body', 'pain-text',
-  'habit-scene', 'intro-text', 'summary-text',
-];
 
 /**
  * 对指定帖子执行全部静态 QA 检查
@@ -56,6 +50,7 @@ function run(taskDir) {
 
   // ─── 3. manifest.json 格式 + 内容 ────────────────────
   let manifest;
+  let qaProfile = qaProfiles.resolveProfile(null);
   try {
     manifest = JSON.parse(fs.readFileSync(manifestPath, 'utf-8'));
     checks.push({ name: 'manifest_valid', pass: true, detail: null });
@@ -65,6 +60,15 @@ function run(taskDir) {
   }
 
   if (manifest) {
+    qaProfile = qaProfiles.resolveProfile(manifest.styleVersion);
+    if (!qaProfile) {
+      checks.push({ name: 'qa_profile', pass: false, detail: `unsupported styleVersion: ${manifest.styleVersion}` });
+      allPassed = false;
+      qaProfile = qaProfiles.resolveProfile(null);
+    } else {
+      checks.push({ name: 'qa_profile', pass: true, detail: manifest.styleVersion || 'legacy' });
+    }
+
     const title = manifest?.outputs?.xiaohongshu?.copy?.title || '';
     const tags = manifest?.outputs?.xiaohongshu?.copy?.tags || [];
 
@@ -126,7 +130,7 @@ function run(taskDir) {
       }
 
       // 5c. 正文字号检测
-      const fontSizeIssues = detectFontSize(htmlContent);
+      const fontSizeIssues = detectFontSize(htmlContent, qaProfile);
       if (fontSizeIssues.length > 0) {
         checks.push({
           name: 'font_size',
@@ -134,6 +138,12 @@ function run(taskDir) {
           detail: `${htmlFile}: ${fontSizeIssues.join('; ')}`,
         });
         allPassed = false;
+      } else {
+        checks.push({
+          name: 'font_size',
+          pass: true,
+          detail: qaProfile.name,
+        });
       }
 
       // 5d. emoji 图标检测（warning，不阻断）
@@ -154,7 +164,7 @@ function run(taskDir) {
   // ─── 填充未执行的 check 项（标记为跳过） ─────────────
   const allCheckNames = [
     'directory_exists', 'manifest_exists', 'manifest_valid',
-    'title_length', 'tags_count', 'output_exists',
+    'qa_profile', 'title_length', 'tags_count', 'output_exists',
     'html_exists', 'border_radius', 'box_shadow', 'font_size',
   ];
 
@@ -191,57 +201,30 @@ function detectInSlideCSS(html, property) {
  * 检测正文字号是否低于阈值
  * MVP 版：正则扫描 CSS 中的 font-size 定义
  */
-function detectFontSize(html) {
+function detectFontSize(html, profile) {
   const issues = [];
 
-  // 检查特定 body text class 的 font-size
-  for (const cls of BODY_TEXT_CLASSES) {
-    const regex = new RegExp(`\\.${cls}[^}]*font-size\\s*:\\s*(\\d+)\\s*px`, 'i');
-    const match = html.match(regex);
-    if (match) {
-      const size = parseInt(match[1], 10);
-      if (size < config.qa.fontSizeMin) {
-        issues.push(`.${cls} font-size: ${size}px (< ${config.qa.fontSizeMin}px)`);
-      }
-    }
-  }
+  for (const rule of profile.typography) {
+    const sizeText = findFontSizeForSelector(html, rule.selector);
+    if (!sizeText) continue;
 
-  // 额外扫描所有 font-size 小于阈值的通用规则（忽略无关类）
-  const allFontSizes = html.match(/font-size\s*:\s*(\d+)\s*px/gi);
-  if (allFontSizes) {
-    for (const decl of allFontSizes) {
-      const match = decl.match(/(\d+)/);
-      if (match) {
-        const size = parseInt(match[1], 10);
-        // 忽略页码、品牌标、小标注等允许小字的元素
-        if (size >= 1 && size < config.qa.fontSizeMin && size >= 20) {
-          // 20-45px 范围内检查是否属于正文类
-          const contextLine = findContextForSize(html, decl);
-          if (contextLine && BODY_TEXT_CLASSES.some(cls => contextLine.includes(cls))) {
-            const msg = `${size}px (${contextLine.trim().substring(0, 60)})`;
-            if (!issues.find(i => i.includes(msg))) {
-              // 不重复报告，交由专门的 class 检测处理
-            }
-          }
-        }
-      }
+    const size = parseInt(sizeText, 10);
+    if (size < rule.min) {
+      issues.push(`${rule.selector} font-size: ${size}px (< ${rule.min}px, ${rule.tier})`);
     }
   }
 
   return issues;
 }
 
-/**
- * 找到 font-size 声明附近的上下文行
- */
-function findContextForSize(html, decl) {
-  const lines = html.split('\n');
-  for (let i = 0; i < lines.length; i++) {
-    if (lines[i].includes(decl)) {
-      return lines[i];
-    }
-  }
-  return null;
+function findFontSizeForSelector(html, selector) {
+  const selectorPattern = selector.trim()
+    .split(/\s+/)
+    .map(part => part.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'))
+    .join('\\s+');
+  const regex = new RegExp(`${selectorPattern}\\s*\\{[^}]*font-size\\s*:\\s*(\\d+)\\s*px`, 'i');
+  const match = html.match(regex);
+  return match ? match[1] : null;
 }
 
 /**

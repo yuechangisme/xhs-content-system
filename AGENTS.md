@@ -57,6 +57,8 @@ npx http-server -p 8080 content/ --cors
 - 文案规则：朋友式、懒人式、可执行，不写医学功效承诺，不写产品种草话术。
 - 禁止项：不重新发明版式，不使用 `flex-1` / `spacer` / `space-evenly` 硬撑页面，不做低对比 CTA，不做文档式长段说明。
 
+采用 V6.1 风格的新轮播正式内容，`manifest.json` 必须声明 `styleVersion: "lazy-health-v6.1"`，让 QA 使用 V6.1 分级字号规则。
+
 如确需偏离 `docs/STYLE_GUIDE.md`，必须先说明原因并获得用户确认。
 
 ## 内容策划流程

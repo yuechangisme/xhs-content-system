@@ -1,5 +1,18 @@
 # Changelog
 
+## v0.5.7 (2026-05-22)
+
+### 新增
+
+- 新增 `manifest.styleVersion` 支持，缺省时使用 legacy QA profile。
+- 新增 `lazy-health-v6.1` QA profile，按 V6.1 风格规范执行分级字号检查。
+- `.food-desc` 等次级说明不再按 legacy 正文 46px 阈值阻断；`.note-value`、`.method-text`、`.sum-value` 等主要正文仍保持阻断检查。
+
+### 兼容
+
+- legacy 内容继续沿用旧 QA 逻辑。
+- `styleVersion` 只影响 QA，不影响 render / publish / schedule。
+
 ## v0.5.6 (2026-05-21)
 
 ### 修复

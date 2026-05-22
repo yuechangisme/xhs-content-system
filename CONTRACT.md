@@ -927,3 +927,42 @@ TopicCandidate[]（全部 CANDIDATE）→ 写入 candidates.json
 | `SEASONAL_DUPLICATE_TOPIC` | 待生成的 topic 与现有候选中重复 |
 | `SEASONAL_CALENDAR_INVALID` | seasonal-calendar.json 解析失败 |
 | `SEASONAL_ACCOUNT_PROFILE_MISSING` | 账号定位 profile 未配置 |
+## v0.5.7 Draft - V6.1 QA Profile Contract
+
+### manifest.styleVersion
+
+正式内容可以在 `manifest.json` 顶层声明视觉风格版本：
+
+```json
+{
+  "styleVersion": "lazy-health-v6.1"
+}
+```
+
+兼容规则：
+
+- 缺少 `styleVersion` 的旧内容默认使用 `legacy` QA profile。
+- `legacy` 内容继续沿用旧 QA 逻辑，不强制适配 V6.1。
+- `lazy-health-v6.1` 内容使用 V6.1 分级字号规则。
+- `styleVersion` 只影响 QA profile 选择，不影响 render / publish / schedule。
+
+### QA profile 选择逻辑
+
+```text
+manifest.styleVersion 缺失                -> legacy
+manifest.styleVersion = lazy-health-v6.1  -> lazy-health-v6.1
+manifest.styleVersion 未知                -> QA_FAILED
+```
+
+### V6.1 字号阻断规则
+
+| 层级 | 选择器 | Blocking |
+|------|--------|----------|
+| 主标题 / 封面标题 | `.cover-title` | `< 90px` |
+| 页面标题 | `.page-title` | `< 52px` |
+| 副标题 / CTA 主句 | `.subtitle`, `.cta-card .big`, `.save-btn` | `< 34px` |
+| 主要正文 | `.note-value`, `.method-text`, `.sum-value`, `.menu-foods`, `.principle-main` | `< 32px` |
+| 次级说明 | `.food-desc`, `.principle-note`, `.menu-fit`, `.bottom-tip`, `.memory-line`, `.compare-line .muted` | `< 24px` |
+| 标签 / 弱品牌 / 页码 | `.food-tag`, `.brand`, `.topbar .left`, `.topbar .right`, `.cover-offer .hint` | `< 18px` |
+
+Emoji icon 检查继续作为 warning，不作为阻断项。

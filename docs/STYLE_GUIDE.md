@@ -140,6 +140,27 @@ V6.1 的 7 张 PNG 参考图也归档在：
 - 不允许使用大面积无意义空白硬撑页面。
 - 不允许用 `flex-1`、`spacer`、`space-evenly` 等方式把内容机械拉满。
 
+### V6.1 QA 字号分级
+
+正式内容如果采用 V6.1 风格，`manifest.json` 应声明：
+
+```json
+{
+  "styleVersion": "lazy-health-v6.1"
+}
+```
+
+QA 会按以下层级检查字号，缺少 `styleVersion` 的旧内容继续使用 legacy 规则：
+
+- 主标题 / 封面标题：`.cover-title`，blocking `< 90px`
+- 页面标题：`.page-title`，blocking `< 52px`
+- 副标题 / CTA 主句：`.subtitle`、`.cta-card .big`、`.save-btn`，blocking `< 34px`
+- 主要正文：`.note-value`、`.method-text`、`.sum-value`、`.menu-foods`、`.principle-main`，blocking `< 32px`
+- 次级说明：`.food-desc`、`.principle-note`、`.menu-fit`、`.bottom-tip`、`.memory-line`、`.compare-line .muted`，blocking `< 24px`
+- 标签 / 弱品牌 / 页码：`.food-tag`、`.brand`、`.topbar .left`、`.topbar .right`、`.cover-offer .hint`，blocking `< 18px`
+
+`.food-desc` 属于次级说明，不按 legacy 正文 46px 阈值阻断；`.note-value`、`.method-text`、`.sum-value` 等主要正文如果过小仍应阻断。
+
 ## 5. 文案规则
 
 - 每页一句明确主题。

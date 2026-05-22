@@ -9,8 +9,8 @@
 ## 版本状态
 
 ```
-当前版本: v0.5.4
-当前阶段: manual post analytics metrics（发布后数据手动录入）
+当前版本: v0.5.7
+当前阶段: V6.1 style-aware QA profile（V6.1 风格感知 QA）
 ```
 
 ### 已完成
@@ -49,6 +49,7 @@
 - **analytics summary**：汇总统计（平均互动率、Top 3 排名）
 - **衍生指标自动计算**：likeRate、favRate、commentRate
 - **6 个 ANALYTICS_* 错误码**
+- **V6.1 视觉风格 QA（v0.5.7）**：`manifest.styleVersion` 支持，`lazy-health-v6.1` 分级字号 QA，legacy 兼容
 
 ### 未完成
 
@@ -114,6 +115,18 @@ pipeline.js publish <taskDir> --confirm-publish
 pipeline.js publish <taskDir>
     ↓ 安全保护：提示必须 --confirm-publish
 ```
+
+### V6.1 视觉风格 QA
+
+采用 V6.1 视觉风格的新轮播内容，需要在 `manifest.json` 顶层声明：
+
+```json
+{
+  "styleVersion": "lazy-health-v6.1"
+}
+```
+
+QA 会根据 `styleVersion` 选择 profile：缺省使用 `legacy`；`lazy-health-v6.1` 使用 V6.1 分级字号 QA。
 
 ---
 

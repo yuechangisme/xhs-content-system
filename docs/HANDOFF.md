@@ -218,3 +218,9 @@
 
 确认理解后，再等待我下达任务。
 ```
+## V6.1 QA profile handoff note
+
+- V6.1 已从视觉参考进入流程规则落地阶段。
+- 新风格正式内容应在 `manifest.json` 顶层声明 `styleVersion: "lazy-health-v6.1"`。
+- QA 根据 `styleVersion` 选择 profile：缺省为 legacy，`lazy-health-v6.1` 使用分级字号规则。
+- 当前阶段只落地 QA profile，不建立完整模板系统，不改变 render / publish / schedule。
