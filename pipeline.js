@@ -15,9 +15,11 @@
  *   node pipeline.js topic add/list/show/shortlist/approve/reject/export
  *   node pipeline.js topic seasonal list/generate
  *   node pipeline.js analytics add/list/summary
+ *   node pipeline.js promote <taskDir> --confirm-promote      # 待制作 → 待投递
  *   node pipeline.js publish <taskDir> --dry-run              # 仅验证，不调用
  *   node pipeline.js publish <taskDir>                        # 提示需要 --confirm-publish
  *   node pipeline.js publish <taskDir> --confirm-publish      # 真实发布
+ *   node pipeline.js reconcile-move <taskDir> --confirm-reconcile # 仅修复发布后归档
  *   node pipeline.js publish <taskDir> --mock-success         # 模拟发布成功（仅测试用）
  *   node pipeline.js publish <taskDir> --mock-fail            # 模拟发布失败（仅测试用）
  */
@@ -33,6 +35,7 @@ const scheduler = require('./modules/scheduler');
 const topicStore = require('./modules/topic-store');
 const seasonalGen = require('./modules/seasonal-generator');
 const analytics = require('./modules/analytics');
+const archiveWorkflow = require('./modules/archive-workflow');
 
 // ─── 命令路由 ────────────────────────────────────────────
 
@@ -79,6 +82,14 @@ switch (command) {
   // ─── publish ───────────────────────────────────────────
   case 'publish':
     cmdPublish();
+    break;
+
+  case 'promote':
+    cmdPromote();
+    break;
+
+  case 'reconcile-move':
+    cmdReconcileMove();
     break;
 
   // ─── topic ────────────────────────────────────────────
@@ -617,6 +628,11 @@ function cmdPublish() {
     return;
   }
 
+  if ((isDryRun || isConfirm) && !archiveWorkflow.isWaitingPublishTask(taskDir)) {
+    errorOut('PUBLISH_DIR_NOT_READY', '真实发布前请先 promote 到 投稿内容/待投递/', 'publisher', { taskDir });
+    return;
+  }
+
   // 验证任务目录存在
   const fullPath = path.join(config.contentDir, taskDir);
   if (!fs.existsSync(fullPath)) {
@@ -654,6 +670,38 @@ function cmdPublish() {
 
   // ─── 模式 D: confirm 模式 ─────────────────────────
   return cmdPublishConfirm(taskDir, fullPath, s, post);
+}
+
+function cmdPromote() {
+  const taskDir = args[0];
+  const confirmed = args.includes('--confirm-promote');
+  if (!taskDir) {
+    errorOut('PROMOTE_MISSING_ARGS', '用法: pipeline promote <taskDir> [--confirm-promote]', 'promote');
+    return;
+  }
+
+  const result = archiveWorkflow.promote(taskDir, confirmed);
+  if (!result.success) {
+    errorOut(result.error.code, result.error.message, 'promote', result.error.detail);
+    return;
+  }
+  output({ success: true, command, data: result.data, ...(result.warning ? { warning: result.warning } : {}) });
+}
+
+function cmdReconcileMove() {
+  const taskDir = args[0];
+  const confirmed = args.includes('--confirm-reconcile');
+  if (!taskDir) {
+    errorOut('RECONCILE_MISSING_ARGS', '用法: pipeline reconcile-move <taskDir> [--confirm-reconcile]', 'publisher');
+    return;
+  }
+
+  const result = archiveWorkflow.reconcileMove(taskDir, confirmed);
+  if (!result.success) {
+    errorOut(result.error.code, result.error.message, 'publisher', result.error.detail);
+    return;
+  }
+  output({ success: true, command, data: result.data });
 }
 
 // ─── 模式 A: dry-run ──────────────────────────────────
@@ -843,14 +891,21 @@ async function cmdPublishConfirm(taskDir, fullPath, s, post) {
     const parentDir = path.dirname(fullPath);
     const folderName = path.basename(fullPath);
     const targetDir = path.join(config.contentDir, '投稿内容', '已投递', folderName);
+    let moveWarning = null;
 
     try {
       // 如果目标已存在先删除
       if (fs.existsSync(targetDir)) fs.rmSync(targetDir, { recursive: true, force: true });
       fs.renameSync(fullPath, targetDir);
     } catch (moveErr) {
+      moveWarning = {
+        code: 'PUBLISH_MOVE_FAILED',
+        message: '平台发布已成功，但本地归档移动失败。不要重复 publish，请执行 reconcile-move 修复归档。',
+        detail: { source: fullPath, target: targetDir, error: moveErr.message, reconcileCommand: `node pipeline.js reconcile-move "${taskDir}" --confirm-reconcile` },
+      };
       logger.error('PUBLISH_MOVE_FAILED', 'publisher',
-        `发布成功但文件夹移动失败: ${moveErr.message}`, { source: fullPath, target: targetDir });
+        `发布成功但文件夹移动失败: ${moveErr.message}。平台发布已成功，不要重复 publish，请执行 reconcile-move。`,
+        moveWarning.detail);
     }
 
     logger.info('PUBLISH_SUCCEEDED', 'publisher', `发布成功: ${taskDir}`,
@@ -864,8 +919,10 @@ async function cmdPublishConfirm(taskDir, fullPath, s, post) {
         taskDir,
         publishedAt: result.data.publishedAt,
         imageCount: result.data.imageCount,
-        note: '发布成功',
+        note: moveWarning ? '发布成功，但本地归档移动失败；不要重复 publish，请执行 reconcile-move' : '发布成功',
+        ...(moveWarning ? { reconciliation: moveWarning.detail } : {}),
       },
+      ...(moveWarning ? { warnings: [moveWarning] } : {}),
     });
 
   } else {

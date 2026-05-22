@@ -14,6 +14,7 @@ const config = require('../config');
 const state = require('./state');
 const logger = require('./logger');
 const publisher = require('./publisher');
+const archiveWorkflow = require('./archive-workflow');
 
 const ACTIVE_STATUSES = ['CONFIRMED', 'RUNNING'];
 
@@ -26,6 +27,10 @@ const ACTIVE_STATUSES = ['CONFIRMED', 'RUNNING'];
  * @returns {object} { success, data?, error? }
  */
 function add(taskDir, timeStr, confirmed) {
+  if (!archiveWorkflow.isWaitingPublishTask(taskDir)) {
+    return { success: false, error: { code: 'PUBLISH_DIR_NOT_READY', message: '真实发布前请先 promote 到 投稿内容/待投递/' } };
+  }
+
   // 1. 解析时间
   const parsed = parseTime(timeStr);
   if (!parsed) {
@@ -309,6 +314,10 @@ function runDue(mockType) {
  * @returns {Promise<object>}
  */
 async function runDueConfirm(taskDir, dryRun) {
+  if (!archiveWorkflow.isWaitingPublishTask(taskDir)) {
+    return { success: false, error: { code: 'PUBLISH_DIR_NOT_READY', message: '真实发布前请先 promote 到 投稿内容/待投递/' } };
+  }
+
   const dueResult = due();
   const dueTasks = dueResult.data.due;
   const dueIds = dueTasks.map(t => t.id);

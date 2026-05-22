@@ -966,3 +966,74 @@ manifest.styleVersion 未知                -> QA_FAILED
 | 标签 / 弱品牌 / 页码 | `.food-tag`, `.brand`, `.topbar .left`, `.topbar .right`, `.cover-offer .hint` | `< 18px` |
 
 Emoji icon 检查继续作为 warning，不作为阻断项。
+
+---
+
+## v0.5.8 - Promote and Publish Reconciliation Contract
+
+### 发布前目录边界
+
+真实发布前，帖子必须位于：
+
+```text
+投稿内容/待投递/<taskDir>
+```
+
+`投稿内容/待制作/` 只用于制作和 QA。QA 通过后，必须通过 promote 进入待投递，不允许直接 publish。
+
+### promote
+
+```bash
+node pipeline.js promote "投稿内容/待制作/<dir>"
+node pipeline.js promote "投稿内容/待制作/<dir>" --confirm-promote
+```
+
+- 无 `--confirm-promote`：只做 dry-run，返回 `PROMOTE_CONFIRM_REQUIRED`，不移动目录，不写 state。
+- 带 `--confirm-promote`：检查通过后移动到 `投稿内容/待投递/<dir>`，并同步 state 中 post 的 `id` / `title`。
+- promote 要求：源目录存在、目标目录不存在、HTML / manifest / 文案 md / drafts / output / PNG 存在，且 state 中 `post.status = QA_PASSED`、`publish.status = PENDING`。
+
+### publish 目录限制
+
+`publish --dry-run`、`publish --confirm-publish`、`schedule add`、scheduled publish 均要求 taskDir 位于 `投稿内容/待投递/`。否则返回：
+
+```text
+PUBLISH_DIR_NOT_READY
+```
+
+message:
+
+```text
+真实发布前请先 promote 到 投稿内容/待投递/
+```
+
+### reconcile-move
+
+```bash
+node pipeline.js reconcile-move "投稿内容/待投递/<dir>"
+node pipeline.js reconcile-move "投稿内容/待投递/<dir>" --confirm-reconcile
+```
+
+用于处理“平台发布成功，但本地归档移动失败”的场景。
+
+- 无 `--confirm-reconcile`：只做 dry-run，返回 `RECONCILE_CONFIRM_REQUIRED`，不移动目录，不写 state。
+- 带 `--confirm-reconcile`：检查通过后移动到 `投稿内容/已投递/<dir>`。
+- 只允许 state 已经是 `post.status = PUBLISHED` 且 `publish.status = PUBLISHED` 且 `publishedAt` 存在。
+- 不重新 publish，不改回 QA_PASSED，不清空 publishedAt。
+
+### 新增错误码
+
+```text
+PROMOTE_CONFIRM_REQUIRED
+PROMOTE_SOURCE_INVALID
+PROMOTE_TARGET_EXISTS
+PROMOTE_QA_NOT_PASSED
+PROMOTE_PUBLISH_NOT_PENDING
+PROMOTE_MOVE_FAILED
+PUBLISH_DIR_NOT_READY
+RECONCILE_CONFIRM_REQUIRED
+RECONCILE_SOURCE_INVALID
+RECONCILE_TARGET_EXISTS
+RECONCILE_NOT_PUBLISHED
+RECONCILE_CONTENT_INCOMPLETE
+RECONCILE_MOVE_FAILED
+```

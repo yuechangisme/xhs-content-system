@@ -9,8 +9,8 @@
 ## 版本状态
 
 ```
-当前版本: v0.5.7
-当前阶段: V6.1 style-aware QA profile（V6.1 风格感知 QA）
+当前版本: v0.5.8
+当前阶段: promote + publish reconciliation（发布前提交流程与归档修复）
 ```
 
 ### 已完成
@@ -50,6 +50,7 @@
 - **衍生指标自动计算**：likeRate、favRate、commentRate
 - **6 个 ANALYTICS_* 错误码**
 - **V6.1 视觉风格 QA（v0.5.7）**：`manifest.styleVersion` 支持，`lazy-health-v6.1` 分级字号 QA，legacy 兼容
+- **promote + publish reconciliation（v0.5.8）**：正式发布前必须从 `待制作` promote 到 `待投递`；发布成功但归档移动失败时使用 `reconcile-move` 修复本地归档，避免重复发布
 
 ### 未完成
 
@@ -106,6 +107,8 @@ render.js
     ↓ 导出 PNG 1620×2160
 pipeline.js qa <taskDir>
     ↓ QA 检测 → QA_PASSED / QA_FAILED
+pipeline.js promote <taskDir> --confirm-promote
+    ↓ 待制作 → 待投递（正式进入发布队列）
 pipeline.js schedule
     ↓ 推荐发布时间
 pipeline.js publish <taskDir> --dry-run
@@ -163,7 +166,11 @@ node pipeline.js status "投稿内容/待投递/2026-05-17-内脏脂肪食物"
 cd content && node render.js "投稿内容/待投递/你的任务目录/xxx.html" "文件前缀"
 
 # QA 检测
-node pipeline.js qa "投稿内容/待投递/你的任务目录"
+node pipeline.js qa "投稿内容/待制作/你的任务目录"
+
+# 发布前 promote（待制作 → 待投递）
+node pipeline.js promote "投稿内容/待制作/你的任务目录"              # dry-run，不移动、不写 state
+node pipeline.js promote "投稿内容/待制作/你的任务目录" --confirm-promote
 
 # 查看推荐发布时间
 node pipeline.js schedule
@@ -214,6 +221,9 @@ node pipeline.js publish "投稿内容/待投递/你的任务目录"
 
 # 真实发布（需显式确认，否则拒绝执行）
 node pipeline.js publish "投稿内容/待投递/你的任务目录" --confirm-publish
+
+# 发布成功但本地归档移动失败时，仅修复归档（不重新发布）
+node pipeline.js reconcile-move "投稿内容/待投递/你的任务目录" --confirm-reconcile
 
 # 模拟发布成功（仅测试用，不调真实脚本）
 node pipeline.js publish "投稿内容/待投递/mock-发布测试" --mock-success

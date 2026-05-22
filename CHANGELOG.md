@@ -1,5 +1,18 @@
 # Changelog
 
+## v0.5.8 (2026-05-22)
+
+### 新增
+
+- 新增 `promote` 流程：正式发布前将帖子从 `投稿内容/待制作/` 移动到 `投稿内容/待投递/`，并同步 state 中的 task id。
+- 新增 `reconcile-move`：当平台发布成功但本地归档移动失败时，只修复 `待投递` 到 `已投递` 的物理归档，不重新发布。
+
+### 变更
+
+- `publish --dry-run` / `publish --confirm-publish` 仅允许 `投稿内容/待投递/` 目录。
+- scheduled publish 同样要求 taskDir 位于 `投稿内容/待投递/`。
+- publish 成功但移动失败时，输出更明确的 reconciliation 提示，避免重复 publish。
+
 ## v0.5.7 (2026-05-22)
 
 ### 新增

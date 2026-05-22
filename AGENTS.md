@@ -61,6 +61,14 @@ npx http-server -p 8080 content/ --cors
 
 如确需偏离 `docs/STYLE_GUIDE.md`，必须先说明原因并获得用户确认。
 
+## 发布前目录边界
+
+真实发布前，正式内容必须先通过 `node pipeline.js promote "投稿内容/待制作/<dir>" --confirm-promote` 从 `待制作` 进入 `待投递`。
+
+- `publish --dry-run` / `publish --confirm-publish` 只允许 `投稿内容/待投递/`。
+- 如果平台发布成功但本地移动到 `已投递` 失败，不要重复 publish；应使用 `reconcile-move` 只修复本地归档。
+- 不得手动修改 state.json 来伪造 promote、publish 或 reconciliation 状态。
+
 ## 内容策划流程
 
 使用 `xhs-planner` skill 按 9 步流程走：

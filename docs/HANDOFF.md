@@ -224,3 +224,9 @@
 - 新风格正式内容应在 `manifest.json` 顶层声明 `styleVersion: "lazy-health-v6.1"`。
 - QA 根据 `styleVersion` 选择 profile：缺省为 legacy，`lazy-health-v6.1` 使用分级字号规则。
 - 当前阶段只落地 QA profile，不建立完整模板系统，不改变 render / publish / schedule。
+
+## v0.5.8 publish boundary note
+
+- QA 通过后，帖子必须通过 `promote --confirm-promote` 从 `投稿内容/待制作/` 进入 `投稿内容/待投递/`。
+- `publish --dry-run`、`publish --confirm-publish`、`schedule add` 和 scheduled publish 只接受 `投稿内容/待投递/`。
+- 如果平台发布成功但移动到 `已投递` 失败，状态保持 PUBLISHED，不要重复 publish；使用 `reconcile-move --confirm-reconcile` 只修复本地归档。
