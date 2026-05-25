@@ -112,7 +112,7 @@ async function publish(taskDir) {
  */
 function runPublishScript(scriptPath, taskDir) {
   return new Promise((resolve) => {
-    const proc = spawn('node', [scriptPath, taskDir], {
+    const proc = spawn(process.execPath, [scriptPath, taskDir], {
       cwd: path.dirname(scriptPath),
       timeout: PUBLISH_SCRIPT_TIMEOUT,
       stdio: ['pipe', 'pipe', 'pipe'],

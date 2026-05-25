@@ -1,5 +1,11 @@
 # Changelog
 
+## v0.5.9 draft (unreleased)
+
+### 修复
+
+- publish 子进程改为使用当前 pipeline 的 Node 可执行文件（`process.execPath`），避免 Windows 环境中 PATH 内 `node.exe` 被系统拒绝导致 `spawn EPERM`。
+
 ## v0.5.8 (2026-05-22)
 
 ### 新增
