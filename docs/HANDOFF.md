@@ -8,8 +8,9 @@
 → xhs-planner 策划
 → HTML / PNG 渲染
 → QA 检测
-→ 排期
-→ 小红书发布
+→ promote / 发布前 dry-run
+→ 用户人工在小红书发布
+→ 本地归档辅助
 ```
 
 ## 当前系统分层
@@ -230,3 +231,11 @@
 - QA 通过后，帖子必须通过 `promote --confirm-promote` 从 `投稿内容/待制作/` 进入 `投稿内容/待投递/`。
 - `publish --dry-run`、`publish --confirm-publish`、`schedule add` 和 scheduled publish 只接受 `投稿内容/待投递/`。
 - 如果平台发布成功但移动到 `已投递` 失败，状态保持 PUBLISHED，不要重复 publish；使用 `reconcile-move --confirm-reconcile` 只修复本地归档。
+
+## v0.5.9 manual-only publishing note
+
+- 为降低平台自动化检测风险，真实小红书自动发布入口已停用。
+- `publish --confirm-publish` 返回 `PUBLISH_DISABLED`，不得启动 Chrome、读取 cookie、调用 `publish-xhs.js`、写 PUBLISHED 或移动目录。
+- `schedule run-due --confirm-scheduled-publish --task "<taskDir>"` 的真执行分支同样返回 `PUBLISH_DISABLED`。
+- `publish --dry-run` 和 scheduled publish `--dry-run --task` 继续保留，只用于人工发布前检查。
+- 平台发布由用户人工完成。用户人工确认发布成功后，才能按单独指令处理本地归档或状态 reconciliation。

@@ -1,5 +1,60 @@
 # xhs-content-system Contract
 
+## v0.5.9 Draft - Manual-only Publishing Contract
+
+### 目标
+
+为降低平台自动化检测风险，从 v0.5.9 起，系统取消所有真实小红书自动发布执行入口。系统继续负责内容生产、render、QA、promote、发布前 dry-run 检查和人工发布后的本地归档辅助；平台发布动作由用户人工完成。
+
+### 允许保留的流程
+
+```text
+draft/content generation
+  -> render
+  -> QA
+  -> promote 到 投稿内容/待投递/
+  -> publish --dry-run 发布前检查
+  -> 用户人工在小红书发布
+  -> 按需做本地归档 / reconciliation
+```
+
+### 禁止的自动发布入口
+
+| 入口 | 行为 |
+|------|------|
+| `node pipeline.js publish <taskDir> --confirm-publish` | 返回 `PUBLISH_DISABLED`，不得启动 Chrome、读取 cookie、调用 publish-xhs.js、写 PUBLISHED 或移动目录 |
+| `node pipeline.js publish <taskDir>` | 返回 `PUBLISH_DISABLED`，提示仅使用 `--dry-run` 做人工发布前检查 |
+| `node pipeline.js schedule run-due --confirm-scheduled-publish --task "<taskDir>"` | 返回 `PUBLISH_DISABLED`，不得执行 scheduled publish |
+| `modules/publisher.publish(taskDir)` | 返回 `PUBLISH_DISABLED`，作为绕过 CLI 的兜底保护 |
+
+### 仍然允许的检查入口
+
+| 入口 | 行为 |
+|------|------|
+| `node pipeline.js publish <taskDir> --dry-run` | 检查目录、manifest、图片、QA、配置完整性，不发布、不写 state |
+| `node pipeline.js schedule run-due --confirm-scheduled-publish --dry-run --task "<taskDir>"` | 检查 scheduled publish 前置条件，不发布、不写 PUBLISHED |
+| `node pipeline.js schedule` / `schedule add/list/status/cancel/due` | 仅做节奏建议和排期管理，不触发平台自动发布 |
+
+### 错误码
+
+```text
+PUBLISH_DISABLED
+```
+
+message:
+
+```text
+自动发布流程已停用：请只使用 dry-run 做发布前检查，平台发布改为人工完成。
+```
+
+### 状态约束
+
+- `PUBLISH_DISABLED` 不得修改 `state.json`。
+- `PUBLISH_DISABLED` 不得增加 publish attempts。
+- `PUBLISH_DISABLED` 不得写 `PUBLISHING`、`PUBLISHED`、`publishedAt`。
+- `PUBLISH_DISABLED` 不得移动 `投稿内容/待投递/` 到 `投稿内容/已投递/`。
+- 人工发布成功后的状态/归档处理必须由用户单独确认，不得自动推断。
+
 ## v0.3.0 — Schedule Queue Contract
 
 ### 状态字段设计
@@ -1003,7 +1058,7 @@ PUBLISH_DIR_NOT_READY
 message:
 
 ```text
-真实发布前请先 promote 到 投稿内容/待投递/
+人工发布前检查请先 promote 到 投稿内容/待投递/
 ```
 
 ### reconcile-move

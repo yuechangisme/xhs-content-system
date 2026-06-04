@@ -1,6 +1,6 @@
 /**
  * xhs-content-system v0.2
- * publisher 模块 — 真实发布接入
+ * publisher 模块 — 自动发布已停用
  *
  * 职责：验证前置条件 → 调用 publish-xhs.js → 捕获结果 → 更新状态
  * 不包含：调度逻辑、定时器、多账号
@@ -21,6 +21,15 @@ const SUCCESS_MARKER = '✅ 已点击发布笔记';
  * @returns {Promise<object>} { success, data?, error? }
  */
 async function publish(taskDir) {
+  return {
+    success: false,
+    error: {
+      code: 'PUBLISH_DISABLED',
+      message: '自动发布流程已停用：不再调用 publish-xhs.js，请使用 dry-run 检查后人工发布。',
+      detail: { taskDir },
+    },
+  };
+
   const fullPath = path.join(config.contentDir, taskDir);
 
   // ─── 前置条件验证 ─────────────────────────────────

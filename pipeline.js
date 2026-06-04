@@ -17,8 +17,8 @@
  *   node pipeline.js analytics add/list/summary
  *   node pipeline.js promote <taskDir> --confirm-promote      # 待制作 → 待投递
  *   node pipeline.js publish <taskDir> --dry-run              # 仅验证，不调用
- *   node pipeline.js publish <taskDir>                        # 提示需要 --confirm-publish
- *   node pipeline.js publish <taskDir> --confirm-publish      # 真实发布
+ *   node pipeline.js publish <taskDir>                        # 自动发布已停用
+ *   node pipeline.js publish <taskDir> --confirm-publish      # 自动发布已停用
  *   node pipeline.js reconcile-move <taskDir> --confirm-reconcile # 仅修复发布后归档
  *   node pipeline.js publish <taskDir> --mock-success         # 模拟发布成功（仅测试用）
  *   node pipeline.js publish <taskDir> --mock-fail            # 模拟发布失败（仅测试用）
@@ -315,14 +315,11 @@ function cmdScheduleRunDue() {
     return;
   }
 
-  // 模式 4: confirm + task（无 dry-run）→ 真实 scheduled publish
-  scheduler.runDueConfirm(taskDir, false).then(result => {
-    if (!result.success) {
-      errorOut(result.error.code || 'SCHEDULE_PUBLISH_FAILED', result.error.message, 'scheduler', result.error.detail);
-      return;
-    }
-    output({ success: true, command, data: result.data });
-  });
+  // 模式 4: confirm + task（无 dry-run）→ 自动发布已停用
+  errorOut('PUBLISH_DISABLED',
+    '自动发布流程已停用：请只使用 --dry-run 做发布前检查，平台发布改为人工完成。',
+    'scheduler',
+    { taskDir });
 }
 
 // 从 args 中获取指定 flag 的值
@@ -628,8 +625,16 @@ function cmdPublish() {
     return;
   }
 
+  if (isConfirm) {
+    errorOut('PUBLISH_DISABLED',
+      '自动发布流程已停用：请只使用 publish --dry-run 做发布前检查，平台发布改为人工完成。',
+      'publisher',
+      { taskDir });
+    return;
+  }
+
   if ((isDryRun || isConfirm) && !archiveWorkflow.isWaitingPublishTask(taskDir)) {
-    errorOut('PUBLISH_DIR_NOT_READY', '真实发布前请先 promote 到 投稿内容/待投递/', 'publisher', { taskDir });
+    errorOut('PUBLISH_DIR_NOT_READY', '人工发布前检查请先 promote 到 投稿内容/待投递/', 'publisher', { taskDir });
     return;
   }
 
@@ -663,8 +668,8 @@ function cmdPublish() {
 
   // ─── 模式 C: 默认模式（无 flag）───────────────────
   if (!isConfirm) {
-    errorOut('PUBLISH_CONFIRM_REQUIRED',
-      '安全保护：真实发布需要 --confirm-publish 确认。使用 --dry-run 进行前置检查', 'publisher');
+    errorOut('PUBLISH_DISABLED',
+      '自动发布流程已停用：请使用 --dry-run 进行前置检查，之后由人工在小红书发布。', 'publisher');
     return;
   }
 
@@ -762,7 +767,7 @@ function cmdPublishDryRun(taskDir, fullPath, post) {
       checks,
       imageCount: pngCount,
       note: allPassed
-        ? '[DRY-RUN] 前置条件通过，可执行 --confirm-publish 真实发布'
+        ? '[DRY-RUN] 前置条件通过，可进入人工发布确认；系统自动发布已停用'
         : '[DRY-RUN] 前置条件未全部满足，请修复后重试',
     },
   });

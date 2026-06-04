@@ -2,6 +2,13 @@
 
 ## v0.5.9 draft (unreleased)
 
+### 变更
+
+- 停用所有真实自动发布入口：`publish --confirm-publish` 直接返回 `PUBLISH_DISABLED`，不启动 Chrome、不读取 cookie、不调用 `publish-xhs.js`、不写 `PUBLISHING/PUBLISHED`、不移动目录。
+- 停用 scheduled publish 真执行分支：`schedule run-due --confirm-scheduled-publish --task "<taskDir>"` 返回 `PUBLISH_DISABLED`；仅保留 `--dry-run --task` 做人工发布前检查。
+- `modules/publisher.js` 增加兜底保护：即使被直接调用，也返回 `PUBLISH_DISABLED`，避免绕过 CLI 触发平台自动化。
+- `publish --dry-run` 保留，用作人工发布前检查；QA、render、promote、schedule 建议、analytics、topic 流程不变。
+
 ### 修复
 
 - publish 子进程改为使用当前 pipeline 的 Node 可执行文件（`process.execPath`），避免 Windows 环境中 PATH 内 `node.exe` 被系统拒绝导致 `spawn EPERM`。

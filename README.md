@@ -2,15 +2,15 @@
 
 **AI-powered RedNote / Xiaohongshu content workflow system.**
 
-一个 AI 驱动的小红书内容自动化执行系统，用于承接 xhs-planner skill 生成的内容，并完成状态管理、HTML 渲染、QA 检测、发布节奏管理和后续自动发布流程。
+一个 AI 驱动的小红书内容自动化执行系统，用于承接 xhs-planner skill 生成的内容，并完成状态管理、HTML 渲染、QA 检测、发布前检查、发布节奏管理和人工发布后的归档辅助。
 
 ---
 
 ## 版本状态
 
 ```
-当前版本: v0.5.8
-当前阶段: promote + publish reconciliation（发布前提交流程与归档修复）
+当前版本: v0.5.9 draft
+当前阶段: manual-only publishing（自动发布停用，仅保留发布前检查）
 ```
 
 ### 已完成
@@ -22,11 +22,11 @@
 - `modules/qa.js` 静态 P0 检测（字号 / border-radius / manifest / emoji）
 - `render.js` 1080×1440 → 1620×2160 稳定导出
 - `publish --dry-run` 安全占位（仅验证前置条件，不污染 state）
-- `publish --confirm-publish` 真实发布（调用 publish-xhs.js，写 PUBLISHED，移动文件夹）
+- `publish --confirm-publish` 已停用：系统不再执行小红书自动发布
 - `publish --mock-success` / `--mock-fail` 模拟发布测试
 - 五种发布模式：dry-run / 默认安全保护 / confirm / mock-success / mock-fail
-- publish-xhs.js 正常退出（browser.close + process.exit）
-- 真实发布 → 小红书平台确认成功
+- publish-xhs.js 保留为历史脚本，但当前流程不再调用
+- 平台发布改为人工在小红书完成，系统只做发布前检查和内容归档辅助
 - 状态 reconciliation：PUBLISH_FAILED 可人工修正为 PUBLISHED
 - GitHub / Gitee 双远程基线
 - `modules/scheduler.js` 排期队列管理（add/list/status/cancel/due）
@@ -51,6 +51,7 @@
 - **6 个 ANALYTICS_* 错误码**
 - **V6.1 视觉风格 QA（v0.5.7）**：`manifest.styleVersion` 支持，`lazy-health-v6.1` 分级字号 QA，legacy 兼容
 - **promote + publish reconciliation（v0.5.8）**：正式发布前必须从 `待制作` promote 到 `待投递`；发布成功但归档移动失败时使用 `reconcile-move` 修复本地归档，避免重复发布
+- **自动发布停用（v0.5.9 draft）**：`publish --confirm-publish` 与 scheduled publish 真执行分支返回 `PUBLISH_DISABLED`，只保留 `publish --dry-run` 作为人工发布前检查
 
 ### 未完成
 
@@ -85,7 +86,7 @@ xhs-content-system   = 执行层 / 身体
 **xhs-content-system 负责：**
 - 内容状态管理、渲染导出
 - QA 检测、发布前验证
-- 发布节奏建议、后续真实发布接入
+- 发布节奏建议、人工发布后的归档辅助
 - 选题候选池管理（v0.5.1+）
 
 ---
@@ -112,11 +113,11 @@ pipeline.js promote <taskDir> --confirm-promote
 pipeline.js schedule
     ↓ 推荐发布时间
 pipeline.js publish <taskDir> --dry-run
-    ↓ 验证发布前置条件
+    ↓ 验证人工发布前置条件
 pipeline.js publish <taskDir> --confirm-publish
-    ↓ 真实发布（需显式确认）
+    ↓ 已停用：返回 PUBLISH_DISABLED
 pipeline.js publish <taskDir>
-    ↓ 安全保护：提示必须 --confirm-publish
+    ↓ 已停用：提示只使用 --dry-run，平台发布改为人工完成
 ```
 
 ### V6.1 视觉风格 QA
@@ -184,7 +185,7 @@ node pipeline.js schedule due
 node pipeline.js schedule run-due --mock-success                    # 模拟到期成功（仅测试）
 node pipeline.js schedule run-due --mock-fail                       # 模拟到期失败（仅测试）
 node pipeline.js schedule run-due --confirm-scheduled-publish        # 列出到期任务，不执行
-node pipeline.js schedule run-due --confirm-scheduled-publish --dry-run --task "<taskDir>"  # 发布前验证
+node pipeline.js schedule run-due --confirm-scheduled-publish --dry-run --task "<taskDir>"  # 人工发布前验证
 
 # 本地选题池（v0.5.1）
 node pipeline.js topic add --title "夏季养生" --source manual --raw "灵感来源" --reason "节气热点"                                                          # 创建候选（基础）
@@ -213,13 +214,13 @@ node pipeline.js analytics add --taskDir "2026-05-17-内脏脂肪食物" --title
 node pipeline.js analytics list                                                                                # 查看所有记录
 node pipeline.js analytics summary                                                                             # 数据汇总分析
 
-# 发布前验证（dry-run，不调用真实发布脚本）
+# 人工发布前验证（dry-run，不调用真实发布脚本）
 node pipeline.js publish "投稿内容/待投递/你的任务目录" --dry-run
 
-# 默认模式（安全保护，提示必须 --confirm-publish）
+# 默认模式（自动发布已停用）
 node pipeline.js publish "投稿内容/待投递/你的任务目录"
 
-# 真实发布（需显式确认，否则拒绝执行）
+# 自动发布已停用：该命令会返回 PUBLISH_DISABLED
 node pipeline.js publish "投稿内容/待投递/你的任务目录" --confirm-publish
 
 # 发布成功但本地归档移动失败时，仅修复归档（不重新发布）

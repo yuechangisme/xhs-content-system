@@ -28,7 +28,7 @@ const ACTIVE_STATUSES = ['CONFIRMED', 'RUNNING'];
  */
 function add(taskDir, timeStr, confirmed) {
   if (!archiveWorkflow.isWaitingPublishTask(taskDir)) {
-    return { success: false, error: { code: 'PUBLISH_DIR_NOT_READY', message: '真实发布前请先 promote 到 投稿内容/待投递/' } };
+    return { success: false, error: { code: 'PUBLISH_DIR_NOT_READY', message: '人工发布前检查请先 promote 到 投稿内容/待投递/' } };
   }
 
   // 1. 解析时间
@@ -307,15 +307,26 @@ function runDue(mockType) {
 }
 
 /**
- * 受控 scheduled publish — 真实发布入口
+ * 受控 scheduled publish 检查入口；真实自动发布已停用
  *
  * @param {string} taskDir - 帖子目录
  * @param {boolean} dryRun - 是否仅 dry-run
  * @returns {Promise<object>}
  */
 async function runDueConfirm(taskDir, dryRun) {
+  if (!dryRun) {
+    return {
+      success: false,
+      error: {
+        code: 'PUBLISH_DISABLED',
+        message: '自动发布流程已停用：scheduled publish 只允许 dry-run 检查，平台发布改为人工完成。',
+        detail: { taskDir },
+      },
+    };
+  }
+
   if (!archiveWorkflow.isWaitingPublishTask(taskDir)) {
-    return { success: false, error: { code: 'PUBLISH_DIR_NOT_READY', message: '真实发布前请先 promote 到 投稿内容/待投递/' } };
+    return { success: false, error: { code: 'PUBLISH_DIR_NOT_READY', message: '人工发布前检查请先 promote 到 投稿内容/待投递/' } };
   }
 
   const dueResult = due();
@@ -404,7 +415,7 @@ async function runDueConfirm(taskDir, dryRun) {
         allPassed: failedChecks.length === 0,
         checks: prechecks,
         note: failedChecks.length === 0
-          ? '[DRY-RUN] 前置条件通过。使用 --task (不加 --dry-run) 执行真实 scheduled publish'
+          ? '[DRY-RUN] 前置条件通过。自动 scheduled publish 已停用，请人工发布'
           : '[DRY-RUN] 前置条件未全部满足',
       },
     };
