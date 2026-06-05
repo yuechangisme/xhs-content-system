@@ -156,6 +156,22 @@ function run(taskDir) {
         });
       }
 
+      const customIssues = detectCustomProfileIssues(htmlContent, manifest, fullPath, qaProfile);
+      if (customIssues.length > 0) {
+        checks.push({
+          name: 'style_profile_rules',
+          pass: false,
+          detail: `${htmlFile}: ${customIssues.join('; ')}`,
+        });
+        allPassed = false;
+      } else if (qaProfile.customChecks?.length) {
+        checks.push({
+          name: 'style_profile_rules',
+          pass: true,
+          detail: qaProfile.name,
+        });
+      }
+
       // 只检测第一个 HTML 文件（避免重复报告）
       break;
     }
@@ -166,6 +182,7 @@ function run(taskDir) {
     'directory_exists', 'manifest_exists', 'manifest_valid',
     'qa_profile', 'title_length', 'tags_count', 'output_exists',
     'html_exists', 'border_radius', 'box_shadow', 'font_size',
+    'style_profile_rules',
   ];
 
   for (const name of allCheckNames) {
@@ -215,6 +232,125 @@ function detectFontSize(html, profile) {
   }
 
   return issues;
+}
+
+function detectCustomProfileIssues(html, manifest, fullPath, profile) {
+  const checks = profile.customChecks || [];
+  const issues = [];
+
+  if (checks.includes('lazy_health_v7')) {
+    issues.push(...detectLazyHealthV7Issues(html, manifest, fullPath));
+  }
+
+  return issues;
+}
+
+function detectLazyHealthV7Issues(html, manifest, fullPath) {
+  const issues = [];
+
+  if (manifest?.pageCount !== 5) {
+    issues.push(`manifest.pageCount must be 5 (actual: ${manifest?.pageCount})`);
+  }
+
+  const slideCount = (html.match(/<section\s+class="slide"/g) || []).length;
+  if (slideCount !== 5) {
+    issues.push(`slide count must be 5 (actual: ${slideCount})`);
+  }
+
+  const outputDir = path.join(fullPath, 'output');
+  const pngCount = fs.existsSync(outputDir)
+    ? fs.readdirSync(outputDir).filter(f => /\.png$/i.test(f)).length
+    : 0;
+  if (pngCount !== 5) {
+    issues.push(`output PNG count must be 5 (actual: ${pngCount})`);
+  }
+
+  const nums = [...html.matchAll(/<div\s+class="num">\s*(\d+)\s*<\/div>/g)].map(m => Number(m[1]));
+  if (nums.length > 8 || Math.max(...nums, 0) > 8) {
+    issues.push(`numbered content must not exceed 8 (actual count: ${nums.length}, max: ${Math.max(...nums, 0)})`);
+  }
+
+  const coverImageMatch = html.match(/<div\s+class="cover-illus"[^>]*>[\s\S]*?<img[^>]+src="([^"]+)"/i);
+  const coverImageSrc = coverImageMatch?.[1] || '';
+  if (!coverImageSrc) {
+    issues.push('cover illustration image is required');
+  } else if (!/\.(png|jpe?g)$/i.test(coverImageSrc)) {
+    issues.push(`cover illustration must be PNG/JPG, not ${path.extname(coverImageSrc) || 'unknown'}`);
+  } else {
+    const imagePath = path.join(fullPath, coverImageSrc.replace(/\//g, path.sep));
+    const dimensions = readImageDimensions(imagePath);
+    if (!dimensions) {
+      issues.push(`cover illustration dimensions unreadable: ${coverImageSrc}`);
+    } else {
+      const ratio = dimensions.width / dimensions.height;
+      const target = 37 / 30;
+      if (Math.abs(ratio - target) > 0.08) {
+        issues.push(`cover illustration ratio must be close to 37:30 (actual: ${ratio.toFixed(3)})`);
+      }
+    }
+  }
+
+  const coverBlock = findCssBlock(html, '.cover-illus');
+  const requiredCss = [
+    ['left', '96px'],
+    ['right', '96px'],
+    ['bottom', '176px'],
+    ['height', '720px'],
+  ];
+  for (const [prop, value] of requiredCss) {
+    if (!new RegExp(`${prop}\\s*:\\s*${value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}`, 'i').test(coverBlock)) {
+      issues.push(`.cover-illus must set ${prop}: ${value}`);
+    }
+  }
+
+  const forbiddenV61Classes = [
+    'food-grid', 'food-card', 'principle-card', 'note-card',
+    'solution-card', 'menu-card', 'cta-card', 'food-tag',
+    'cover-offer', 'topbar',
+  ];
+  for (const className of forbiddenV61Classes) {
+    if (new RegExp(`class=["'][^"']*\\b${className}\\b`, 'i').test(html)) {
+      issues.push(`V7 must not use V6.1 card/grid class: .${className}`);
+    }
+  }
+
+  return issues;
+}
+
+function findCssBlock(html, selector) {
+  const escaped = selector.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  const match = html.match(new RegExp(`${escaped}\\s*\\{[^}]*\\}`, 'is'));
+  return match ? match[0] : '';
+}
+
+function readImageDimensions(imagePath) {
+  if (!fs.existsSync(imagePath)) return null;
+  const buffer = fs.readFileSync(imagePath);
+
+  if (buffer.length >= 24 && buffer.toString('ascii', 1, 4) === 'PNG') {
+    return {
+      width: buffer.readUInt32BE(16),
+      height: buffer.readUInt32BE(20),
+    };
+  }
+
+  if (buffer.length >= 4 && buffer[0] === 0xFF && buffer[1] === 0xD8) {
+    let offset = 2;
+    while (offset < buffer.length) {
+      if (buffer[offset] !== 0xFF) return null;
+      const marker = buffer[offset + 1];
+      const length = buffer.readUInt16BE(offset + 2);
+      if (marker >= 0xC0 && marker <= 0xC3) {
+        return {
+          height: buffer.readUInt16BE(offset + 5),
+          width: buffer.readUInt16BE(offset + 7),
+        };
+      }
+      offset += 2 + length;
+    }
+  }
+
+  return null;
 }
 
 function findFontSizeForSelector(html, selector) {

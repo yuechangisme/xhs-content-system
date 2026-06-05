@@ -50,6 +50,7 @@
 - **衍生指标自动计算**：likeRate、favRate、commentRate
 - **6 个 ANALYTICS_* 错误码**
 - **V6.1 视觉风格 QA（v0.5.7）**：`manifest.styleVersion` 支持，`lazy-health-v6.1` 分级字号 QA，legacy 兼容
+- **V7 极简文字手册 QA（v0.5.9 draft）**：`lazy-health-v7` 支持 5 页结构、封面 AI 图窗口比例、最多 8 条编号等检查
 - **promote + publish reconciliation（v0.5.8）**：正式发布前必须从 `待制作` promote 到 `待投递`；发布成功但归档移动失败时使用 `reconcile-move` 修复本地归档，避免重复发布
 - **自动发布停用（v0.5.9 draft）**：`publish --confirm-publish` 与 scheduled publish 真执行分支返回 `PUBLISH_DISABLED`，只保留 `publish --dry-run` 作为人工发布前检查
 
@@ -131,6 +132,18 @@ pipeline.js publish <taskDir>
 ```
 
 QA 会根据 `styleVersion` 选择 profile：缺省使用 `legacy`；`lazy-health-v6.1` 使用 V6.1 分级字号 QA。
+
+### V7 极简文字手册 QA
+
+采用 V7 极简文字手册风的新内容，需要在 `manifest.json` 顶层声明：
+
+```json
+{
+  "styleVersion": "lazy-health-v7"
+}
+```
+
+QA 会检查 V7 的 5 页结构、最多 8 条编号、封面 AI PNG/JPG 插图、固定 `888×720` 图片窗口和接近 `37:30` 的封面图比例。
 
 ---
 

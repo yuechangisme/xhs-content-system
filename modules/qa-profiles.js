@@ -54,6 +54,28 @@ const profiles = {
       { selector: '.cover-offer .hint', min: 18, tier: 'label_brand' },
     ],
   },
+
+  'lazy-health-v7': {
+    name: 'lazy-health-v7',
+    typography: [
+      { selector: '.cover-title', min: 90, tier: 'cover_title' },
+      { selector: '.title', min: 52, tier: 'page_title' },
+
+      { selector: '.cover-sub', min: 34, tier: 'subtitle' },
+      { selector: '.save', min: 34, tier: 'summary_warning' },
+
+      { selector: '.item-title', min: 34, tier: 'item_title' },
+      { selector: '.item-text', min: 32, tier: 'primary_body' },
+      { selector: '.summary-line', min: 32, tier: 'summary_body' },
+      { selector: '.one-line', min: 34, tier: 'emphasis' },
+
+      { selector: '.tiny', min: 18, tier: 'label_brand' },
+      { selector: '.kicker', min: 18, tier: 'label_brand' },
+      { selector: '.brand', min: 18, tier: 'label_brand' },
+      { selector: '.page', min: 18, tier: 'label_brand' },
+    ],
+    customChecks: ['lazy_health_v7'],
+  },
 };
 
 function resolveProfile(styleVersion) {

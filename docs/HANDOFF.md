@@ -1,5 +1,12 @@
 # Handoff — xhs-content-system
 
+## 最新状态：V7 极简文字手册 QA
+
+- V7 极简文字手册风已成为当前新帖默认风格。
+- 新 V7 正式内容应在 `manifest.json` 顶层声明 `styleVersion: "lazy-health-v7"`。
+- QA 已支持 `lazy-health-v7` profile，检查 5 页结构、最多 8 条编号、封面 AI PNG/JPG 插图、固定 `888×720` 窗口、接近 `37:30` 的插图比例，以及 V7 字号规则。
+- 自动发布仍停用；发布前只执行 `publish --dry-run`，平台发布由用户人工完成。
+
 ## 项目一句话目标
 
 ```
