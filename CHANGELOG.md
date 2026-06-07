@@ -8,7 +8,7 @@
 - 停用 scheduled publish 真执行分支：`schedule run-due --confirm-scheduled-publish --task "<taskDir>"` 返回 `PUBLISH_DISABLED`；仅保留 `--dry-run --task` 做人工发布前检查。
 - `modules/publisher.js` 增加兜底保护：即使被直接调用，也返回 `PUBLISH_DISABLED`，避免绕过 CLI 触发平台自动化。
 - `publish --dry-run` 保留，用作人工发布前检查；QA、render、promote、schedule 建议、analytics、topic 流程不变。
-- 新增 `lazy-health-v7` QA profile：检查 V7 极简文字手册的字号、5 页结构、封面 AI 图窗口比例、最多 8 条编号和禁止 V6.1 卡片类结构。
+- 新增 `lazy-health-v7` QA profile：检查 V7 极简文字手册的字号、5/6 页结构一致性、封面 AI 图窗口比例、最多 8 条编号和禁止 V6.1 卡片类结构。
 
 ### 修复
 

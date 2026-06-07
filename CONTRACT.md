@@ -6,7 +6,7 @@
 
 为降低平台自动化检测风险，从 v0.5.9 起，系统取消所有真实小红书自动发布执行入口。系统继续负责内容生产、render、QA、promote、发布前 dry-run 检查和人工发布后的本地归档辅助；平台发布动作由用户人工完成。
 
-V7 极简文字手册风正式内容应声明 `manifest.styleVersion = "lazy-health-v7"`。QA 根据该 profile 检查 5 页结构、封面 AI PNG/JPG 插图、固定封面窗口比例、最多 8 条编号和 V7 字号规则。缺少 `styleVersion` 的旧内容继续走 legacy。
+V7 极简文字手册风正式内容应声明 `manifest.styleVersion = "lazy-health-v7"`。QA 根据该 profile 检查 5/6 页结构一致性、封面 AI PNG/JPG 插图、固定封面窗口比例、最多 8 条编号和 V7 字号规则。缺少 `styleVersion` 的旧内容继续走 legacy。
 
 ### 允许保留的流程
 

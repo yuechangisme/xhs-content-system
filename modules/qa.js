@@ -248,21 +248,30 @@ function detectCustomProfileIssues(html, manifest, fullPath, profile) {
 function detectLazyHealthV7Issues(html, manifest, fullPath) {
   const issues = [];
 
-  if (manifest?.pageCount !== 5) {
-    issues.push(`manifest.pageCount must be 5 (actual: ${manifest?.pageCount})`);
+  const allowedPageCounts = [5, 6];
+  if (!allowedPageCounts.includes(manifest?.pageCount)) {
+    issues.push(`manifest.pageCount must be 5 or 6 (actual: ${manifest?.pageCount})`);
   }
 
-  const slideCount = (html.match(/<section\s+class="slide"/g) || []).length;
-  if (slideCount !== 5) {
-    issues.push(`slide count must be 5 (actual: ${slideCount})`);
+  const slideCount = (html.match(/<section\b[^>]*class="[^"]*\bslide\b[^"]*"/g) || []).length;
+  if (!allowedPageCounts.includes(slideCount)) {
+    issues.push(`slide count must be 5 or 6 (actual: ${slideCount})`);
+  }
+
+  if (manifest?.pageCount && slideCount !== manifest.pageCount) {
+    issues.push(`slide count must match manifest.pageCount (slides: ${slideCount}, manifest: ${manifest.pageCount})`);
   }
 
   const outputDir = path.join(fullPath, 'output');
   const pngCount = fs.existsSync(outputDir)
     ? fs.readdirSync(outputDir).filter(f => /\.png$/i.test(f)).length
     : 0;
-  if (pngCount !== 5) {
-    issues.push(`output PNG count must be 5 (actual: ${pngCount})`);
+  if (!allowedPageCounts.includes(pngCount)) {
+    issues.push(`output PNG count must be 5 or 6 (actual: ${pngCount})`);
+  }
+
+  if (manifest?.pageCount && pngCount !== manifest.pageCount) {
+    issues.push(`output PNG count must match manifest.pageCount (png: ${pngCount}, manifest: ${manifest.pageCount})`);
   }
 
   const nums = [...html.matchAll(/<div\s+class="num">\s*(\d+)\s*<\/div>/g)].map(m => Number(m[1]));
